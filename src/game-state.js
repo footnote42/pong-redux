@@ -1,25 +1,26 @@
 // src/game-state.js
 // Minimal centralized state + update function stub
 
+import { createPaddle, updatePaddle } from './paddle.js';
+import { createBall, updateBall, bounceOffHorizontalEdge, resetBall, serveBall, reflectFromPaddle } from './ball.js';
+import { isCircleRectColliding, resolveCircleRectPenetration } from './collision.js';
+
 export function createInitialState(width = 800, height = 600) {
   return {
     width,
     height,
     score: { left: 0, right: 0 },
     paddles: {
-      left: { x: 10, y: height / 2, w: 10, h: 80, vy: 0 },
-      right: { x: width - 20, y: height / 2, w: 10, h: 80, vy: 0 },
+      left: createPaddle(10, height / 2, 10, 80, 300),
+      right: createPaddle(width - 20, height / 2, 10, 80, 300),
     },
-    ball: { x: width / 2, y: height / 2, vx: 200, vy: 0, r: 6 },
+    ball: createBall(width / 2, height / 2, 6, 200),
     running: false,
     paused: false,
   };
 }
 
 // dt is seconds
-import { updatePaddle } from './paddle.js';
-import { updateBall, bounceOffHorizontalEdge, resetBall, serveBall, reflectFromPaddle } from './ball.js';
-import { isCircleRectColliding, resolveCircleRectPenetration } from './collision.js';
 
 export function update(state, dt) {
   if (state.paused) return;
