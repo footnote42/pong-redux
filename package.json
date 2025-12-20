@@ -1,0 +1,11 @@
+{
+  "name": "pong-redux",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "node test/run_collision_tests.mjs"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}

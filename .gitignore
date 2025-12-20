@@ -1,0 +1,32 @@
+# Node
+node_modules/
+npm-debug.log*
+.yarn-integrity
+.pnpm-debug.log
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+nul
+
+# Editors
+.vscode/
+.idea/
+
+# Tooling / artifacts
+.playwright-mcp/
+.claude/
+*.png
+
+# Build / output
+dist/
+build/
+coverage/
+
+# Environment
+.env
