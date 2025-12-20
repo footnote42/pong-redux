@@ -1,9 +1,31 @@
 # Build Plan: Pong Redux
 
-**Status:** 🚨 Critical Fixes Needed → 🎯 Ready to Build  
-**Target Completion:** 3-4 days (4-6 hours total per TRD.md)  
-**Goal:** Fully playable Pong with game modes, customization, and delight  
+**Status:** 🎯 Stage 2 Complete - Core Physics Done!
+**Progress:** 2 of 16 stages complete (12.5%)
+**Target Completion:** 3-4 days (4-6 hours total per TRD.md)
+**Goal:** Fully playable Pong with game modes, customization, and delight
 **Reference:** TRD.md for technical requirements and architectural decisions
+
+---
+
+## Progress Summary
+
+**✅ Completed (Stages 1-2)**
+- Fixed-timestep game loop with accumulator pattern (60Hz)
+- Paddle and ball rendering (factory functions)
+- AABB collision detection with positional correction
+- Swept collision guard (tunneling prevention)
+- Paddle hit angle variation (50° max, 5% center deadzone)
+- Comprehensive test suite (headless + browser + debug harness)
+- GitHub Actions CI pipeline
+- All collision tests passing ✓
+
+**🚧 In Progress**
+- None (ready for Stage 3)
+
+**⏭️ Next Up**
+- Stage 3: Scoring & Win Conditions
+- Stage 4: Pause & Input Handling
 
 ---
 
@@ -11,13 +33,15 @@
 
 This plan takes a partially-implemented Pong rebuild and completes it with modern game features. Wayne (the developer) is testing his "Vibe Coding Workflow" - using AI tools strategically to maximize learning while building efficiently.
 
-**Current State:** 
+**Current State:**
 - Fixed-timestep game loop implemented ✓
 - ES6 module structure in place ✓
 - Canvas renders with scores and center line ✓
-- **CRITICAL BUG:** Paddles not rendering ❌
-- No ball visible ❌
-- No restart/pause UI ❌
+- Paddles visible and controllable (W/S, Arrow keys) ✓
+- Ball moves and bounces off walls ✓
+- Ball bounces off paddles with angle variation ✓
+- Collision system tested and validated ✓
+- **Next:** Implement scoring logic and win conditions
 
 **Target State:** 
 - Fully playable classic Pong (1P vs AI, 2P local)

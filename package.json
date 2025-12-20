@@ -1,11 +1,30 @@
 {
   "name": "pong-redux",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.2.0",
+  "description": "A modern rebuild of Pong with clean architecture, precise physics, and a path to online multiplayer. Learning exercise in game dev fundamentals.",
+  "main": "src/main.js",
+  "type": "module",
   "scripts": {
     "test": "node test/run_collision_tests.mjs"
   },
+  "keywords": [
+    "pong",
+    "game",
+    "canvas",
+    "fixed-timestep",
+    "collision-detection",
+    "vanilla-js",
+    "es6-modules",
+    "game-physics",
+    "learning-project"
+  ],
+  "author": "Wayne Sutton",
+  "license": "MIT",
   "engines": {
     "node": ">=16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/waynesutton/pong-redux"
   }
 }
