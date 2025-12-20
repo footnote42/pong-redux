@@ -47,13 +47,22 @@ export function bounceOffHorizontalEdge(ball, boundsHeight) {
   return false;
 }
 
+export const DEFAULT_MAX_BOUNCE_DEG = 50;
+export const DEFAULT_CENTER_DEADZONE = 0.05; // relative offset deadzone around center that yields straight bounce
+
 // Compute new velocity after hitting a paddle using hit offset.
 // paddleY is center Y of paddle, paddleH is paddle height, direction is +1 if paddle is on left (ball should go right), -1 otherwise.
-export function reflectFromPaddle(ball, paddleY, paddleH, direction) {
+// maxBounceDeg is the maximum deflection angle at the paddle edge (degrees)
+// centerDeadzone is a relative value (-1..1) around center that forces zero vertical deflection for more forgiving center hits
+export function reflectFromPaddle(ball, paddleY, paddleH, direction, maxBounceDeg = DEFAULT_MAX_BOUNCE_DEG, centerDeadzone = DEFAULT_CENTER_DEADZONE) {
   const relative = (ball.y - paddleY) / (paddleH / 2); // -1 .. +1
-  const clamp = Math.max(-1, Math.min(1, relative));
-  const maxBounce = (60 * Math.PI) / 180; // 60 degrees max deflection
-  const angle = clamp * maxBounce;
+  const clampVal = Math.max(-1, Math.min(1, relative));
+
+  // Apply center deadzone
+  const effective = Math.abs(clampVal) <= Math.abs(centerDeadzone) ? 0 : clampVal;
+
+  const maxBounce = (maxBounceDeg * Math.PI) / 180; // convert to radians
+  const angle = effective * maxBounce;
   const speed = Math.hypot(ball.vx, ball.vy) || ball.speed;
   ball.vx = Math.cos(angle) * speed * direction;
   ball.vy = Math.sin(angle) * speed;

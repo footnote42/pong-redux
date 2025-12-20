@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Collision Debug Harness</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:0;padding:1rem;background:#111;color:#eee}
+    #ui{display:flex;gap:1rem;margin-bottom:1rem;align-items:center}
+    canvas{background:#000;border:1px solid #444}
+    label{font-size:13px}
+    button, input, select{font-size:13px}
+    .small{font-size:12px;color:#ccc}
+  </style>
+</head>
+<body>
+  <h2>Collision Debug Harness</h2>
+  <div id="ui">
+    <label>Ball X <input id="ballX" type="range" min="0" max="600" value="300"></label>
+    <label>Ball Y <input id="ballY" type="range" min="0" max="400" value="200"></label>
+    <label>Speed <input id="speed" type="range" min="50" max="800" value="400"></label>
+    <label>Radius <input id="radius" type="range" min="2" max="30" value="6"></label>
+    <label><input id="auto" type="checkbox"> Auto-run</label>
+    <label><input id="useCorrection" type="checkbox" checked>Use correction</label>
+    <label><input id="useSwept" type="checkbox" checked>Use swept guard</label>
+    <label>Max Bounce <input id="maxBounce" type="range" min="10" max="85" value="50"></label>
+    <label>Center Deadzone <input id="deadzone" type="range" min="0" max="20" value="5"></label> <!-- deadzone percent -->
+    <button id="step">Step</button>
+  </div>
+  <canvas id="c" width="600" height="400"></canvas>
+  <pre id="log" class="small">Ready</pre>
+
+  <script type="module">
+    import { isCircleRectColliding, resolveCircleRectPenetration } from '../src/collision.js';
+    import { reflectFromPaddle, updateBall, bounceOffHorizontalEdge } from '../src/ball.js';
+
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+    const logEl = document.getElementById('log');
+
+    const paddle = { x: 100, y: 200, w: 10, h: 80 };
+    const rightPaddle = { x: 500, y: 200, w: 10, h: 80 };
+
+    const state = {
+      ball: { x: 300, y:200, r:6, vx: 300, vy:0 }
+    };
+
+    const inputs = {
+      ballX: document.getElementById('ballX'),
+      ballY: document.getElementById('ballY'),
+      speed: document.getElementById('speed'),
+      radius: document.getElementById('radius'),
+      auto: document.getElementById('auto'),
+      step: document.getElementById('step')
+    };
+
+    function readInputs() {
+      state.ball.x = Number(inputs.ballX.value);
+      state.ball.y = Number(inputs.ballY.value);
+      state.ball.r = Number(inputs.radius.value);
+      const sp = Number(inputs.speed.value);
+      const dir = state.ball.vx >= 0 ? 1 : -1;
+      const ang = Math.atan2(state.ball.vy, state.ball.vx);
+      state.ball.vx = Math.cos(ang)*sp*dir;
+      state.ball.vy = Math.sin(ang)*sp;
+    }
+
+    inputs.ballX.addEventListener('input', ()=>{ readInputs(); render(); });
+    inputs.ballY.addEventListener('input', ()=>{ readInputs(); render(); });
+    inputs.speed.addEventListener('input', ()=>{ readInputs(); render(); });
+    inputs.radius.addEventListener('input', ()=>{ readInputs(); render(); });
+
+    inputs.step.addEventListener('click', ()=> step(1/60));
+
+    let last = 0;
+    function loop(ts){
+      if(inputs.auto.checked){
+        const dt = Math.min(0.05, (ts - last) / 1000 || 1/60);
+        step(dt);
+      }
+      last = ts;
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    function step(dt){
+      // move ball
+      updateBall(state.ball, dt);
+      // wall bounce
+      const bounced = bounceOffHorizontalEdge(state.ball, canvas.height);
+
+      const useCorrection = inputs.useCorrection.checked;
+      const useSwept = inputs.useSwept.checked;
+
+      // Swept guard (optional)
+      let leftColl = false;
+      let rightColl = false;
+      if (useSwept) {
+        if (state.prevX !== undefined && (state.prevX - state.ball.r > paddle.x + paddle.w) && (state.ball.x - state.ball.r <= paddle.x + paddle.w) && Math.abs(state.ball.y - paddle.y) <= paddle.h/2 + state.ball.r) {
+          leftColl = true;
+        }
+        if (state.prevX !== undefined && (state.prevX + state.ball.r < rightPaddle.x) && (state.ball.x + state.ball.r >= rightPaddle.x) && Math.abs(state.ball.y - rightPaddle.y) <= rightPaddle.h/2 + state.ball.r) {
+          rightColl = true;
+        }
+      }
+
+      // fallback to regular overlap detection if swept didn't trigger
+      if (!leftColl) leftColl = isCircleRectColliding(state.ball, paddle);
+      if (!rightColl) rightColl = isCircleRectColliding(state.ball, rightPaddle);
+
+      const maxBounce = Number(inputs.maxBounce ? inputs.maxBounce.value : 50);
+      const deadzonePercent = Number(inputs.deadzone ? inputs.deadzone.value : 5);
+      const deadzone = deadzonePercent / 100; // convert percent to relative
+      if(leftColl) {
+        if (useCorrection) resolveCircleRectPenetration(state.ball, paddle);
+        reflectFromPaddle(state.ball, paddle.y, paddle.h, +1, maxBounce, deadzone);
+        // nudge out
+        state.ball.x = paddle.x + paddle.w + state.ball.r;
+      } else if(rightColl) {
+        if (useCorrection) resolveCircleRectPenetration(state.ball, rightPaddle);
+        reflectFromPaddle(state.ball, rightPaddle.y, rightPaddle.h, -1, maxBounce, deadzone);
+        state.ball.x = rightPaddle.x - state.ball.r;
+      }
+
+      // show hit info
+      if (leftColl || rightColl) {
+        const off = (state.ball.y - (leftColl ? paddle.y : rightPaddle.y)) / ((leftColl ? paddle.h : rightPaddle.h) / 2);
+        const ang = Math.atan2(state.ball.vy, state.ball.vx) * 180 / Math.PI;
+        logEl.textContent = `Ball: ${state.ball.x.toFixed(2)}, ${state.ball.y.toFixed(2)} r=${state.ball.r} | vx=${state.ball.vx.toFixed(1)} vy=${state.ball.vy.toFixed(1)} | off=${off.toFixed(2)} ang=${ang.toFixed(1)}°`;
+      }
+
+      // store prev for next frame
+      state.prevX = state.ball.x;
+      state.prevY = state.ball.y;
+
+      render();
+
+      logEl.textContent = `Ball: ${state.ball.x.toFixed(2)}, ${state.ball.y.toFixed(2)} r=${state.ball.r} | vx=${state.ball.vx.toFixed(1)} vy=${state.ball.vy.toFixed(1)} | leftColl=${leftColl} rightColl=${rightColl} bounced=${bounced}`;
+    }
+
+    function render(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      // paddles
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(paddle.x, paddle.y - paddle.h/2, paddle.w, paddle.h);
+      ctx.fillRect(rightPaddle.x, rightPaddle.y - rightPaddle.h/2, rightPaddle.w, rightPaddle.h);
+      // ball
+      ctx.beginPath(); ctx.fillStyle = '#0f0'; ctx.arc(state.ball.x, state.ball.y, state.ball.r, 0, Math.PI*2); ctx.fill();
+      // center line
+      ctx.strokeStyle = '#444'; ctx.setLineDash([5,5]); ctx.beginPath(); ctx.moveTo(canvas.width/2,0); ctx.lineTo(canvas.width/2, canvas.height); ctx.stroke(); ctx.setLineDash([]);
+    }
+
+    // init
+    readInputs(); render();
+
+  </script>
+</body>
+</html>

@@ -21,7 +21,8 @@ export function isCircleRectColliding(ball, paddle) {
 }
 
 // Resolve penetration by moving the ball out along the minimal penetration axis.
-// Returns { axis: 'x'|'y', penetration: number }
+// Uses closest-point overlap resolution to nudge the ball out along the collision normal without changing its velocity.
+// Returns { axis: 'x'|'y'|'both', penetration: number }
 export function resolveCircleRectPenetration(ball, paddle) {
   const rect = {
     left: paddle.x,
@@ -30,36 +31,47 @@ export function resolveCircleRectPenetration(ball, paddle) {
     bottom: paddle.y + paddle.h / 2,
   };
 
-  // Compute penetration on X axis
-  let penX = 0;
-  if (ball.x < rect.left) {
-    penX = ball.x + ball.r - rect.left;
-  } else if (ball.x > rect.right) {
-    penX = rect.right - (ball.x - ball.r);
+  // Find closest point on rect to circle center
+  const closestX = clamp(ball.x, rect.left, rect.right);
+  const closestY = clamp(ball.y, rect.top, rect.bottom);
+  const dx = ball.x - closestX;
+  const dy = ball.y - closestY;
+  const dist2 = dx * dx + dy * dy;
+  const r = ball.r;
+
+  // No penetration
+  if (dist2 > r * r || dist2 === 0) {
+    // Handle degenerate case where center is exactly at closest point (ball center inside rect centerline)
+    // Fallback to axis-based correction
+    let penX = 0;
+    if (ball.x < rect.left) penX = ball.x + r - rect.left;
+    else if (ball.x > rect.right) penX = rect.right - (ball.x - r);
+
+    let penY = 0;
+    if (ball.y < rect.top) penY = ball.y + r - rect.top;
+    else if (ball.y > rect.bottom) penY = rect.bottom - (ball.y - r);
+
+    if (penX === 0 && penY === 0) return null;
+
+    // Resolve on the smaller penetration axis
+    if (Math.abs(penX) < Math.abs(penY)) {
+      ball.x -= penX;
+      return { axis: 'x', penetration: penX };
+    } else {
+      ball.y -= penY;
+      return { axis: 'y', penetration: penY };
+    }
   }
 
-  // Compute penetration on Y axis
-  let penY = 0;
-  if (ball.y < rect.top) {
-    penY = ball.y + ball.r - rect.top;
-  } else if (ball.y > rect.bottom) {
-    penY = rect.bottom - (ball.y - ball.r);
-  }
+  const dist = Math.sqrt(dist2);
+  const overlap = r - dist;
+  // move ball out along collision normal by overlap (plus tiny epsilon)
+  const nx = dx / dist;
+  const ny = dy / dist;
+  ball.x += nx * (overlap + 0.001);
+  ball.y += ny * (overlap + 0.001);
 
-  // If both zero, no penetration
-  if (penX === 0 && penY === 0) return null;
-
-  // Decide which axis to resolve (smallest absolute penetration)
-  const absPenX = Math.abs(penX) || Infinity;
-  const absPenY = Math.abs(penY) || Infinity;
-
-  if (absPenX < absPenY) {
-    // move out in X
-    ball.x -= penX;
-    return { axis: 'x', penetration: penX };
-  } else {
-    // move out in Y
-    ball.y -= penY;
-    return { axis: 'y', penetration: penY };
-  }
+  // Decide dominant axis for caller convenience
+  const axis = Math.abs(nx) > Math.abs(ny) ? 'x' : 'y';
+  return { axis, penetration: overlap };
 }
