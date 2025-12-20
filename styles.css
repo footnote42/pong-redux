@@ -1,0 +1,3 @@
+/* styles.css - minimal layout */
+html,body{height:100%;margin:0;background:#111;display:flex;align-items:center;justify-content:center}
+canvas{box-shadow:0 6px 24px rgba(0,0,0,0.6);image-rendering:pixelated;border:2px solid #222}
