@@ -36,8 +36,8 @@ export function createInitialState(width = 800, height = 600) {
     serveTimer: 0, // countdown timer for serve delay (seconds)
     winScore: 11, // first to 11 points wins
     showInstructions: !hasSeen,
-    // Stage 5: landing and game mode
-    gameState: 'PLAYING', // 'LANDING' | 'PLAYING' | 'PAUSED' | 'GAME_OVER'
+    // Stage 5: landing and game mode - default to LANDING screen
+    gameState: 'LANDING', // 'LANDING' | 'PLAYING' | 'PAUSED' | 'GAME_OVER'
     gameMode: null, // 'single' or 'versus'
     landingHover: null,
     // Stage 5 extras: settings and high score

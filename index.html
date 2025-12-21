@@ -14,13 +14,7 @@
     const canvas = document.getElementById('gameCanvas');
     const game = createGame(canvas);
 
-    // Serve ball to start
-    const state = game.getState();
-    import('./src/ball.js').then(mod => {
-      mod.resetBall(state.ball, state.width / 2, state.height / 2);
-      mod.serveBall(state.ball, Math.random() < 0.5 ? 1 : -1);
-    });
-
+    // Start the game (landing screen will be shown if first time)
     game.start();
 
     // simple resize handling to keep canvas logical size (no scaling for now)

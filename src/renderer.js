@@ -47,8 +47,8 @@ export function render(state, ctx, interp = 0) {
     ctx.textAlign = 'center';
   }
 
-  // settings icon (top-right corner)
-  drawSettingsIcon(ctx, w - 40, 12, 24, state.settingsHover === 'settings' || state.showSettings);
+  // settings icon (top-right corner) - aligned with click area from input.js
+  drawSettingsIcon(ctx, w - 64 + 24, 8 + 24, 24, state.settingsHover === 'settings' || state.showSettings);
 
 
   // landing screen
@@ -99,12 +99,10 @@ export function render(state, ctx, interp = 0) {
     ctx.fillStyle = '#666';
     ctx.font = '12px monospace';
     ctx.fillText('Open Settings: S or click gear', w / 2, h * 0.82);
-
-    return;
   }
 
-  // instructions overlay (first-time)
-  if (state.showInstructions) {
+  // instructions overlay (first-time) - only show if not on landing
+  if (state.showInstructions && state.gameState !== 'LANDING') {
     ctx.fillStyle = 'rgba(0,0,0,0.75)';
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = '#fff';
@@ -120,8 +118,8 @@ export function render(state, ctx, interp = 0) {
     return; // skip other overlays while instructions shown
   }
 
-  // pause overlay
-  if (state.paused) {
+  // pause overlay - only show if not on landing
+  if (state.paused && state.gameState !== 'LANDING') {
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = '#fff';
@@ -133,8 +131,8 @@ export function render(state, ctx, interp = 0) {
     ctx.fillText('Press P or ESC to resume', w / 2, h / 2 + 70);
   }
 
-  // game over overlay
-  if (state.gameOver) {
+  // game over overlay - only show if not on landing
+  if (state.gameOver && state.gameState !== 'LANDING') {
     ctx.fillStyle = 'rgba(0,0,0,0.7)';
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = '#fff';
@@ -152,6 +150,11 @@ export function render(state, ctx, interp = 0) {
     ctx.font = '20px monospace';
     ctx.fillStyle = '#aaa';
     ctx.fillText('Press SPACE to restart', w / 2, h / 2 + 80);
+  }
+
+  // settings overlay (drawn on top of everything else)
+  if (state.showSettings) {
+    drawSettingsOverlay(state, ctx, w, h);
   }
 }
 

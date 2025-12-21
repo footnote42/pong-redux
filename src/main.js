@@ -51,9 +51,8 @@ export function createGame(canvas) {
     // attach input handlers (pass canvas for pointer events)
     attachInputHandlers(state, canvas);
 
-    // If this is first run, show landing screen
-    const seen = typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('pong:seenLanding') === '1';
-    if (!seen) showLanding(state);
+    // Landing screen is shown by default (gameState starts as 'LANDING')
+    // No need to manually call showLanding here
 
     rafId = requestAnimationFrame(loop);
   }
