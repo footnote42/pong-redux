@@ -1,12 +1,14 @@
 // Test Stage 3: Scoring & Win Conditions
 
-import { createInitialState, update, restartGame } from '../src/game-state.js';
+import { createInitialState, update, restartGame, startPlaying } from '../src/game-state.js';
 
 console.log('Testing Stage 3: Scoring & Win Conditions...\n');
 
 // Test 1: Serve delay after scoring
 console.log('Test 1: Serve delay after scoring');
 const state1 = createInitialState(800, 600);
+startPlaying(state1, 'versus');  // Start in versus mode to avoid CPU interference
+state1.serveTimer = 0;  // Clear serve timer so update can process scoring
 state1.ball.x = -10; // Force ball out of left boundary
 update(state1, 0.016);
 console.assert(state1.score.right === 1, 'Right player should score');
@@ -17,6 +19,7 @@ console.log('✅ Serve delay works correctly\n');
 // Test 2: Ball serves after timer expires
 console.log('Test 2: Ball serves after timer expires');
 const state2 = createInitialState(800, 600);
+startPlaying(state2, 'versus');
 state2.serveTimer = 0.5;
 state2.ball.vx = 0;
 state2.ball.vy = 0;
@@ -28,6 +31,8 @@ console.log('✅ Ball serves after timer expires\n');
 // Test 3: Win condition at 11 points
 console.log('Test 3: Win condition at 11 points');
 const state3 = createInitialState(800, 600);
+startPlaying(state3, 'versus');
+state3.serveTimer = 0;  // Clear serve timer
 state3.score.left = 10; // One point away from winning
 state3.ball.x = state3.width + 10; // Force ball out of right boundary
 update(state3, 0.016);
@@ -40,6 +45,7 @@ console.log('✅ Win condition works at 11 points\n');
 // Test 4: Game stops updating when over
 console.log('Test 4: Game stops updating when over');
 const state4 = createInitialState(800, 600);
+startPlaying(state4, 'versus');
 state4.gameOver = true;
 state4.winner = 'right';
 state4.ball.x = 400;
@@ -52,6 +58,7 @@ console.log('✅ Game stops updating when over\n');
 // Test 5: Restart functionality
 console.log('Test 5: Restart functionality');
 const state5 = createInitialState(800, 600);
+startPlaying(state5, 'versus');
 state5.score.left = 11;
 state5.score.right = 7;
 state5.gameOver = true;
@@ -71,12 +78,16 @@ console.log('✅ Restart functionality works correctly\n');
 // Test 6: Both players can win
 console.log('Test 6: Both players can win');
 const state6a = createInitialState(800, 600);
+startPlaying(state6a, 'versus');
+state6a.serveTimer = 0;  // Clear serve timer
 state6a.score.right = 10;
 state6a.ball.x = -10;
 update(state6a, 0.016);
 console.assert(state6a.winner === 'right', 'Right player can win');
 
 const state6b = createInitialState(800, 600);
+startPlaying(state6b, 'versus');
+state6b.serveTimer = 0;  // Clear serve timer
 state6b.score.left = 10;
 state6b.ball.x = state6b.width + 10;
 update(state6b, 0.016);

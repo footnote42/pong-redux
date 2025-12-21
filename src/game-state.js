@@ -4,6 +4,7 @@
 import { createPaddle, updatePaddle } from './paddle.js';
 import { createBall, updateBall, bounceOffHorizontalEdge, resetBall, serveBall, reflectFromPaddle } from './ball.js';
 import { isCircleRectColliding, resolveCircleRectPenetration } from './collision.js';
+import { initCPU, updateCPU, setCPUDifficulty } from './ai.js';
 
 export function createInitialState(width = 800, height = 600) {
   const hasSeen = typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('pong:seenInstructions') === '1';
@@ -50,6 +51,12 @@ export function createInitialState(width = 800, height = 600) {
 
 export function setDifficulty(state, level) {
   state.settings.difficulty = level;
+
+  // Update CPU difficulty if in single player mode
+  if (state.cpu && state.cpu.enabled) {
+    setCPUDifficulty(state, level);
+  }
+
   if (typeof window !== 'undefined' && window.localStorage) {
     try {
       const s = JSON.stringify(state.settings);
@@ -88,6 +95,12 @@ export function startPlaying(state, mode = 'versus') {
   // Persist that user has seen landing so it won't show automatically again
   if (typeof window !== 'undefined' && window.localStorage) {
     window.localStorage.setItem('pong:seenLanding', '1');
+  }
+  // Initialize CPU if single player mode
+  if (mode === 'single') {
+    initCPU(state, state.settings.difficulty);
+  } else {
+    state.cpu = { enabled: false };
   }
   // Reset play state
   restartGame(state);
@@ -137,7 +150,13 @@ export function update(state, dt) {
 
   // Update paddles
   updatePaddle(state.paddles.left, dt, state.height);
-  updatePaddle(state.paddles.right, dt, state.height);
+
+  // CPU controls right paddle in single player mode
+  if (state.cpu && state.cpu.enabled) {
+    updateCPU(state, dt);
+  } else {
+    updatePaddle(state.paddles.right, dt, state.height);
+  }
 
   // Integrate ball and keep previous position + velocity for swept checks and corner handling
   const ball = state.ball;
