@@ -5,6 +5,37 @@ All notable changes to the Pong Redux project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-12-21
+
+### Added - Stage 4: Pause & Input Handling
+- First-time control instructions overlay (dismissible with any key) and `localStorage` persistence
+- Pause system (P / ESC) with semi-opaque pause overlay and helpful control hints
+- Improved keyboard input handling to support simultaneous key presses and avoid 1-frame glitches
+- Paddle smoothing with acceleration/deceleration for more natural movement
+- Unit tests for pause and input behavior (`test/stage4-pause-input-test.mjs`)
+
+### Changed
+- `src/input.js` now tracks pressed keys and maps them to paddle input directions
+- `src/paddle.js` adds `inputDir` and `accel` for smooth paddle motion
+- `src/renderer.js` includes instructions overlay and enhanced pause overlay
+
+---
+
+## [0.3.0] - 2025-12-21
+
+### Added - Stage 3: Scoring & Win Conditions
+- Score tracking when ball exits left/right boundaries
+- Win condition (first to 11 points) and winner announcement overlay
+- Restart functionality with SPACE key and reset of game state
+- 0.5s serve delay after each point, and re-serve logic
+- Unit tests covering scoring, win detection, serve delay, and restart (`test/stage3-scoring-test.mjs`)
+
+### Changed
+- `src/game-state.js` updated with `serveTimer`, `gameOver`, and `winner` fields
+- Renderer overlays updated to show winner and restart instructions
+
+---
+
 ## [0.2.0] - 2025-12-20
 
 ### Added - Stage 2: Collision & Physics System

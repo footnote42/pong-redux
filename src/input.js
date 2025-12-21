@@ -6,62 +6,60 @@ import { restartGame } from './game-state.js';
 
 let _state = null;
 let listeners = [];
+const pressed = new Set();
+
+function computeDirForLeft() {
+  if (pressed.has('w') || pressed.has('W')) return -1;
+  if (pressed.has('s') || pressed.has('S')) return 1;
+  return 0;
+}
+function computeDirForRight() {
+  if (pressed.has('ArrowUp')) return -1;
+  if (pressed.has('ArrowDown')) return 1;
+  return 0;
+}
 
 function keydown(e) {
   if (!_state) return;
   const k = e.key;
+
+  // Dismiss instructions on any key press
+  if (_state.showInstructions) {
+    _state.showInstructions = false;
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem('pong:seenInstructions', '1');
+    }
+    return;
+  }
+
+  // Prevent page scrolling for space / arrows
+  if (k === ' ' || k === 'ArrowUp' || k === 'ArrowDown') e.preventDefault();
+
   switch (k) {
-    case 'w':
-    case 'W':
-      setPaddleDirection(_state.paddles.left, -1);
-      break;
-    case 's':
-    case 'S':
-      setPaddleDirection(_state.paddles.left, +1);
-      break;
-    case 'ArrowUp':
-      setPaddleDirection(_state.paddles.right, -1);
-      break;
-    case 'ArrowDown':
-      setPaddleDirection(_state.paddles.right, +1);
-      break;
     case 'p':
     case 'P':
     case 'Escape':
       _state.paused = !_state.paused;
       break;
     case ' ':
-      // Restart game if game over
-      if (_state.gameOver) {
-        restartGame(_state);
-      }
+      if (_state.gameOver) restartGame(_state);
       break;
     default:
       break;
   }
+
+  // Track pressed keys for directional input
+  pressed.add(k);
+  setPaddleDirection(_state.paddles.left, computeDirForLeft());
+  setPaddleDirection(_state.paddles.right, computeDirForRight());
 }
 
 function keyup(e) {
   if (!_state) return;
   const k = e.key;
-  switch (k) {
-    case 'w':
-    case 'W':
-      setPaddleDirection(_state.paddles.left, 0);
-      break;
-    case 's':
-    case 'S':
-      setPaddleDirection(_state.paddles.left, 0);
-      break;
-    case 'ArrowUp':
-      setPaddleDirection(_state.paddles.right, 0);
-      break;
-    case 'ArrowDown':
-      setPaddleDirection(_state.paddles.right, 0);
-      break;
-    default:
-      break;
-  }
+  pressed.delete(k);
+  setPaddleDirection(_state.paddles.left, computeDirForLeft());
+  setPaddleDirection(_state.paddles.right, computeDirForRight());
 }
 
 export function attachInputHandlers(state) {
@@ -77,4 +75,5 @@ export function detachInputHandlers() {
   window.removeEventListener('keyup', listeners[1]);
   listeners = [];
   _state = null;
+  pressed.clear();
 }

@@ -1,7 +1,7 @@
 # Build Plan: Pong Redux
 
-**Status:** 🎯 Stage 3 Complete - Scoring & Win Conditions Done!
-**Progress:** 3 of 16 stages complete (18.75%)
+**Status:** 🎯 Stage 4 Complete - Pause & Input Handling Done!
+**Progress:** 4 of 16 stages complete (25%)
 **Target Completion:** 3-4 days (4-6 hours total per TRD.md)
 **Goal:** Fully playable Pong with game modes, customization, and delight
 **Reference:** TRD.md for technical requirements and architectural decisions
@@ -10,7 +10,7 @@
 
 ## Progress Summary
 
-**✅ Completed (Stages 1-3)**
+**✅ Completed (Stages 1-4)**
 - Fixed-timestep game loop with accumulator pattern (60Hz)
 - Paddle and ball rendering (factory functions)
 - AABB collision detection with positional correction
@@ -29,7 +29,7 @@
 - None (ready for Stage 4)
 
 **⏭️ Next Up**
-- Stage 4: Pause & Input Handling
+- Stage 5: Landing Screen & Mode Selection
 - Stage 5: Landing Screen & Mode Selection
 
 ---
@@ -248,30 +248,30 @@ All Stage 3 automated tests pass; proceed to Stage 4 (Pause & Input Handling).
 
 ---
 
-### Stage 4: Pause & Input Handling
+### Stage 4: Pause & Input Handling ✅
 **Goal:** Players can pause and controls feel responsive
 
 **AI Tool:** Copilot (event handlers)
 
-- [ ] **Implement pause system**
-  - ESC or P key pauses/unpauses game
-  - Pause overlay shows "PAUSED" message
-  - Pause overlay shows control instructions
-  - Game state freezes (no physics updates)
-- [ ] **Improve input responsiveness**
-  - Verify input buffering works correctly
-  - Ensure no 1-frame input lag
-  - Test simultaneous key presses (both paddles)
-  - Smooth paddle acceleration/deceleration
-- [ ] **Add control instructions overlay**
-  - Show on first game start
-  - "Player 1: W/S | Player 2: Arrow Up/Down"
-  - "P or ESC to pause"
-  - Dismissible with any key press
-- [ ] **Test on actual gameplay**
-  - Paddles feel responsive and precise
-  - Pause doesn't cause state corruption
-  - Instructions are clear and helpful
+- [x] **Implement pause system**
+  - ESC or P key pauses/unpauses game ✓
+  - Pause overlay shows "PAUSED" message ✓
+  - Pause overlay shows control instructions ✓
+  - Game state freezes (no physics updates) ✓
+- [x] **Improve input responsiveness**
+  - Verify input buffering works correctly ✓
+  - Ensure no 1-frame input lag ✓
+  - Test simultaneous key presses (both paddles) ✓
+  - Smooth paddle acceleration/deceleration ✓
+- [x] **Add control instructions overlay**
+  - Show on first game start ✓
+  - "Player 1: W/S | Player 2: Arrow Up/Arrow Down" ✓
+  - "P or ESC to pause" ✓
+  - Dismissible with any key press ✓
+- [x] **Test on actual gameplay**
+  - Paddles feel responsive and precise ✓
+  - Pause doesn't cause state corruption ✓
+  - Instructions are clear and helpful ✓
 
 **Success Criteria:**
 - Pause works instantly and reliably ✓
@@ -281,6 +281,27 @@ All Stage 3 automated tests pass; proceed to Stage 4 (Pause & Input Handling).
 
 **Time Estimate:** 30-45 minutes  
 **Complexity:** Low (mostly UI work)
+
+---
+
+### Stage 4 — Wrap-up ✅
+**Completed:** 2025-12-21
+
+**Summary:** Stage 4 (Pause & Input Handling) has been implemented and validated. Key deliverables:
+- First-time instructions overlay with dismiss-on-key and `localStorage` persistence
+- Pause system (P / ESC) with informative overlay and instruction text
+- Improved input handling: simultaneous key press support and prevention of 1-frame lag
+- Paddle motion smoothing (acceleration/deceleration) for better feel
+- Unit tests for Stage 4 were added and all pass locally
+
+**Implementation Notes:**
+- Added `showInstructions` flag to `game-state.js`, persisted via `localStorage` as `pong:seenInstructions`
+- `input.js` tracks pressed keys and computes target directions for both paddles; pressing any key dismisses instructions and prevents default scrolling for arrows/space
+- `paddle.js` now supports `inputDir`, `accel`, and smooth velocity ramping
+- `renderer.js` now displays the instructions overlay on first start and improved pause overlay with control hints
+- Tests added: `test/stage4-pause-input-test.mjs` (instructions, pause, paddle smoothing)
+
+All Stage 4 tests pass locally; proceed to Stage 5 (Landing Screen & Mode Selection).
 
 ---
 

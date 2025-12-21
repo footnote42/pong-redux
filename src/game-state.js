@@ -6,6 +6,7 @@ import { createBall, updateBall, bounceOffHorizontalEdge, resetBall, serveBall, 
 import { isCircleRectColliding, resolveCircleRectPenetration } from './collision.js';
 
 export function createInitialState(width = 800, height = 600) {
+  const hasSeen = typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('pong:seenInstructions') === '1';
   return {
     width,
     height,
@@ -21,6 +22,7 @@ export function createInitialState(width = 800, height = 600) {
     winner: null, // 'left' or 'right'
     serveTimer: 0, // countdown timer for serve delay (seconds)
     winScore: 11, // first to 11 points wins
+    showInstructions: !hasSeen,
   };
 }
 

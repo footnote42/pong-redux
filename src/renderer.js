@@ -37,6 +37,23 @@ export function render(state, ctx, interp = 0) {
   ctx.fillText(state.score.left, w * 0.25, 40);
   ctx.fillText(state.score.right, w * 0.75, 40);
 
+  // instructions overlay (first-time)
+  if (state.showInstructions) {
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.font = '40px monospace';
+    ctx.fillText('PONG REDUX', w / 2, h * 0.28);
+    ctx.font = '20px monospace';
+    ctx.fillText('Player 1: W / S', w / 2, h * 0.44);
+    ctx.fillText('Player 2: Arrow Up / Arrow Down', w / 2, h * 0.50);
+    ctx.fillText('P or ESC to pause', w / 2, h * 0.56);
+    ctx.fillStyle = '#aaa';
+    ctx.fillText('Press any key to start', w / 2, h * 0.72);
+    return; // skip other overlays while instructions shown
+  }
+
   // pause overlay
   if (state.paused) {
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
@@ -44,6 +61,10 @@ export function render(state, ctx, interp = 0) {
     ctx.fillStyle = '#fff';
     ctx.font = '32px monospace';
     ctx.fillText('PAUSED', w / 2, h / 2);
+    ctx.font = '18px monospace';
+    ctx.fillStyle = '#aaa';
+    ctx.fillText('Player 1: W/S  |  Player 2: Arrow Up/Down', w / 2, h / 2 + 40);
+    ctx.fillText('Press P or ESC to resume', w / 2, h / 2 + 70);
   }
 
   // game over overlay
