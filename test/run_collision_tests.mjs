@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { isCircleRectColliding, resolveCircleRectPenetration } from '../src/collision.js';
 import { reflectFromPaddle, bounceOffHorizontalEdge } from '../src/ball.js';
-import { update, createInitialState } from '../src/game-state.js';
+import { update, createInitialState, startPlaying } from '../src/game-state.js';
 
 function nearlyEqual(a, b, eps = 1e-6) {
   return Math.abs(a - b) <= eps;
@@ -63,6 +63,9 @@ console.log('Wall bounce OK');
 
 // swept guard (fast crossing)
 const state = createInitialState(600, 400);
+startPlaying(state, 'versus');
+state.serveTimer = 0;
+state.paused = false;
 const leftP = state.paddles.left;
 state.ball.x = leftP.x + leftP.w + 200;
 state.ball.y = leftP.y;
@@ -74,6 +77,9 @@ console.log('Swept collision guard OK');
 
 // Corner collision: ball overlapping right paddle near top and moving up-right
 const s2 = createInitialState(600, 400);
+startPlaying(s2, 'versus');
+s2.serveTimer = 0;
+s2.paused = false;
 const rightP = s2.paddles.right;
 // move paddle up so its top is near the top wall, then place ball overlapping both
 rightP.y = rightP.h / 2 + 2; // top ≈ 2px
@@ -90,6 +96,9 @@ console.log('Corner collision handling OK');
 
 // Spawn inside paddle: simulate scoring serve that would land inside a paddle
 const s3 = createInitialState(600, 400);
+startPlaying(s3, 'versus');
+s3.serveTimer = 0;
+s3.paused = false;
 const leftP3 = s3.paddles.left;
 // artificially trigger scoring by moving ball out of bounds on the left
 s3.ball.x = -10;

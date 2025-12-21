@@ -1,11 +1,15 @@
 {
   "name": "pong-redux",
-  "version": "0.2.0",
+  "version": "0.8.0",
   "description": "A modern rebuild of Pong with clean architecture, precise physics, and a path to online multiplayer. Learning exercise in game dev fundamentals.",
   "main": "src/main.js",
   "type": "module",
   "scripts": {
-    "test": "node test/run_collision_tests.mjs"
+    "test": "npm run test:collision && npm run test:stage3 && npm run test:stage6 && npm run test:stage8",
+    "test:collision": "node test/run_collision_tests.mjs",
+    "test:stage3": "node test/stage3-scoring-test.mjs",
+    "test:stage6": "node test/stage6-cpu-test.mjs",
+    "test:stage8": "node test/stage8-settings-test.mjs"
   },
   "keywords": [
     "pong",

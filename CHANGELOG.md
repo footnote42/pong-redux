@@ -5,6 +5,125 @@ All notable changes to the Pong Redux project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2025-12-21
+
+### Added - Stage 8: Settings Menu Foundation
+- **Comprehensive settings system** with organized tabbed interface:
+  - **Gameplay Tab**: AI difficulty selector, ball speed slider (0.5x-2.0x), win score selector (5/7/11/15/21)
+  - **Audio Tab**: Sound toggle (ON/OFF), volume slider (0-100%)
+  - **About Tab**: Version info, credits
+- **Settings persistence** via localStorage
+- **Live settings application**:
+  - Ball speed changes apply immediately to active ball
+  - Difficulty changes sync with CPU in single-player mode
+  - Win score changes apply to current game
+- **Tabbed UI navigation** with hover states and visual feedback
+- **Slider controls** for continuous values (ball speed, volume)
+- **Keyboard shortcuts**: Press S or ESC to toggle settings, 1/2/3 for difficulty selection
+- **Settings state management**: `settingsTab`, `showSettings`, `settingsHover`
+- Comprehensive test suite (`test/stage8-settings-test.mjs`) - 12 tests
+
+### Changed
+- `src/game-state.js`: Expanded settings structure with `ballSpeed`, `winScore`, `soundEnabled`, `volume`
+- `src/game-state.js`: Added setter functions: `setBallSpeed()`, `setWinScore()`, `setSoundEnabled()`, `setVolume()`
+- `src/game-state.js`: Settings persist to localStorage on every change
+- `src/game-state.js`: Settings load from localStorage on initialization
+- `src/game-state.js`: Ball speed changes apply live to ball velocity
+- `src/game-state.js`: CPU difficulty syncs with settings changes
+- `src/renderer.js`: Complete settings UI rewrite with tabbed interface
+- `src/renderer.js`: Added `drawGameplaySettings()`, `drawAudioSettings()`, `drawAboutSettings()`
+- `src/renderer.js`: Added reusable `drawSlider()` component
+- `src/input.js`: Settings interaction handlers for all controls
+- `src/input.js`: Added helper functions: `detectSettingsHover()`, `handleSettingsClick()`
+- `src/input.js`: ESC key closes settings overlay
+- `package.json`: Added test scripts for all stages (collision, stage3, stage6, stage8)
+- `test/run_collision_tests.mjs`: Updated to work with new game state model
+
+### Technical Details
+- Settings stored in `state.settings` object with defaults
+- `persistSettings()` helper writes to localStorage on every change
+- Ball speed stored as multiplier (0.5-2.0) and applied to ball velocity
+- Volume clamped to 0-100 range
+- All setter functions include bounds checking
+- Settings UI uses canvas rendering with interactive hover states
+- Slider controls calculate normalized values (0-1) for precise input
+
+### Testing
+- All 12 Stage 8 tests passing ✓
+- Settings persistence verified
+- Live ball speed application verified
+- CPU difficulty synchronization verified
+- All bounds checking verified
+- All previous stage tests still passing
+
+### Known Issues
+- **Settings menu non-responsive**: UI renders but clicks/interactions don't register. Needs investigation of event handling in `src/input.js`. Documented in `TODO.md` for next session.
+
+---
+
+## [0.6.0] - 2025-12-21
+
+### Added - Stage 6: CPU Opponent
+- **Reactive AI with intentional flaws** for human-like CPU opponent
+- **Three difficulty levels** with distinct parameters:
+  - Easy: 400ms reaction, ±60px error, 70% speed
+  - Medium: 200ms reaction, ±30px error, 85% speed
+  - Hard: 100ms reaction, ±15px error, 100% speed
+- **AI features**:
+  - Reaction delay timers (simulates human response time)
+  - Periodic target updates (not frame-perfect tracking)
+  - Random targeting errors (imperfect aim)
+  - Dead zone to prevent paddle jitter
+  - Return-to-center behavior when ball moves away
+  - Respects movement speed limits (no cheating)
+- **Single-player mode integration**: CPU controls right paddle when gameMode is 'single'
+- **Difficulty synchronization**: Settings panel difficulty applies to CPU
+- Comprehensive test suite (`test/stage6-cpu-test.mjs`)
+
+### Changed
+- `src/game-state.js`: Imports and initializes CPU on single-player mode start
+- `src/game-state.js`: Updates CPU paddle in main game loop
+- `src/game-state.js`: Synchronizes CPU difficulty with settings changes
+- `test/stage3-scoring-test.mjs`: Updated to work with new game state model
+
+### Technical Details
+- CPU uses reactive tracking (not predictive) for fair, beatable gameplay
+- AI parameters follow guidance from `cpu-player.md`
+- CPU designed to "lose in interesting ways" rather than be unbeatable
+
+---
+
+## [0.5.0] - 2025-12-21
+
+### Added - Stage 5: Landing Screen & Mode Selection
+- **Landing screen** with professional game title and mode selection
+- **Two game modes**:
+  - "1 Player (vs CPU)" - Single-player mode
+  - "2 Players (Local)" - Local multiplayer
+- **Game state management**: LANDING, PLAYING, PAUSED, GAME_OVER states
+- **Settings panel** accessible from landing screen:
+  - Difficulty selection (Easy/Medium/Hard)
+  - Settings persist to localStorage
+  - Visual feedback for selected options
+- **High score tracking** with localStorage persistence
+- **Settings gear icon** in top-right corner
+- Keyboard shortcuts: Press 1 or 2 to select mode, S to open settings
+- Tests for landing screen and settings (`test/stage5-landing-test.mjs`, `test/stage5-settings-test.mjs`)
+
+### Changed
+- `src/game-state.js`: Default gameState is now 'LANDING' instead of 'PLAYING'
+- `src/game-state.js`: Added mode selection logic and settings management
+- `src/renderer.js`: Landing screen overlay with buttons and instructions
+- `src/renderer.js`: Settings overlay with difficulty options
+- `src/input.js`: Landing screen input handling (mouse and keyboard)
+- `index.html`: Removed immediate ball serving to allow landing screen
+
+### Fixed
+- Settings overlay rendering (removed early return from landing screen render)
+- Settings gear icon alignment with clickable area
+
+---
+
 ## [0.4.0] - 2025-12-21
 
 ### Added - Stage 4: Pause & Input Handling

@@ -21,6 +21,15 @@ export function createInitialState(width = 800, height = 600) {
       // ignore parse errors
     }
   }
+
+  // Default settings with all options
+  const defaultSettings = {
+    difficulty: 'medium',
+    ballSpeed: 1.0,      // 0.5x to 2.0x multiplier
+    winScore: 11,        // Points needed to win
+    soundEnabled: true,  // Sound effects on/off
+    volume: 70           // 0-100
+  };
   return {
     width,
     height,
@@ -35,17 +44,18 @@ export function createInitialState(width = 800, height = 600) {
     gameOver: false,
     winner: null, // 'left' or 'right'
     serveTimer: 0, // countdown timer for serve delay (seconds)
-    winScore: 11, // first to 11 points wins
+    winScore: (persistedSettings && persistedSettings.winScore) || defaultSettings.winScore,
     showInstructions: !hasSeen,
     // Stage 5: landing and game mode - default to LANDING screen
     gameState: 'LANDING', // 'LANDING' | 'PLAYING' | 'PAUSED' | 'GAME_OVER'
     gameMode: null, // 'single' or 'versus'
     landingHover: null,
     // Stage 5 extras: settings and high score
-    settings: persistedSettings || { difficulty: 'medium' },
+    settings: persistedSettings || defaultSettings,
     highScore: persistedHigh || { score: 0, holder: null },
     showSettings: false,
     settingsHover: null,
+    settingsTab: 'gameplay', // 'gameplay', 'audio', 'about'
   };
 }
 
@@ -57,6 +67,42 @@ export function setDifficulty(state, level) {
     setCPUDifficulty(state, level);
   }
 
+  persistSettings(state);
+}
+
+export function setBallSpeed(state, multiplier) {
+  state.settings.ballSpeed = Math.max(0.5, Math.min(2.0, multiplier));
+  // Apply to current ball if game is running
+  if (state.ball) {
+    const baseSpeed = 200;
+    const currentSpeed = Math.sqrt(state.ball.vx * state.ball.vx + state.ball.vy * state.ball.vy);
+    if (currentSpeed > 0) {
+      const targetSpeed = baseSpeed * state.settings.ballSpeed;
+      const ratio = targetSpeed / currentSpeed;
+      state.ball.vx *= ratio;
+      state.ball.vy *= ratio;
+    }
+  }
+  persistSettings(state);
+}
+
+export function setWinScore(state, score) {
+  state.settings.winScore = score;
+  state.winScore = score;
+  persistSettings(state);
+}
+
+export function setSoundEnabled(state, enabled) {
+  state.settings.soundEnabled = enabled;
+  persistSettings(state);
+}
+
+export function setVolume(state, volume) {
+  state.settings.volume = Math.max(0, Math.min(100, volume));
+  persistSettings(state);
+}
+
+function persistSettings(state) {
   if (typeof window !== 'undefined' && window.localStorage) {
     try {
       const s = JSON.stringify(state.settings);
