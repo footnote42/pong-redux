@@ -44,9 +44,9 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 - `paddle.js` - Paddle entity and movement
 - `ball.js` - Ball entity, physics, serving, bounce angle computation
 - `collision.js` - Circle-rect collision detection and resolution
-- `renderer.js` - Canvas drawing
-- `input.js` - Keyboard handlers
-- `ai.js` - CPU opponent (not yet implemented)
+- `renderer.js` - Canvas drawing (411 lines - consider splitting)
+- `input.js` - Keyboard and mouse handlers (380 lines - consider splitting)
+- `ai.js` - CPU opponent with configurable difficulty
 
 ## Key Implementation Details
 
@@ -94,12 +94,41 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 - Increase ball speed temporarily to reproduce collision edge cases
 - Add console logs in `collision.js` and `ball.js` to inspect collision responses
 
+## Current Status (2025-12-21)
+
+**Completed Features:**
+- ✅ Fixed-timestep game loop with accumulator pattern
+- ✅ Two-player local multiplayer (W/S and Arrow keys)
+- ✅ Single-player mode with CPU opponent (easy/medium/hard)
+- ✅ Landing screen with mode selection
+- ✅ Settings menu with gameplay and audio tabs
+- ✅ Score tracking and high score persistence
+- ✅ Win condition (configurable: 5, 7, 11, 15, 21 points)
+- ✅ Swept collision detection for corner cases
+- ✅ Ball speed customization (0.5x - 2.0x)
+
+**Known Issues (See TODO.md for details):**
+1. **CRITICAL**: Settings menu renders but is non-responsive to mouse clicks
+2. No error handling for canvas initialization
+3. localStorage errors are silently swallowed
+4. CSS is minified on one line (hard to maintain)
+
+**Code Quality Assessment:**
+- Overall Score: 7.5/10
+- Strengths: Architecture, game loop, collision detection
+- Needs Improvement: Error handling, file organization, documentation
+
+**Refactoring Recommendations:**
+- Extract magic numbers to `src/constants.js`
+- Split large files (renderer.js, input.js, game-state.js) into smaller modules
+- Add JSDoc documentation for complex functions
+- Reduce tight coupling between input.js and game-state.js
+- Implement or remove unused `interp` parameter
+
 ## Future Extensions
 
-- AI opponent (`ai.js` - pluggable difficulty)
-- Sound effects (Web Audio API)
-- Win condition (first to 11 points)
-- Game state transitions (start → playing → ended)
-- Ball speed progression
+- Sound effects (Web Audio API) - Stage 10-11
+- Paddle customization (styles, colors) - Stage 9
+- Visual effects (trails, particles) - Stage 10-11
 - Touch/mobile controls
 - Online multiplayer (WebSocket, state sync, input buffering already architected for this)
