@@ -1,7 +1,7 @@
 // src/main.js
 // Fixed-timestep game loop with requestAnimationFrame + accumulator
 
-import { createInitialState, update as updateState } from './game-state.js';
+import { createInitialState, update as updateState, showLanding } from './game-state.js';
 import * as renderer from './renderer.js';
 import { attachInputHandlers, detachInputHandlers } from './input.js';
 
@@ -48,8 +48,13 @@ export function createGame(canvas) {
     running = true;
     lastTime = performance.now();
     accumulator = 0;
-    // attach input handlers
-    attachInputHandlers(state);
+    // attach input handlers (pass canvas for pointer events)
+    attachInputHandlers(state, canvas);
+
+    // If this is first run, show landing screen
+    const seen = typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('pong:seenLanding') === '1';
+    if (!seen) showLanding(state);
+
     rafId = requestAnimationFrame(loop);
   }
 

@@ -307,33 +307,33 @@ All Stage 4 tests pass locally; proceed to Stage 5 (Landing Screen & Mode Select
 
 ## Phase 2: Game Modes & Menu System
 
-### Stage 5: Landing Screen & Mode Selection
+### Stage 5: Landing Screen & Mode Selection (In progress)
 **Goal:** Professional start screen with mode choices
 
 **AI Tool:** Claude Chat (structure), Copilot (implementation)
 
-- [ ] **Design landing screen layout**
-  - Game title: "PONG REDUX" or similar
+- [x] **Design landing screen layout**
+  - Game title: "PONG REDUX" or similar ✓
   - Subtitle: "A Classic Reimagined" or Wayne's tagline
   - Mode selection buttons:
-    - "1 Player (vs CPU)"
-    - "2 Players (Local)"
+    - "1 Player (vs CPU)" ✓
+    - "2 Players (Local)" ✓
     - Settings icon/button (for Phase 3)
   - Optional: High score display (if implemented)
-- [ ] **Implement game state management**
-  - States: LANDING, PLAYING, PAUSED, GAME_OVER
-  - Clean transitions between states
-  - State determines which screen renders
-- [ ] **Add mode selection logic**
-  - Clicking "1 Player" → sets gameMode = 'single'
-  - Clicking "2 Players" → sets gameMode = 'versus'
-  - Transition to PLAYING state
-  - Store selected mode in game state
-- [ ] **Style landing screen**
-  - Responsive layout (scales with canvas)
-  - Clear visual hierarchy
-  - Buttons have hover states
-  - Matches overall game aesthetic
+- [x] **Implement game state management**
+  - States: LANDING, PLAYING, PAUSED, GAME_OVER ✓
+  - Clean transitions between states ✓
+  - State determines which screen renders ✓
+- [x] **Add mode selection logic**
+  - Clicking "1 Player" → sets gameMode = 'single' ✓
+  - Clicking "2 Players" → sets gameMode = 'versus' ✓
+  - Transition to PLAYING state ✓
+  - Store selected mode in game state ✓
+- [x] **Style landing screen**
+  - Responsive layout (scales with canvas) ✓
+  - Clear visual hierarchy ✓
+  - Buttons have hover states ✓
+  - Matches overall game aesthetic ✓
 
 **Success Criteria:**
 - Landing screen looks professional ✓

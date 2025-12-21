@@ -23,7 +23,30 @@ export function createInitialState(width = 800, height = 600) {
     serveTimer: 0, // countdown timer for serve delay (seconds)
     winScore: 11, // first to 11 points wins
     showInstructions: !hasSeen,
+    // Stage 5: landing and game mode
+    gameState: 'PLAYING', // 'LANDING' | 'PLAYING' | 'PAUSED' | 'GAME_OVER'
+    gameMode: null, // 'single' or 'versus'
+    landingHover: null,
   };
+}
+
+export function showLanding(state) {
+  state.gameState = 'LANDING';
+  state.showInstructions = false; // don't show instruction overlay on top of landing
+  state.landingHover = null;
+}
+
+export function startPlaying(state, mode = 'versus') {
+  state.gameMode = mode; // 'single' or 'versus'
+  state.gameState = 'PLAYING';
+  state.showInstructions = false;
+  state.landingHover = null;
+  // Persist that user has seen landing so it won't show automatically again
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.setItem('pong:seenLanding', '1');
+  }
+  // Reset play state
+  restartGame(state);
 }
 
 // Ensure a newly-served ball isn't spawned overlapping a paddle. Attempts a few re-serves then centers as fallback.
@@ -52,6 +75,8 @@ function ensureBallNotInsidePaddles(state, maxAttempts = 5) {
 // dt is seconds
 
 export function update(state, dt) {
+  // Only update game when we're actively playing
+  if (state.gameState !== 'PLAYING') return;
   if (state.paused || state.gameOver) return;
 
   // Handle serve delay timer
