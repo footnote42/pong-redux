@@ -45,6 +45,27 @@ export function render(state, ctx, interp = 0) {
     ctx.font = '32px monospace';
     ctx.fillText('PAUSED', w / 2, h / 2);
   }
+
+  // game over overlay
+  if (state.gameOver) {
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#fff';
+
+    // Winner announcement
+    ctx.font = '48px monospace';
+    const winnerText = state.winner === 'left' ? 'LEFT PLAYER WINS!' : 'RIGHT PLAYER WINS!';
+    ctx.fillText(winnerText, w / 2, h / 2 - 40);
+
+    // Final score
+    ctx.font = '24px monospace';
+    ctx.fillText(`Final Score: ${state.score.left} - ${state.score.right}`, w / 2, h / 2 + 20);
+
+    // Restart instruction
+    ctx.font = '20px monospace';
+    ctx.fillStyle = '#aaa';
+    ctx.fillText('Press SPACE to restart', w / 2, h / 2 + 80);
+  }
 }
 
 function drawPaddle(ctx, p) {

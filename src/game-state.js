@@ -17,6 +17,10 @@ export function createInitialState(width = 800, height = 600) {
     ball: createBall(width / 2, height / 2, 6, 200),
     running: false,
     paused: false,
+    gameOver: false,
+    winner: null, // 'left' or 'right'
+    serveTimer: 0, // countdown timer for serve delay (seconds)
+    winScore: 11, // first to 11 points wins
   };
 }
 
@@ -46,7 +50,19 @@ function ensureBallNotInsidePaddles(state, maxAttempts = 5) {
 // dt is seconds
 
 export function update(state, dt) {
-  if (state.paused) return;
+  if (state.paused || state.gameOver) return;
+
+  // Handle serve delay timer
+  if (state.serveTimer > 0) {
+    state.serveTimer -= dt;
+    if (state.serveTimer <= 0) {
+      state.serveTimer = 0;
+      // Serve the ball
+      serveBall(state.ball, Math.random() < 0.5 ? 1 : -1);
+      ensureBallNotInsidePaddles(state);
+    }
+    return; // Don't update game while waiting to serve
+  }
 
   // Update paddles
   updatePaddle(state.paddles.left, dt, state.height);
@@ -134,16 +150,50 @@ export function update(state, dt) {
   if (ball.x - ball.r <= 0) {
     state.score.right += 1;
     resetBall(ball, state.width / 2, state.height / 2);
-    serveBall(ball, Math.random() < 0.5 ? 1 : -1);
-    ensureBallNotInsidePaddles(state);
+
+    // Check for win condition
+    if (state.score.right >= state.winScore) {
+      state.gameOver = true;
+      state.winner = 'right';
+    } else {
+      // Set serve delay (0.5 seconds)
+      state.serveTimer = 0.5;
+    }
   }
 
   if (ball.x + ball.r >= state.width) {
     state.score.left += 1;
     resetBall(ball, state.width / 2, state.height / 2);
-    serveBall(ball, Math.random() < 0.5 ? 1 : -1);
-    ensureBallNotInsidePaddles(state);
+
+    // Check for win condition
+    if (state.score.left >= state.winScore) {
+      state.gameOver = true;
+      state.winner = 'left';
+    } else {
+      // Set serve delay (0.5 seconds)
+      state.serveTimer = 0.5;
+    }
   }
+}
+
+export function restartGame(state) {
+  // Reset scores
+  state.score.left = 0;
+  state.score.right = 0;
+
+  // Reset paddles to center
+  state.paddles.left.y = state.height / 2;
+  state.paddles.right.y = state.height / 2;
+
+  // Reset ball to center
+  resetBall(state.ball, state.width / 2, state.height / 2);
+
+  // Clear game over state
+  state.gameOver = false;
+  state.winner = null;
+
+  // Serve the ball after a brief delay
+  state.serveTimer = 0.5;
 }
 
 export function serialize(state) {

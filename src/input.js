@@ -2,6 +2,7 @@
 // Keyboard input handling - maps keys to paddle directions and pause
 
 import { setPaddleDirection } from './paddle.js';
+import { restartGame } from './game-state.js';
 
 let _state = null;
 let listeners = [];
@@ -28,6 +29,12 @@ function keydown(e) {
     case 'P':
     case 'Escape':
       _state.paused = !_state.paused;
+      break;
+    case ' ':
+      // Restart game if game over
+      if (_state.gameOver) {
+        restartGame(_state);
+      }
       break;
     default:
       break;

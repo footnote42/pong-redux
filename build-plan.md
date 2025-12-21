@@ -1,7 +1,7 @@
 # Build Plan: Pong Redux
 
-**Status:** 🎯 Stage 2 Complete - Core Physics Done!
-**Progress:** 2 of 16 stages complete (12.5%)
+**Status:** 🎯 Stage 3 Complete - Scoring & Win Conditions Done!
+**Progress:** 3 of 16 stages complete (18.75%)
 **Target Completion:** 3-4 days (4-6 hours total per TRD.md)
 **Goal:** Fully playable Pong with game modes, customization, and delight
 **Reference:** TRD.md for technical requirements and architectural decisions
@@ -10,7 +10,7 @@
 
 ## Progress Summary
 
-**✅ Completed (Stages 1-2)**
+**✅ Completed (Stages 1-3)**
 - Fixed-timestep game loop with accumulator pattern (60Hz)
 - Paddle and ball rendering (factory functions)
 - AABB collision detection with positional correction
@@ -19,13 +19,18 @@
 - Comprehensive test suite (headless + browser + debug harness)
 - GitHub Actions CI pipeline
 - All collision tests passing ✓
+- Scoring system with 0.5s serve delay
+- Win condition (first to 11 points)
+- Winner announcement overlay
+- Restart functionality (SPACE key)
+- Stage 3 automated tests passing ✓
 
 **🚧 In Progress**
-- None (ready for Stage 3)
+- None (ready for Stage 4)
 
 **⏭️ Next Up**
-- Stage 3: Scoring & Win Conditions
 - Stage 4: Pause & Input Handling
+- Stage 5: Landing Screen & Mode Selection
 
 ---
 
@@ -172,27 +177,27 @@ All headless collision tests pass locally; proceed to Stage 3 (Scoring & Win Con
 
 ---
 
-### Stage 3: Scoring & Win Conditions
+### Stage 3: Scoring & Win Conditions ✅
 **Goal:** Complete game loop with victory and restart
 
 **AI Tool:** Copilot (straightforward logic)
 
-- [ ] **Implement scoring logic**
+- [x] **Implement scoring logic**
   - Ball exiting left boundary → right player scores
   - Ball exiting right boundary → left player scores
   - Score updates displayed on screen
   - Ball resets to center after each point
-- [ ] **Add win condition**
+- [x] **Add win condition**
   - First to 11 points wins (configurable later)
   - Display winner announcement overlay
   - Game loop pauses on win
   - Clear visual indication of victory
-- [ ] **Restart functionality**
+- [x] **Restart functionality**
   - Add "Press SPACE to restart" prompt on win screen
   - Reset scores, ball position, paddle positions
   - Clear any game state flags
   - Test multiple restarts work correctly
-- [ ] **Serve mechanics**
+- [x] **Serve mechanics**
   - Brief pause (0.5s) after each point
   - Ball serves in random direction (left or right)
   - Visual countdown or "Ready?" indicator optional
@@ -203,8 +208,43 @@ All headless collision tests pass locally; proceed to Stage 3 (Scoring & Win Con
 - Restart clears state and starts fresh ✓
 - Serving feels fair (random direction) ✓
 
-**Time Estimate:** 45-60 minutes  
+**Time Estimate:** 45-60 minutes
 **Complexity:** Low-Medium (straightforward logic)
+
+**Actual Time:** ~40 minutes
+**Completed:** 2025-12-21
+
+---
+
+### Stage 3 — Wrap-up ✅
+**Completed:** 2025-12-21
+
+**Summary:** Stage 3 (Scoring & Win Conditions) has been implemented and validated. Key deliverables:
+- Enhanced scoring system with automatic score tracking (ball exits trigger points)
+- **0.5-second serve delay** after each point - ball resets to center and waits before serving
+- **Win condition**: First player to reach **11 points** wins the game
+- **Game over state management** - game pauses when someone wins, preventing further gameplay
+- **Winner announcement overlay** showing:
+  - Large winner text ("LEFT PLAYER WINS!" or "RIGHT PLAYER WINS!")
+  - Final score display
+  - Restart instruction ("Press SPACE to restart")
+- **Restart functionality** - SPACE key resets all game state:
+  - Scores reset to 0-0
+  - Paddles return to center positions
+  - Ball resets to center with 0.5s serve delay
+  - Game over flags cleared
+- Automated test suite (`test/stage3-scoring-test.mjs`) validates all functionality
+- All tests pass (6 comprehensive tests covering serve delay, win conditions, restart, etc.)
+
+**Implementation Notes:**
+- Added state fields: `gameOver`, `winner`, `serveTimer`, `winScore`
+- Update loop now handles serve timer countdown and blocks gameplay when game is over
+- Renderer displays game over overlay with semi-transparent background
+- Input handler listens for SPACE key during game over state
+- Serve delay provides natural pause after scoring (feels better than instant re-serve)
+- Win score of 11 is configurable for future customization (Stage 11)
+
+All Stage 3 automated tests pass; proceed to Stage 4 (Pause & Input Handling).
 
 ---
 
