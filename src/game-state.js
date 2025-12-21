@@ -7,6 +7,19 @@ import { isCircleRectColliding, resolveCircleRectPenetration } from './collision
 
 export function createInitialState(width = 800, height = 600) {
   const hasSeen = typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('pong:seenInstructions') === '1';
+  // load settings and highScore from localStorage if available
+  let persistedSettings = null;
+  let persistedHigh = null;
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const s = window.localStorage.getItem('pong:settings');
+      if (s) persistedSettings = JSON.parse(s);
+      const h = window.localStorage.getItem('pong:highScore');
+      if (h) persistedHigh = JSON.parse(h);
+    } catch (e) {
+      // ignore parse errors
+    }
+  }
   return {
     width,
     height,
@@ -27,8 +40,39 @@ export function createInitialState(width = 800, height = 600) {
     gameState: 'PLAYING', // 'LANDING' | 'PLAYING' | 'PAUSED' | 'GAME_OVER'
     gameMode: null, // 'single' or 'versus'
     landingHover: null,
+    // Stage 5 extras: settings and high score
+    settings: persistedSettings || { difficulty: 'medium' },
+    highScore: persistedHigh || { score: 0, holder: null },
+    showSettings: false,
+    settingsHover: null,
   };
 }
+
+export function setDifficulty(state, level) {
+  state.settings.difficulty = level;
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const s = JSON.stringify(state.settings);
+      window.localStorage.setItem('pong:settings', s);
+    } catch (e) {
+      // noop
+    }
+  }
+}
+
+export function recordHighScore(state, score, holder = 'Player') {
+  if (score > state.highScore.score) {
+    state.highScore = { score, holder };
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        window.localStorage.setItem('pong:highScore', JSON.stringify(state.highScore));
+      } catch (e) {
+        // noop
+      }
+    }
+  }
+}
+
 
 export function showLanding(state) {
   state.gameState = 'LANDING';
