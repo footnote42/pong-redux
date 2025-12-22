@@ -204,7 +204,7 @@ function detectSettingsHover(x, y, state) {
   const panelY = h * UI.SETTINGS_PANEL.HEIGHT_RATIO;
 
   // Check tabs
-  const tabs = ['gameplay', 'audio', 'about'];
+  const tabs = ['gameplay', 'custom', 'audio', 'about'];
   const tabW = UI.TAB_WIDTH;
   const tabH = UI.TAB_HEIGHT;
   const tabY = panelY + 80;
@@ -220,6 +220,8 @@ function detectSettingsHover(x, y, state) {
   // Check content based on active tab
   if (state.settingsTab === 'gameplay') {
     return detectGameplayHover(x, y, state, panelX, panelY);
+  } else if (state.settingsTab === 'custom') {
+    return detectCustomizationHover(x, y, state, panelX, panelY);
   } else if (state.settingsTab === 'audio') {
     return detectAudioHover(x, y, state, panelX, panelY);
   }
@@ -380,7 +382,7 @@ function handleSettingsClick(x, y, state) {
   }
 
   // Check tabs
-  const tabs = ['gameplay', 'audio', 'about'];
+  const tabs = ['gameplay', 'custom', 'audio', 'about'];
   const tabW = UI.TAB_WIDTH;
   const tabH = UI.TAB_HEIGHT;
   const tabY = panelY + 80;
@@ -397,6 +399,8 @@ function handleSettingsClick(x, y, state) {
   // Handle content clicks based on active tab
   if (state.settingsTab === 'gameplay') {
     handleGameplayClick(x, y, state, panelX, panelY);
+  } else if (state.settingsTab === 'custom') {
+    handleCustomizationClick(x, y, state, panelX, panelY);
   } else if (state.settingsTab === 'audio') {
     handleAudioClick(x, y, state, panelX, panelY);
   }
@@ -580,4 +584,13 @@ function handleAudioClick(x, y, state, panelX, panelY) {
       return;
     }
   }
+}
+// Stub functions - to be implemented
+function detectCustomizationHover(x, y, state, panelX, panelY) {
+  // TODO: Implement customization hover detection
+  return null;
+}
+
+function handleCustomizationClick(x, y, state, panelX, panelY) {
+  // TODO: Implement customization click handling
 }

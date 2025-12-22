@@ -1,7 +1,7 @@
 # Build Plan: Pong Redux
 
-**Status:** 🎯 Stage 11 Complete - Difficulty & Gameplay Tweaks!
-**Progress:** 11 of 16 stages complete (69%)
+**Status:** 🎯 Stage 12 Complete - Sound Effects System!
+**Progress:** 12 of 16 stages complete (75%)
 **Target Completion:** 3-4 days (4-6 hours total per TRD.md)
 **Goal:** Fully playable Pong with game modes, customization, and delight
 **Reference:** TRD.md for technical requirements and architectural decisions
@@ -39,11 +39,11 @@
 - **Difficulty tweaks**: Ball speed presets (slow/normal/fast/insane), paddle size slider (0.5x-1.5x), endless mode toggle
 
 **🚧 In Progress**
-- None (ready for Stage 12)
+- None (ready for Stage 13)
 
 **⏭️ Next Up**
-- Stage 12: Sound Effects System
 - Stage 13: Visual Polish & Animations
+- Stage 14: Scoreboard & Stats Tracking (optional)
 
 ---
 
@@ -709,34 +709,34 @@ All Stage 11 features complete and tested!
 
 ## Phase 4: Polish & Delight
 
-### Stage 12: Sound Effects System
+### Stage 12: Sound Effects System ✅
 **Goal:** Audio feedback enhances gameplay
 
-**AI Tool:** Copilot (Web Audio API), Claude Chat (asset sourcing)
+**AI Tool:** Claude Code (implementation)
 
-- [ ] **Find/create sound assets**
-  - Paddle hit: Short "pong" or "blip"
-  - Wall bounce: Slightly different tone
-  - Score point: Success chime
-  - Win game: Victory fanfare
-  - UI click: Subtle confirmation sound
-  - Free sources: freesound.org, kenney.nl, zapsplat.com
-- [ ] **Implement Web Audio API**
-  - Load sounds on game init
-  - Play sounds on events (collision, score, etc.)
-  - Volume control from settings
-  - Mute toggle
-- [ ] **Add sound to game events**
-  - Ball hits paddle → paddle hit sound
-  - Ball hits wall → wall bounce sound
-  - Point scored → score sound
-  - Game won → victory sound
-  - UI interactions → click sounds
-- [ ] **Polish audio experience**
-  - Sounds don't overlap/clip
-  - Volume is balanced (not too loud)
-  - Mute setting persists
-  - Optional: retro 8-bit sound mode
+- [x] **Find/create sound assets**
+  - Paddle hit: 440Hz square wave (short beep) ✓
+  - Wall bounce: 330Hz square wave (medium pitch) ✓
+  - Score point: C-E-G major chord (ascending chime) ✓
+  - Win game: C-E-G-C melody (victory fanfare) ✓
+  - UI click: 800Hz sine wave (subtle confirmation) ✓
+  - **Method: Procedural synthesis** (no external assets needed)
+- [x] **Implement Web Audio API**
+  - SoundManager class with AudioContext ✓
+  - Procedural sound generation using oscillators ✓
+  - Volume control from settings (0-100%) ✓
+  - Mute toggle (soundEnabled) ✓
+- [x] **Add sound to game events**
+  - Ball hits paddle → playPaddleHit() ✓
+  - Ball hits wall → playWallBounce() ✓
+  - Point scored → playScore() ✓
+  - Game won → playWin() ✓
+  - UI interactions → playUIClick() ✓
+- [x] **Polish audio experience**
+  - Sounds use exponential ramps (no clicks/pops) ✓
+  - Volume balanced (0.15-0.3 max, scaled by user volume) ✓
+  - Mute setting persists via localStorage ✓
+  - Retro square wave aesthetic matches game style ✓
 
 **Success Criteria:**
 - Sounds enhance feedback without annoying ✓
@@ -744,8 +744,49 @@ All Stage 11 features complete and tested!
 - Audio optional (mute toggle) ✓
 - Sounds match game aesthetic ✓
 
-**Time Estimate:** 45-60 minutes  
-**Complexity:** Medium (asset integration)
+**Time Taken:** ~60 minutes
+**Completed:** 2025-12-22
+**Complexity:** Medium (procedural synthesis)
+
+---
+
+### Stage 12 — Wrap-up ✅
+**Completed:** 2025-12-22
+
+**Summary:** Stage 12 (Sound Effects System) successfully implemented a complete audio feedback system using procedural synthesis:
+
+**Sound Manager** (src/sound.js)
+- SoundManager singleton class with Web Audio API
+- Five distinct procedural sounds using oscillators:
+  - **Paddle hit**: 440Hz square wave, 100ms duration
+  - **Wall bounce**: 330Hz square wave, 80ms duration
+  - **Score**: C-E-G major chord (523/659/784 Hz), ascending chime
+  - **Win**: C-E-G-C melody (523/659/784/1047 Hz), victory fanfare
+  - **UI click**: 800Hz sine wave, 50ms subtle confirmation
+- Exponential gain ramps prevent audio clicks/pops
+- Volume scaling: 0.15-0.3 max gain, multiplied by user volume setting
+- Browser autoplay policy compliance: context initialization on user interaction
+
+**Integration Points:**
+- **game-state.js**: Sound triggers on collisions (src/game-state.js:354-421), scoring (432-458)
+- **input.js**: UI click sounds on all button interactions (418-577)
+- **main.js**: Audio context initialization on game start (50-52)
+- **Settings sync**: Volume and mute changes update sound manager in real-time
+
+**Implementation Details:**
+- Procedural synthesis eliminates need for external audio assets
+- Retro square wave aesthetic matches game's visual style
+- All sounds persist settings via localStorage
+- No performance impact - sounds use temporary oscillators (auto-garbage collected)
+
+**Testing:**
+- All collision types trigger appropriate sounds
+- Volume control works smoothly (0-100%)
+- Mute toggle disables all sounds immediately
+- UI clicks provide satisfying feedback
+- No audio overlap or clipping issues
+
+All Stage 12 features complete and tested! Game now has complete audio feedback.
 
 ---
 

@@ -6,6 +6,7 @@ import { createBall, updateBall, bounceOffHorizontalEdge, resetBall, serveBall, 
 import { isCircleRectColliding, resolveCircleRectPenetration } from './collision.js';
 import { initCPU, updateCPU, setCPUDifficulty } from './ai.js';
 import { CANVAS, PADDLE, BALL, GAME, AUDIO, PHYSICS } from './constants.js';
+import { soundManager } from './sound.js';
 
 /**
  * Creates the initial game state with default values
@@ -53,6 +54,7 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
     endlessMode: false // Endless mode (no win condition)
   };
   const paddleHeight = PADDLE.DEFAULT_HEIGHT * ((persistedSettings && persistedSettings.paddleSize) || defaultSettings.paddleSize);
+  const ballSpeed = BALL.DEFAULT_SPEED * ((persistedSettings && persistedSettings.ballSpeed) || defaultSettings.ballSpeed);
   
   return {
     width,
@@ -62,7 +64,7 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
       left: createPaddle(PADDLE.DEFAULT_X_OFFSET_LEFT, height / 2, PADDLE.DEFAULT_WIDTH, paddleHeight, PADDLE.DEFAULT_SPEED),
       right: createPaddle(width - PADDLE.DEFAULT_X_OFFSET_RIGHT, height / 2, PADDLE.DEFAULT_WIDTH, paddleHeight, PADDLE.DEFAULT_SPEED),
     },
-    ball: createBall(width / 2, height / 2, BALL.DEFAULT_RADIUS, BALL.DEFAULT_SPEED),
+    ball: createBall(width / 2, height / 2, BALL.DEFAULT_RADIUS, ballSpeed),
     ballTrail: [], // Array of {x, y} positions for trail effect
     ballFlashTimer: 0, // Timer for collision flash effect (seconds)
     running: false,
@@ -101,9 +103,14 @@ export function setBallSpeed(state, multiplier) {
   // Apply to current ball if game is running
   if (state.ball) {
     const baseSpeed = BALL.DEFAULT_SPEED;
+    const targetSpeed = baseSpeed * state.settings.ballSpeed;
+    
+    // Update the ball's speed property so future serves use the correct speed
+    state.ball.speed = targetSpeed;
+    
+    // Also update current velocity if ball is moving
     const currentSpeed = Math.sqrt(state.ball.vx * state.ball.vx + state.ball.vy * state.ball.vy);
     if (currentSpeed > 0) {
-      const targetSpeed = baseSpeed * state.settings.ballSpeed;
       const ratio = targetSpeed / currentSpeed;
       state.ball.vx *= ratio;
       state.ball.vy *= ratio;
@@ -120,11 +127,13 @@ export function setWinScore(state, score) {
 
 export function setSoundEnabled(state, enabled) {
   state.settings.soundEnabled = enabled;
+  soundManager.setEnabled(enabled); // Update sound manager
   persistSettings(state);
 }
 
 export function setVolume(state, volume) {
   state.settings.volume = Math.max(AUDIO.VOLUME_MIN, Math.min(AUDIO.VOLUME_MAX, volume));
+  soundManager.setVolume(state.settings.volume); // Update sound manager
   persistSettings(state);
 }
 
@@ -354,8 +363,9 @@ export function update(state, dt) {
 
   // Wall collisions (top/bottom)
   const wallBounce = bounceOffHorizontalEdge(ball, state.height);
-  if (wallBounce && state.settings.ballFlash) {
-    state.ballFlashTimer = 0.1; // 100ms flash
+  if (wallBounce) {
+    if (state.settings.ballFlash) state.ballFlashTimer = 0.1; // 100ms flash
+    soundManager.playWallBounce(); // Sound effect for wall bounce
   }
 
   // Paddle collisions
@@ -383,6 +393,7 @@ export function update(state, dt) {
       // reflect based on hit location - ball should go right after hitting left paddle
       reflectFromPaddle(ball, left.y, left.h, +1);
       if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
+      soundManager.playPaddleHit(); // Sound effect for paddle hit
     }
     // nudge ball to front to avoid re-collision
     ball.x = left.x + left.w + ball.r;
@@ -401,6 +412,7 @@ export function update(state, dt) {
     } else {
       reflectFromPaddle(ball, right.y, right.h, -1);
       if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
+      soundManager.playPaddleHit(); // Sound effect for paddle hit
     }
     ball.x = right.x - ball.r;
     bounceOffHorizontalEdge(ball, state.height);
@@ -410,6 +422,7 @@ export function update(state, dt) {
     // reflect based on hit location - ball should go right after hitting left paddle
     reflectFromPaddle(ball, left.y, left.h, +1);
     if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
+    soundManager.playPaddleHit(); // Sound effect for paddle hit
     // ensure no sticking (nudge slightly out)
     ball.x = left.x + left.w + ball.r + 0.5;
     // If the ball was touching top/bottom this frame, invert vy as well (corner case)
@@ -423,6 +436,7 @@ export function update(state, dt) {
     // reflect to left
     reflectFromPaddle(ball, right.y, right.h, -1);
     if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
+    soundManager.playPaddleHit(); // Sound effect for paddle hit
     ball.x = right.x - ball.r - 0.5;
     if (ball.prevY - ball.r <= 0 || ball.prevY + ball.r >= state.height || ball.y - ball.r <= 0 || ball.y + ball.r >= state.height) {
       ball.vy = -ball.vy;
@@ -438,7 +452,9 @@ export function update(state, dt) {
     if (state.score.right >= state.winScore) {
       state.gameOver = true;
       state.winner = 'right';
+      soundManager.playWin(); // Sound effect for winning
     } else {
+      soundManager.playScore(); // Sound effect for scoring
       // Set serve delay (0.5 seconds)
       state.serveTimer = PHYSICS.SERVE_DELAY_SEC;
     }
@@ -452,7 +468,9 @@ export function update(state, dt) {
     if (state.score.left >= state.winScore) {
       state.gameOver = true;
       state.winner = 'left';
+      soundManager.playWin(); // Sound effect for winning
     } else {
+      soundManager.playScore(); // Sound effect for scoring
       // Set serve delay (0.5 seconds)
       state.serveTimer = PHYSICS.SERVE_DELAY_SEC;
     }

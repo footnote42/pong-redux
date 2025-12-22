@@ -404,7 +404,7 @@ function drawSettingsOverlay(state, ctx, w, h) {
   ctx.fillText('Settings', w / 2, panelY + 50);
 
   // Tabs
-  const tabs = ['gameplay', 'audio', 'about'];
+  const tabs = ['gameplay', 'custom', 'audio', 'about'];
   const tabW = UI.TAB_WIDTH;
   const tabH = UI.TAB_HEIGHT;
   const tabY = panelY + 80;
@@ -434,6 +434,8 @@ function drawSettingsOverlay(state, ctx, w, h) {
   // Draw content based on active tab
   if (state.settingsTab === 'gameplay') {
     drawGameplaySettings(state, ctx, w, h, panelX, contentY, panelW, contentH);
+  } else if (state.settingsTab === 'custom') {
+    drawCustomizationSettings(state, ctx, w, h, panelX, contentY, panelW, contentH);
   } else if (state.settingsTab === 'audio') {
     drawAudioSettings(state, ctx, w, h, panelX, contentY, panelW, contentH);
   } else if (state.settingsTab === 'about') {
@@ -568,9 +570,22 @@ function drawGameplaySettings(state, ctx, w, h, panelX, contentY, panelW, conten
 
   y += endlessToggleH + 30;
 
-  // Paddle Style
+  // Paddle Size
   ctx.textAlign = 'left';
   ctx.font = '18px monospace';
+  ctx.fillStyle = '#fff';
+  ctx.fillText('Paddle Size: ' + state.settings.paddleSize.toFixed(1) + 'x', panelX + 40, y);
+  y += 30;
+  drawSlider(ctx, panelX + 40, y, 300, state.settings.paddleSize, 0.5, 1.5, 'paddleSize', state.settingsHover);
+}
+
+
+function drawCustomizationSettings(state, ctx, w, h, panelX, contentY, panelW, contentH) {
+  let y = contentY + 20;
+  ctx.textAlign = 'left';
+  ctx.font = '18px monospace';
+
+  // Paddle Style
   ctx.fillStyle = '#fff';
   ctx.fillText('Paddle Style:', panelX + 40, y);
   y += 30;
@@ -632,18 +647,87 @@ function drawGameplaySettings(state, ctx, w, h, panelX, contentY, panelW, conten
     ctx.strokeStyle = isRightHovered ? '#fff' : '#666';
     ctx.lineWidth = isRightHovered ? 2 : 1;
     ctx.strokeRect(rightColorBoxX, y, colorBoxSize, colorBoxSize);
+    
+    y += colorBoxSize + 30;
+  } else {
+    y += styleBoxH + 30;
   }
 
-  // Add spacing before paddle size
-  y += (state.settings.paddleStyle === 'custom' ? colorBoxSize + 40 : 0);
-
-  // Paddle Size
+  // Ball Style
   ctx.textAlign = 'left';
   ctx.font = '18px monospace';
   ctx.fillStyle = '#fff';
-  ctx.fillText('Paddle Size: ' + state.settings.paddleSize.toFixed(1) + 'x', panelX + 40, y);
+  ctx.fillText('Ball Style:', panelX + 40, y);
   y += 30;
-  drawSlider(ctx, panelX + 40, y, 300, state.settings.paddleSize, 0.5, 1.5, 'paddleSize', state.settingsHover);
+
+  const ballStyles = ['classic', 'retro', 'glow', 'soccer'];
+  const ballStyleBoxW = 90;
+  const ballStyleBoxH = 36;
+
+  for (let i = 0; i < ballStyles.length; i++) {
+    const style = ballStyles[i];
+    const boxX = panelX + 40 + i * (ballStyleBoxW + 10);
+    const isHovered = state.settingsHover === 'ballStyle_' + style;
+    const isSelected = state.settings.ballStyle === style;
+
+    ctx.fillStyle = isHovered ? '#444' : '#222';
+    ctx.fillRect(boxX, y, ballStyleBoxW, ballStyleBoxH);
+    ctx.strokeStyle = isSelected ? '#0f0' : '#666';
+    ctx.lineWidth = isSelected ? 2 : 1;
+    ctx.strokeRect(boxX, y, ballStyleBoxW, ballStyleBoxH);
+
+    ctx.fillStyle = isHovered || isSelected ? '#fff' : '#aaa';
+    ctx.font = '14px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(style.charAt(0).toUpperCase() + style.slice(1), boxX + ballStyleBoxW / 2, y + ballStyleBoxH / 2 + 6);
+  }
+
+  y += ballStyleBoxH + 40;
+
+  // Ball Trail Toggle
+  ctx.textAlign = 'left';
+  const trailToggleW = 100;
+  const trailToggleH = 36;
+  const trailToggleX = panelX + 40;
+  const isTrailHovered = state.settingsHover === 'ballTrail';
+
+  ctx.fillStyle = isTrailHovered ? '#444' : '#222';
+  ctx.fillRect(trailToggleX, y, trailToggleW, trailToggleH);
+  ctx.strokeStyle = state.settings.ballTrail ? '#0f0' : '#666';
+  ctx.lineWidth = state.settings.ballTrail ? 2 : 1;
+  ctx.strokeRect(trailToggleX, y, trailToggleW, trailToggleH);
+
+  ctx.fillStyle = state.settings.ballTrail ? '#0f0' : '#aaa';
+  ctx.font = '14px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Ball Trail', trailToggleX + trailToggleW / 2, y + trailToggleH / 2 + 5);
+
+  // Ball Flash Toggle
+  const flashToggleX = panelX + 40 + trailToggleW + 20;
+  const isFlashHovered = state.settingsHover === 'ballFlash';
+
+  ctx.fillStyle = isFlashHovered ? '#444' : '#222';
+  ctx.fillRect(flashToggleX, y, trailToggleW, trailToggleH);
+  ctx.strokeStyle = state.settings.ballFlash ? '#0f0' : '#666';
+  ctx.lineWidth = state.settings.ballFlash ? 2 : 1;
+  ctx.strokeRect(flashToggleX, y, trailToggleW, trailToggleH);
+
+  ctx.fillStyle = state.settings.ballFlash ? '#0f0' : '#aaa';
+  ctx.font = '14px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Flash Effect', flashToggleX + trailToggleW / 2, y + trailToggleH / 2 + 5);
+
+  y += trailToggleH + 40;
+
+  // Trail Length Slider (only show if trail is enabled)
+  if (state.settings.ballTrail) {
+    ctx.textAlign = 'left';
+    ctx.font = '18px monospace';
+    ctx.fillStyle = '#fff';
+    ctx.fillText('Trail Length: ' + state.settings.trailLength, panelX + 40, y);
+    y += 30;
+    drawSlider(ctx, panelX + 40, y, 300, state.settings.trailLength, 3, 10, 'trailLength', state.settingsHover);
+  }
 }
 
 function drawAudioSettings(state, ctx, w, h, panelX, contentY, panelW, contentH) {

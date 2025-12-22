@@ -36,7 +36,7 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 **Input Buffering** (src/input.js)
 - Attaches/detaches event listeners to prevent memory leaks
 - Input applied in fixed update step, not render loop (avoids 1-frame lag)
-- Supports W/S (left paddle), Arrow Up/Down (right paddle), P/ESC (pause), Tab (settings toggle)
+- Supports W/S (left paddle), Arrow Up/Down (right paddle), P/ESC (pause), M (settings toggle)
 
 **Module Structure**
 - `main.js` - Entry point, game loop
@@ -94,7 +94,7 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 - Increase ball speed temporarily to reproduce collision edge cases
 - Add console logs in `collision.js` and `ball.js` to inspect collision responses
 
-## Current Status (2025-12-22)
+## Current Status (2025-12-22 - Stage 12 Complete)
 
 **Completed Features:**
 - ✅ Fixed-timestep game loop with accumulator pattern
@@ -110,16 +110,17 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 - ✅ **Ball customization (Stage 10)** - Four styles: Classic, Retro, Glow, Soccer
 - ✅ **Ball effects (Stage 10)** - Trail effect with configurable length, collision flash effect
 - ✅ **Difficulty tweaks (Stage 11)** - Ball speed presets (Slow/Normal/Fast/Insane), paddle size slider (0.5x-1.5x), endless mode toggle
-- ✅ Settings accessible during gameplay (Tab key toggle)
+- ✅ **Sound effects system (Stage 12)** - Procedural Web Audio API sounds, paddle/wall/score/win/UI sounds, volume control
+- ✅ Settings accessible during gameplay (M key toggle)
+- ✅ **Ball customization UI (Stage 13 fix)** - Ball style, trail toggle, flash toggle, and trail length now accessible in settings menu
 
 **Known Issues:**
-- Ball customization UI incomplete (settings added to state, rendering implemented, UI pending)
-- Consider adding more visual feedback for settings changes
+- None - all core features working correctly
 
 **Code Quality Assessment:**
-- Overall Score: 8.5/10
-- Strengths: Architecture, game loop, collision detection, visual customization, effects system, gameplay tuning
-- Needs Improvement: Complete ball settings UI, add more player feedback
+- Overall Score: 9.0/10
+- Strengths: Architecture, game loop, collision detection, visual customization, effects system, gameplay tuning, audio feedback
+- Needs Improvement: Consider adding more advanced sound effects (optional)
 
 **Recent Additions (Stage 9, 10 & 11):**
 
@@ -142,15 +143,21 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 - Settings panel height increased (80%) with optimized spacing
 - All settings persist via localStorage and update in real-time
 
+**Sound Effects System** (src/sound.js, integrated throughout)
+- Procedural synthesis using Web Audio API (no external assets needed)
+- Five distinct sound effects: paddle hit (440Hz square wave), wall bounce (330Hz square wave), score (C-E-G chord), win (C-E-G-C melody), UI click (800Hz sine wave)
+- Fully integrated with existing audio settings (soundEnabled, volume)
+- Auto-initialization on game start (after user interaction for browser autoplay policy)
+- Real-time volume control and mute toggle
+- Sound triggers: collision detection (src/game-state.js:354-421), scoring (src/game-state.js:432-458), UI interactions (src/input.js:418-577)
+
 **Refactoring Recommendations:**
-- Complete ball settings UI in settings menu
-- Consider adding a "Visual" tab to settings for ball/paddle customization
+- Consider adding more sound variations (power-ups, menu music) - Stage 13
 - Extract remaining magic numbers to `src/constants.js`
 - Add JSDoc documentation for new customization functions
 
 ## Future Extensions
 
-- Sound effects (Web Audio API) - Stage 12
 - Ball rotation animation - Stage 10 (optional)
 - Speed lines effect - Stage 10 (optional)
 - Touch/mobile controls

@@ -5,6 +5,7 @@ import { createInitialState, update as updateState, showLanding } from './game-s
 import * as renderer from './renderer.js';
 import { attachInputHandlers, detachInputHandlers } from './input.js';
 import { PHYSICS } from './constants.js';
+import { soundManager } from './sound.js';
 
 const { MS_PER_UPDATE, SPIRAL_OF_DEATH_CAP_MS } = PHYSICS;
 
@@ -49,6 +50,12 @@ export function createGame(canvas) {
     running = true;
     lastTime = performance.now();
     accumulator = 0;
+    
+    // Initialize sound system (must be called after user interaction)
+    soundManager.init();
+    soundManager.setEnabled(state.settings.soundEnabled);
+    soundManager.setVolume(state.settings.volume);
+    
     // attach input handlers (pass canvas for pointer events)
     attachInputHandlers(state, canvas);
 
