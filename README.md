@@ -47,12 +47,22 @@ This isn't just another Pong clone. It's a **learning exercise** in rebuilding a
 
 **Key Achievement**: All collision tests pass. Physics feel tight and predictable.
 
-### 🚧 What's Next
-- **Stage 3**: Scoring logic and win conditions (first to 11 points)
-- **Stage 4**: Pause system and input polish
-- **Stage 5+**: AI opponent, game modes, customization, sound effects
+### ✅ Stages 3-12 Complete
+- ✅ Scoring & win conditions
+- ✅ Pause system & input handling
+- ✅ Landing screen & mode selection
+- ✅ CPU opponent with 3 difficulty levels
+- ✅ Settings menu with gameplay/audio tabs
+- ✅ Paddle customization (4 styles, color picker)
+- ✅ Ball customization (4 styles, trail & flash effects)
+- ✅ Difficulty tweaks (speed presets, paddle size, endless mode)
+- ✅ Sound effects system (Web Audio API, procedural synthesis)
 
-See [build-plan.md](build-plan.md) for the complete roadmap (16 stages mapped out).
+### 🚧 What's Next
+- **Stage 13**: Visual polish & animations
+- **Stage 15-16**: Final testing & portfolio prep
+
+See [build-plan.md](build-plan.md) for the complete roadmap (12 of 16 stages complete).
 
 ---
 
@@ -382,6 +392,7 @@ MIT License - Feel free to learn from, fork, or build upon this code.
 
 ---
 
-**Current Status**: Stage 2 complete (Collision & Physics) ✅
-**Next Up**: Stage 3 (Scoring & Win Conditions)
-**Last Updated**: 2025-12-20
+**Current Status**: Stage 12 complete (Sound Effects System) ✅
+**Progress**: 12 of 16 stages complete (75%)
+**Next Up**: Stage 13 (Visual Polish), then portfolio prep
+**Last Updated**: 2025-12-22

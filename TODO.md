@@ -1,408 +1,393 @@
 # TODO - Pong Redux
 
 **Last Updated:** 2025-12-22
-**Frontend Review Completed:** 2025-12-21
-**Immediate Fixes Completed:** 2025-12-22
+**Current Progress:** Stage 12 Complete (12/16 stages, 75%)
+**Path to Portfolio:** 3 focused sessions remaining
 
 ---
 
-## ✅ Completed Tasks
+## 🎯 Path to Portfolio Launch (Recommended: 3 hours)
 
-### 1. Settings Menu Investigation ✅ (2025-12-22)
-**Original Issue:** Settings menu reported as non-responsive
-
-**Resolution:** Settings menu is **fully functional** - the issue was a misdiagnosis or already resolved.
-- Verified all event handlers fire correctly
-- Tested difficulty buttons, tabs, sliders - all working
-- Hover states update properly
-- Click detection is accurate
-- All Stage 8 tests passing
-
-**Files Modified:** `src/input.js` (temporary debug logging added then removed)
-**Time:** 15 minutes
+This is the recommended completion path for a polished, portfolio-ready game. Each session builds on the previous one.
 
 ---
 
-### 2. Add Error Handling for Canvas Initialization ✅ (2025-12-22)
-**Issue:** No validation of canvas context or DOM elements
+## Session 1: Visual Polish & Animations (60-75 minutes)
 
-**Resolution:** Added proper error handling in `index.html`
-- Canvas element existence check
-- 2D context support validation
-- Clear error messages for debugging
+**Goal:** Make the game feel smooth and professional with visual feedback
 
-**Files Modified:** `index.html:14-24`
-**Time:** 5 minutes
+### Stage 13: Visual Polish Checklist
 
----
+#### High-Impact Polish (Essential - 45 min)
+- [ ] **Smooth screen transitions**
+  - Add fade-in/out when switching between LANDING → PLAYING → GAME_OVER states
+  - Transition duration: 300-500ms
+  - Use canvas globalAlpha for fading effect
+  - Files: `src/renderer.js`, `src/game-state.js`
 
-### 3. Add Console Logging to localStorage Error Handlers ✅ (2025-12-22)
-**Issue:** localStorage errors were silently swallowed
+- [ ] **Button animations**
+  - Add press animation (scale down to 0.95 on click)
+  - Smooth hover transitions with easing
+  - Visual feedback for all clickable elements
+  - Files: `src/renderer.js:drawButton()` helper
 
-**Resolution:** Added `console.warn()` to all localStorage catch blocks
-- Settings load failures now logged
-- Settings save failures now logged
-- High score save failures now logged
+- [ ] **Score counter animation**
+  - Animate score changes (lerp from old value to new value over 300ms)
+  - Add brief flash on score change
+  - Files: `src/game-state.js`, `src/renderer.js`
 
-**Files Modified:** `src/game-state.js:20, 110, 123`
-**Time:** 5 minutes
+- [ ] **Enhanced pause overlay**
+  - Smooth fade-in when pausing
+  - Subtle pulsing animation on "PAUSED" text
+  - Files: `src/renderer.js:drawPauseOverlay()`
 
----
+#### Optional Polish (Nice-to-have - 30 min)
+- [ ] **Particle effects on collision**
+  - Small particle burst when ball hits paddle (3-5 particles)
+  - Particles fade out over 0.5s
+  - Use object pooling (reuse particle array)
+  - Files: `src/renderer.js`, `src/game-state.js`
 
-### 4. Unminify CSS for Maintainability ✅ (2025-12-22)
-**Issue:** CSS was compressed on one line
+- [ ] **Victory confetti**
+  - Confetti animation on game win
+  - Randomized colors and trajectories
+  - Auto-clear after 3 seconds
+  - Files: `src/renderer.js:drawGameOver()`
 
-**Resolution:** Expanded CSS with proper formatting
-- Multi-line structure
-- Proper indentation
-- All styles preserved
+- [ ] **CRT screen effect** (optional)
+  - Subtle scanline overlay
+  - Slight screen curvature shader
+  - Toggle in settings (default: OFF)
+  - Files: `src/renderer.js`
 
-**Files Modified:** `styles.css`
-**Time:** 2 minutes
+**Success Criteria:**
+- Game feels responsive with clear visual feedback
+- Transitions are smooth and professional
+- Animations enhance rather than distract
+- Frame rate stays solid at 60fps with effects enabled
 
----
-
-## 🚨 Critical Issues (Fix Immediately)
-
-*No critical issues remaining*
-
----
-
-## ⚙️ Medium Priority (Refactor Later)
-
-### 5. Extract Magic Numbers to Constants File ✅ (2025-12-22)
-**Issue:** Hardcoded values scattered throughout codebase
-**Impact:** Hard to maintain consistent UI dimensions and timing values
-**Files:** `src/renderer.js`, `src/main.js`, `src/ball.js`
-
-**Implementation:**
-Create `src/constants.js`:
-```javascript
-export const CANVAS = {
-  DEFAULT_WIDTH: 800,
-  DEFAULT_HEIGHT: 600
-};
-
-export const UI = {
-  BUTTON_WIDTH: 260,
-  BUTTON_HEIGHT: 60,
-  BUTTON_GAP: 40,
-  SETTINGS_PANEL: {
-    WIDTH_RATIO: 0.7,
-    HEIGHT_RATIO: 0.7,
-    X_OFFSET: 0.15,
-    Y_OFFSET: 0.15
-  },
-  TAB_WIDTH: 140,
-  TAB_HEIGHT: 36
-};
-
-export const PHYSICS = {
-  UPDATE_RATE_HZ: 60,
-  MS_PER_UPDATE: 1000 / 60,
-  SPIRAL_OF_DEATH_CAP_MS: 250,
-  SERVE_DELAY_SEC: 0.5
-};
-
-export const BALL = {
-  DEFAULT_RADIUS: 6,
-  DEFAULT_SPEED: 200,
-  MAX_SERVE_ANGLE_DEG: 75
-};
-
-export const PADDLE = {
-  DEFAULT_WIDTH: 10,
-  DEFAULT_HEIGHT: 80,
-  DEFAULT_SPEED: 300,
-  DEFAULT_ACCEL: 2000
-};
-```
-
-**Completed Changes:**
-- Created `src/constants.js` with all centralized constants
-- Updated `src/main.js` - Game loop timing constants
-- Updated `src/game-state.js` - Defaults, serve delay, ball speed bounds, volume bounds
-- Updated `src/input.js` - UI dimensions, difficulty levels, win scores, ball speed calculation
-- Updated `src/renderer.js` - UI layout constants
-
-**Impact:**
-- Eliminated ~40+ magic numbers across the codebase
-- Centralized all tunable values in one location
-- Easier to maintain and modify game balance
-- All tests passing ✅
-
-**Actual Effort:** 45 minutes
-**Status:** ✅ Completed (2025-12-22)
+**Estimated Time:** 60-75 minutes
 
 ---
 
-### 6. Split Large Files into Smaller Modules
-**Issue:** Some files have grown too large with mixed responsibilities
+## Session 2: Comprehensive Testing (75-90 minutes)
 
-**Files to Split:**
+**Goal:** Ensure the game works flawlessly across browsers and scenarios
 
-#### 6a. `src/renderer.js` (411 lines)
-Split into:
-- `src/rendering/canvas-renderer.js` - Core rendering logic
-- `src/rendering/ui-components.js` - Button, slider, overlay drawing functions
-- `src/rendering/ui-layouts.js` - Layout calculations for landing, settings, etc.
+### Stage 15: Testing & Bug Fixes Checklist
 
-#### 6b. `src/input.js` (380 lines)
-Split into:
-- `src/input/keyboard-handler.js` - Keyboard event handling
-- `src/input/mouse-handler.js` - Pointer events and hover detection
-- `src/input/ui-interactions.js` - Settings menu interaction logic
+#### Browser Compatibility (20 min)
+- [ ] **Chrome/Edge testing**
+  - Test all game modes (1P, 2P)
+  - Verify settings persistence
+  - Check sound effects work
+  - Test all customization options
 
-#### 6c. `src/game-state.js` (330 lines)
-Split into:
-- `src/state/game-state.js` - Core state and update logic
-- `src/state/settings-manager.js` - Settings getters/setters
-- `src/state/persistence.js` - localStorage operations
+- [ ] **Firefox testing**
+  - Full gameplay test
+  - Verify localStorage works
+  - Check Canvas rendering quality
+  - Test sound system (Firefox Audio API quirks)
 
-**Estimated Effort:** 4-6 hours
-**Status:** Not Started
+- [ ] **Safari testing** (if available)
+  - Test Web Audio API initialization
+  - Verify touch events (if mobile safari)
+  - Check for rendering issues
 
----
+#### Gameplay Testing (25 min)
+- [ ] **1-Player mode (vs CPU)**
+  - Play full game on Easy difficulty → verify beatable
+  - Play full game on Medium difficulty → verify challenging
+  - Play full game on Hard difficulty → verify tough but fair
+  - Test mid-game difficulty changes
+  - Verify CPU resets properly on restart
 
-### 7. Add JSDoc Documentation for Public APIs ✅ (2025-12-22)
-**Issue:** No type hints or documentation for function parameters and return values
+- [ ] **2-Player mode**
+  - Play full game with simultaneous key presses
+  - Test rapid paddle movement near boundaries
+  - Verify both players score correctly
+  - Test pause/resume mid-rally
 
-**Completed Documentation:**
+- [ ] **Win conditions**
+  - Test win at 5, 7, 11, 15, 21 points
+  - Test endless mode (play 20+ points, verify no auto-win)
+  - Verify winner announcement shows correct player
+  - Test SPACE restart from game over state
 
-**src/ball.js** - All 6 functions documented:
-- `createBall()` - Ball entity creation
-- `resetBall()` - Reset position and velocity
-- `serveBall()` - Random serve direction
-- `updateBall()` - Position integration
-- `bounceOffHorizontalEdge()` - Wall collision
-- `reflectFromPaddle()` - Complex bounce logic with angle variation
+#### Settings & Customization Testing (15 min)
+- [ ] **Settings persistence**
+  - Change all settings, refresh page → verify persistence
+  - Test localStorage quota (shouldn't fail)
+  - Clear localStorage, verify defaults restore
 
-**src/collision.js** - Both functions documented:
-- `isCircleRectColliding()` - AABB circle-rectangle detection
-- `resolveCircleRectPenetration()` - Positional correction algorithm
+- [ ] **Ball speed testing**
+  - Test all presets: Slow (0.7x), Normal (1.0x), Fast (1.3x), Insane (1.8x)
+  - Test slider at min (0.5x) and max (2.0x)
+  - Verify speed changes apply immediately to active ball
 
-**src/paddle.js** - All 3 functions documented:
-- `createPaddle()` - Paddle entity creation
-- `updatePaddle()` - Smooth acceleration physics
-- `setPaddleDirection()` - Input control
+- [ ] **Paddle customization**
+  - Test all 4 paddle styles render correctly
+  - Test custom colors for both paddles
+  - Test paddle size at 0.5x, 1.0x, 1.5x
+  - Verify collision detection unaffected by styles/sizes
 
-**src/game-state.js** - Key functions documented:
-- `createInitialState()` - Initial state with localStorage
-- `update()` - Main game loop with collision system details
+- [ ] **Ball customization**
+  - Test all 4 ball styles render correctly
+  - Toggle trail ON/OFF, verify trail length slider
+  - Toggle flash effect ON/OFF
+  - Verify effects don't impact collision detection
 
-**src/ai.js** - All 3 CPU functions documented:
-- `initCPU()` - CPU state initialization
-- `updateCPU()` - AI behavior with difficulty personalities
-- `setCPUDifficulty()` - Mid-game difficulty changes
+- [ ] **Sound system**
+  - Test mute toggle
+  - Test volume slider from 0% to 100%
+  - Verify all 5 sounds play correctly
+  - Test settings → sound changes apply immediately
 
-**Impact:**
-- 20+ functions now have comprehensive JSDoc
-- Type information for all parameters and return values
-- Algorithm explanations for complex functions
-- Usage examples where helpful
-- Better IDE autocomplete and intellisense
+#### Edge Cases & Stress Testing (15 min)
+- [ ] **Boundary conditions**
+  - Ball hitting paddle corner at max speed
+  - Simultaneous paddle + wall collision
+  - Rapid pause/unpause during gameplay
+  - Spam clicking settings buttons
+  - Rapid mode switches (LANDING → PLAYING → LANDING)
 
-**Actual Effort:** 30 minutes
-**Status:** ✅ Completed (2025-12-22)
+- [ ] **Performance validation**
+  - Monitor FPS with DevTools (should stay 60fps)
+  - Check for GC spikes in Performance timeline
+  - Test with trail effect + flash effect + particles all enabled
+  - Verify no memory leaks over 5-minute play session
 
----
+- [ ] **Keyboard input edge cases**
+  - Press W+S simultaneously (paddle shouldn't move)
+  - Press Up+Down simultaneously (paddle shouldn't move)
+  - Hold keys while switching screens
+  - Test ESC/P pause while settings open
+  - Test all keyboard shortcuts (1/2 for mode, M/S for settings)
 
-### 8. Remove Unused Interpolation Parameter or Implement It
-**Issue:** `interp` parameter calculated but never used
-**Files:** `src/main.js:39`, `src/renderer.js:4`
+#### Bug Fix Session (Flexible time)
+- [ ] **Document all discovered bugs** (create list)
+- [ ] **Prioritize: Critical → High → Medium → Low**
+- [ ] **Fix critical bugs immediately**
+- [ ] **Fix high-priority bugs if time allows**
+- [ ] **Defer low-priority bugs** (document in TODO or known issues)
 
-**Options:**
-1. **Remove it:** If interpolation isn't needed, remove the parameter
-2. **Implement it:** Use for smooth visual interpolation between physics frames
+**Success Criteria:**
+- Zero critical bugs (game-breaking issues)
+- All high-priority bugs fixed or documented
+- Game tested in 3+ browsers
+- Performance validated (60fps, no memory leaks)
+- Edge cases handled gracefully
 
-**If Implementing:**
-```javascript
-// renderer.js
-export function render(state, ctx, interp = 0) {
-  // Interpolate ball position for smooth rendering
-  const ball = state.ball;
-  const renderX = ball.prevX + (ball.x - ball.prevX) * interp;
-  const renderY = ball.prevY + (ball.y - ball.prevY) * interp;
-
-  ctx.beginPath();
-  ctx.arc(renderX, renderY, ball.r, 0, Math.PI * 2);
-  ctx.fill();
-}
-```
-
-**Estimated Effort:** 1 hour (removal) or 3 hours (implementation)
-**Status:** Not Started
-
----
-
-## 🎨 Low Priority (Nice to Have)
-
-### 9. Reduce Tight Coupling with Command Pattern
-**Issue:** `input.js` imports many functions from `game-state.js`, creating tight coupling
-**Benefit:** Easier testing, better separation of concerns
-
-**Implementation:**
-Create `src/commands.js`:
-```javascript
-export const commands = {
-  setDifficulty: (state, value) => { /* ... */ },
-  setBallSpeed: (state, value) => { /* ... */ },
-  setWinScore: (state, value) => { /* ... */ },
-  // ...
-};
-```
-
-Update `input.js`:
-```javascript
-import { commands } from './commands.js';
-
-function handleGameplayClick(x, y, state, panelX, panelY) {
-  // ...
-  if (clickedDifficulty) {
-    commands.setDifficulty(state, difficulty);
-  }
-}
-```
-
-**Estimated Effort:** 2-3 hours
-**Status:** Not Started
+**Estimated Time:** 75-90 minutes
 
 ---
 
-### 10. Extract Common UI Drawing Functions
-**Issue:** Repeated button/slider drawing code in `renderer.js`
-**Files:** `src/renderer.js:288-301, 330-343`
+## Session 3: Portfolio Documentation (45-60 minutes)
 
-**Implementation:**
-```javascript
-// src/rendering/ui-components.js
-export function drawButton(ctx, x, y, w, h, label, isHovered, isSelected) {
-  ctx.fillStyle = isHovered ? '#444' : '#222';
-  ctx.fillRect(x, y, w, h);
-  ctx.strokeStyle = isSelected ? '#0f0' : '#666';
-  ctx.lineWidth = isSelected ? 2 : 1;
-  ctx.strokeRect(x, y, w, h);
+**Goal:** Create professional documentation and assets for portfolio showcase
 
-  ctx.fillStyle = isHovered || isSelected ? '#fff' : '#aaa';
-  ctx.font = '16px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText(label, x + w / 2, y + h / 2 + 6);
-}
+### Stage 16: Portfolio Prep Checklist
 
-export function drawSlider(ctx, x, y, width, value, min, max, name, hover) {
-  // ... extract from renderer.js:406-427
-}
-```
+#### Screenshots & Media (20 min)
+- [ ] **Capture high-quality screenshots** (1920x1080 or higher)
+  - Landing screen with game title and mode selection
+  - Gameplay action shot (mid-rally, show scores)
+  - Settings menu showing customization options
+  - Paddle customization panel (show different styles)
+  - Ball customization panel (show trail effect)
+  - Victory screen with winner announcement
+  - Optional: Mobile viewport screenshot (if responsive)
 
-**Estimated Effort:** 2 hours
-**Status:** Not Started
+- [ ] **Create demo GIF or video** (optional but recommended)
+  - 30-second gameplay clip showing:
+    - Mode selection
+    - Quick rally
+    - Scoring
+    - Settings menu
+    - Customization
+  - Use LICEcap (free) or ScreenToGif for GIF
+  - Or use OBS/QuickTime for MP4, convert with ffmpeg
 
----
+- [ ] **Optimize media assets**
+  - Compress screenshots (TinyPNG or similar)
+  - Keep GIF under 5MB
+  - Store in `/assets` or `/docs/images`
 
-### 11. Add Accessibility Features
-**Issue:** Canvas content is invisible to screen readers
-**Impact:** Game is not accessible to users with visual impairments
+#### README.md Enhancement (15 min)
+- [ ] **Add screenshots section**
+  - Embed 3-4 key screenshots
+  - Add captions explaining features
+  - Use markdown image syntax with alt text
 
-**Implementation:**
-```html
-<!-- index.html -->
-<canvas id="gameCanvas"
-        width="800"
-        height="600"
-        role="img"
-        aria-label="Pong game canvas"></canvas>
+- [ ] **Create features showcase**
+  - Bullet list of key features with emojis
+  - Highlight unique aspects (fixed timestep, customization, sound)
+  - Link to live demo at top of README
 
-<div id="game-status" class="sr-only" aria-live="polite" aria-atomic="true">
-  <!-- Update with game state changes for screen readers -->
-</div>
+- [ ] **Add "Try It Now" section**
+  - Link to live demo (GitHub Pages URL)
+  - Quick start instructions for local development
+  - Browser compatibility note
 
-<style>
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0,0,0,0);
-    border: 0;
-  }
-</style>
-```
+- [ ] **Update comparison section**
+  - Compare to original PongClone (if exists)
+  - Metrics: Features added, architecture improvements
+  - Learning outcomes highlighted
 
-Add state announcements:
-```javascript
-// Update #game-status when score changes, game starts, etc.
-function updateScreenReaderStatus(state) {
-  const statusEl = document.getElementById('game-status');
-  if (statusEl) {
-    statusEl.textContent = `Score: ${state.score.left} to ${state.score.right}`;
-  }
-}
-```
+#### Deploy to GitHub Pages (10 min)
+- [ ] **Enable GitHub Pages**
+  - Go to repo Settings → Pages
+  - Select main branch, root folder
+  - Wait for deployment (2-3 minutes)
+  - Verify live site works
 
-**Estimated Effort:** 4 hours
-**Status:** Not Started
+- [ ] **Test deployed version**
+  - Click through all screens
+  - Verify assets load correctly
+  - Test sounds work (autoplay policy)
+  - Check for console errors
 
----
+- [ ] **Add demo link to README**
+  - Update README.md with live demo URL
+  - Add badge: `[Play Now](https://username.github.io/pong-redux)`
 
-### 12. Cache Calculations Outside Render Loop
-**Issue:** Panel dimensions recalculated every frame
-**Files:** `src/renderer.js:168-171`
+#### Documentation Polish (10 min)
+- [ ] **Update CLAUDE.md final notes**
+  - Document any architecture changes from Stage 13
+  - Add performance notes (FPS, memory usage)
+  - Update "Current Status" to "Stage 16 Complete - Portfolio Ready"
 
-**Implementation:**
-```javascript
-// Cache UI layout calculations
-let cachedLayout = null;
-let cachedWidth = 0;
-let cachedHeight = 0;
+- [ ] **Create CHANGELOG entry for v1.0.0**
+  - Summarize Stages 13, 15, 16
+  - Mark as stable release
+  - Add deployment info
 
-function getSettingsLayout(w, h) {
-  if (cachedWidth !== w || cachedHeight !== h) {
-    cachedLayout = {
-      panelX: w * 0.15,
-      panelY: h * 0.15,
-      panelW: w * 0.7,
-      panelH: h * 0.7,
-      // ... other cached values
-    };
-    cachedWidth = w;
-    cachedHeight = h;
-  }
-  return cachedLayout;
-}
-```
+- [ ] **Write portfolio blurb** (for your portfolio site)
+  - 2-3 paragraph description of the project
+  - Highlight: Architecture, learning goals, technical achievements
+  - Include tech stack (Vanilla JS, Canvas, Web Audio)
+  - Link to GitHub repo and live demo
 
-**Estimated Effort:** 1 hour
-**Status:** Not Started
+#### Optional: Comparison Analysis (5 min)
+- [ ] **Create metrics comparison** (if you have an older version)
+  - Lines of code
+  - Number of modules
+  - Features count
+  - Test coverage
+  - Performance benchmarks
+
+**Success Criteria:**
+- README.md has screenshots and clear feature showcase
+- Live demo deployed and working
+- All documentation updated to reflect v1.0.0
+- Portfolio blurb written and ready to publish
+- Project is ready to share publicly
+
+**Estimated Time:** 45-60 minutes
 
 ---
 
-## Future Enhancements
+## 🚀 Deployment Checklist
 
-### ✅ Stage 9: Paddle Customization (Completed 2025-12-22)
-- ✅ Paddle styles (Classic, Retro, Neon, Custom)
-- ✅ Color customization
-- ✅ Size options (0.5x-1.5x multiplier)
+Once all three sessions are complete:
 
-### ✅ Stage 10: Ball Customization & Effects (Completed 2025-12-22)
-- ✅ Ball trails with object pooling
-- ✅ Collision flash effects
-- ✅ Ball styles (Classic, Retro, Glow, Soccer)
-- Note: Ball style UI not yet integrated into settings menu
+- [ ] **Final git commit**
+  - Commit message: "Release v1.0.0 - Portfolio ready"
+  - Tag release: `git tag -a v1.0.0 -m "Portfolio launch"`
+  - Push to GitHub: `git push origin main --tags`
 
-### ✅ Stage 11: Difficulty & Gameplay Tweaks (Completed 2025-12-22)
-- ✅ Ball speed presets (Slow/Normal/Fast/Insane)
-- ✅ Paddle size slider
-- ✅ Endless mode toggle
+- [ ] **Verify live demo**
+  - Test on desktop browser
+  - Test on mobile (if responsive)
+  - Share link with friend for sanity check
+
+- [ ] **Add to portfolio site**
+  - Add project card with screenshot
+  - Link to GitHub repo and live demo
+  - Include tech stack and description
+
+- [ ] **Share & celebrate! 🎉**
+  - Share on Twitter/LinkedIn (optional)
+  - Post to relevant subreddits (r/gamedev, r/webdev)
+  - Add to resume/CV under "Projects"
+
+---
+
+## 📊 Progress Tracking
+
+| Session | Stage | Tasks | Time Est. | Status |
+|---------|-------|-------|-----------|--------|
+| 1 | Stage 13 | Visual Polish | 60-75 min | ⬜ Not Started |
+| 2 | Stage 15 | Testing & Bugs | 75-90 min | ⬜ Not Started |
+| 3 | Stage 16 | Portfolio Docs | 45-60 min | ⬜ Not Started |
+| **Total** | **3 stages** | **~40 tasks** | **3-3.75 hours** | **⬜ 0/3 complete** |
+
+---
+
+## ⏭️ Postponed / Out of Scope
+
+### Stage 14: Scoreboard & Stats Tracking
+**Status:** Postponed per user request
+**Reason:** Not required for portfolio launch
+**Future consideration:** Add after v1.0.0 if desired
 
 ### Stage 7: Instructions & Help System
-- Help overlay accessible during gameplay
-- Control reference
-- Tutorial mode (optional)
+**Status:** Optional (basic instructions already exist from Stage 4)
+**Current state:** First-time instructions overlay works
+**Potential addition:** Dedicated help screen with detailed controls
+**Priority:** Low (existing instructions are adequate)
 
-### Stage 12-16: Polish & Launch
-- Sound effects (Web Audio API)
-- Visual polish and animations
-- Stats tracking
-- Portfolio documentation
+---
+
+## 🎯 Success Metrics (Portfolio-Ready Checklist)
+
+Before marking the project complete, verify:
+
+- [ ] Game runs without errors in 3+ browsers
+- [ ] All game modes work flawlessly (1P, 2P)
+- [ ] All customization options apply correctly
+- [ ] Sound effects work (with mute option)
+- [ ] Settings persist across sessions
+- [ ] Live demo is deployed and accessible
+- [ ] README.md has screenshots and clear description
+- [ ] Code is well-documented and commented
+- [ ] No critical or high-priority bugs
+- [ ] Performance is solid (60fps, no memory leaks)
+
+When all boxes are checked: **🎉 Project is portfolio-ready!**
+
+---
+
+## 📝 Notes
+
+### If Time-Constrained
+Skip optional items in Stage 13 (particles, confetti, CRT effect) and focus on:
+- Essential polish (transitions, buttons, score animation)
+- Core testing (browser compatibility, gameplay)
+- Minimal documentation (screenshots, deploy, README update)
+
+**Minimum viable completion:** 2-2.5 hours
+
+### If You Want to Go Above & Beyond
+After completing the recommended path, consider:
+- Mobile touch controls (swipe/tap for paddles)
+- Additional sound variations (power-up sounds, menu music)
+- More ball/paddle styles (unlockable themes)
+- Difficulty progression (ball speeds up over time)
+- Achievement system (first win, win streak, perfect game)
+
+**Extended polish:** +2-4 hours
+
+---
+
+## 🔗 Quick Reference
+
+- **Architecture docs:** CLAUDE.md
+- **Technical requirements:** TRD.md
+- **Stage details:** build-plan.md
+- **Version history:** CHANGELOG.md
+- **Code review notes:** REVIEW-SUMMARY.md
+
+---
+
+**Remember:** The game is already impressive at Stage 12. These final three sessions are about adding that final 10% of polish that makes it truly shine for a portfolio piece

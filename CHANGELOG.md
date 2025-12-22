@@ -5,6 +5,42 @@ All notable changes to the Pong Redux project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2025-12-22
+
+### Added - Stage 12: Sound Effects System
+- **Procedural sound synthesis** using Web Audio API (no external assets needed)
+- **Five distinct sound effects**:
+  - Paddle hit: 440Hz square wave, 100ms duration
+  - Wall bounce: 330Hz square wave, 80ms duration
+  - Score: C-E-G major chord (523/659/784 Hz), ascending chime
+  - Win: C-E-G-C melody (523/659/784/1047 Hz), victory fanfare
+  - UI click: 800Hz sine wave, 50ms subtle confirmation
+- **Sound manager integration**: Auto-initialization on game start (after user interaction)
+- **Volume control**: 0-100% slider in settings with real-time updates
+- **Mute toggle**: Sound ON/OFF in audio settings tab
+- **Browser autoplay policy compliance**: Context initialization on user interaction
+
+### Changed
+- `src/main.js`: Audio context initialization on game start (50-52)
+- `src/game-state.js`: Sound triggers on collisions (354-421) and scoring (432-458)
+- `src/input.js`: UI click sounds on all button interactions (418-577)
+- Settings sync: Volume and mute changes update sound manager in real-time
+
+### Technical Details
+- SoundManager singleton class with AudioContext
+- Exponential gain ramps prevent audio clicks/pops
+- Volume scaling: 0.15-0.3 max gain, multiplied by user volume setting
+- Retro square wave aesthetic matches game's visual style
+- No performance impact - temporary oscillators auto-garbage collected
+
+### Testing
+- All collision types trigger appropriate sounds
+- Volume control works smoothly (0-100%)
+- Mute toggle disables all sounds immediately
+- No audio overlap or clipping issues
+
+---
+
 ## [0.11.0] - 2025-12-22
 
 ### Added - Stages 9, 10 & 11: Customization & Difficulty
