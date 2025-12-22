@@ -1,0 +1,67 @@
+// src/constants.js
+// Centralized constants to avoid magic numbers scattered throughout codebase
+
+export const CANVAS = {
+  DEFAULT_WIDTH: 800,
+  DEFAULT_HEIGHT: 600
+};
+
+export const UI = {
+  BUTTON_WIDTH: 260,
+  BUTTON_HEIGHT: 60,
+  BUTTON_GAP: 40,
+  SETTINGS_PANEL: {
+    WIDTH_RATIO: 0.15,
+    HEIGHT_RATIO: 0.15,
+    PANEL_WIDTH_RATIO: 0.7,
+    PANEL_HEIGHT_RATIO: 0.7
+  },
+  TAB_WIDTH: 140,
+  TAB_HEIGHT: 36,
+  TAB_Y_OFFSET: 80,
+  CONTENT_Y_OFFSET: 136,  // 80 + 36 + 20
+  SECTION_SPACING: 70,
+  PANEL_PADDING: 40,
+  BUTTON_SPACING: 10,
+  SLIDER_WIDTH: 300,
+  SLIDER_HEIGHT: 20,
+  WIN_SCORE_BUTTON_WIDTH: 60,
+  WIN_SCORE_BUTTON_HEIGHT: 36
+};
+
+export const PHYSICS = {
+  UPDATE_RATE_HZ: 60,
+  MS_PER_UPDATE: 1000 / 60,  // 16.67ms
+  SPIRAL_OF_DEATH_CAP_MS: 250,
+  SERVE_DELAY_SEC: 0.5
+};
+
+export const BALL = {
+  DEFAULT_RADIUS: 6,
+  DEFAULT_SPEED: 200,
+  MAX_SERVE_ANGLE_DEG: 75,
+  SPEED_MULTIPLIER_MIN: 0.5,
+  SPEED_MULTIPLIER_MAX: 2.0
+};
+
+export const PADDLE = {
+  DEFAULT_WIDTH: 10,
+  DEFAULT_HEIGHT: 80,
+  DEFAULT_SPEED: 300,
+  DEFAULT_ACCEL: 2000,
+  DEFAULT_X_OFFSET_LEFT: 10,
+  DEFAULT_X_OFFSET_RIGHT: 20
+};
+
+export const GAME = {
+  WIN_SCORES: [5, 7, 11, 15, 21],
+  DEFAULT_WIN_SCORE: 11,
+  DIFFICULTY_LEVELS: ['easy', 'medium', 'hard'],
+  DEFAULT_DIFFICULTY: 'medium'
+};
+
+export const AUDIO = {
+  DEFAULT_VOLUME: 70,
+  VOLUME_MIN: 0,
+  VOLUME_MAX: 100
+};

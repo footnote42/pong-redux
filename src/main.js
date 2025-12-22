@@ -4,8 +4,9 @@
 import { createInitialState, update as updateState, showLanding } from './game-state.js';
 import * as renderer from './renderer.js';
 import { attachInputHandlers, detachInputHandlers } from './input.js';
+import { PHYSICS } from './constants.js';
 
-const MS_PER_UPDATE = 1000 / 60; // 60 Hz fixed update
+const { MS_PER_UPDATE, SPIRAL_OF_DEATH_CAP_MS } = PHYSICS;
 
 export function createGame(canvas) {
   const ctx = canvas.getContext('2d');
@@ -28,7 +29,7 @@ export function createGame(canvas) {
   function loop(now) {
     if (!running) return;
     let deltaMs = now - lastTime;
-    if (deltaMs > 250) deltaMs = 250; // avoid spiral of death after tab switch
+    if (deltaMs > SPIRAL_OF_DEATH_CAP_MS) deltaMs = SPIRAL_OF_DEATH_CAP_MS; // avoid spiral of death after tab switch
     lastTime = now;
     accumulator += deltaMs;
 

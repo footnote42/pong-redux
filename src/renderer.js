@@ -1,6 +1,8 @@
 // src/renderer.js
 // Simple canvas renderer for Pong
 
+import { UI, GAME, PHYSICS } from './constants.js';
+
 export function render(state, ctx, interp = 0) {
   const w = state.width;
   const h = state.height;
@@ -61,8 +63,8 @@ export function render(state, ctx, interp = 0) {
     ctx.fillText('PONG REDUX', w / 2, h * 0.25);
 
     // Buttons
-    const btnW = 260;
-    const btnH = 60;
+    const btnW = UI.BUTTON_WIDTH;
+    const btnH = UI.BUTTON_HEIGHT;
     const gap = 40;
     const cx = w / 2;
     const y = h * 0.5 - btnH / 2;
@@ -179,10 +181,10 @@ function drawSettingsIcon(ctx, x, y, size = 24, active = false) {
 
 function drawSettingsOverlay(state, ctx, w, h) {
   // Background
-  const panelX = w * 0.15;
-  const panelY = h * 0.15;
-  const panelW = w * 0.7;
-  const panelH = h * 0.7;
+  const panelX = w * UI.SETTINGS_PANEL.WIDTH_RATIO;
+  const panelY = h * UI.SETTINGS_PANEL.HEIGHT_RATIO;
+  const panelW = w * UI.SETTINGS_PANEL.PANEL_WIDTH_RATIO;
+  const panelH = h * UI.SETTINGS_PANEL.PANEL_HEIGHT_RATIO;
 
   ctx.fillStyle = 'rgba(0,0,0,0.92)';
   ctx.fillRect(panelX, panelY, panelW, panelH);
@@ -198,8 +200,8 @@ function drawSettingsOverlay(state, ctx, w, h) {
 
   // Tabs
   const tabs = ['gameplay', 'audio', 'about'];
-  const tabW = 140;
-  const tabH = 36;
+  const tabW = UI.TAB_WIDTH;
+  const tabH = UI.TAB_HEIGHT;
   const tabY = panelY + 80;
   const tabStartX = w / 2 - (tabs.length * tabW) / 2;
 
@@ -289,7 +291,7 @@ function drawGameplaySettings(state, ctx, w, h, panelX, contentY, panelW, conten
   ctx.fillText('Win Score:', panelX + 40, y);
   y += 30;
   const winScores = [5, 7, 11, 15, 21];
-  const scoreBoxW = 60;
+  const scoreBoxW = UI.WIN_SCORE_BUTTON_WIDTH;
   const scoreBoxH = 36;
 
   for (let i = 0; i < winScores.length; i++) {

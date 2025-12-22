@@ -5,8 +5,20 @@ import { createPaddle, updatePaddle } from './paddle.js';
 import { createBall, updateBall, bounceOffHorizontalEdge, resetBall, serveBall, reflectFromPaddle } from './ball.js';
 import { isCircleRectColliding, resolveCircleRectPenetration } from './collision.js';
 import { initCPU, updateCPU, setCPUDifficulty } from './ai.js';
+import { CANVAS, PADDLE, BALL, GAME, AUDIO, PHYSICS } from './constants.js';
 
-export function createInitialState(width = 800, height = 600) {
+/**
+ * Creates the initial game state with default values
+ * 
+ * Loads persisted settings and high scores from localStorage if available.
+ * Initializes all game entities (paddles, ball) at starting positions.
+ * Sets game to LANDING screen by default.
+ * 
+ * @param {number} [width=800] - Canvas width in pixels
+ * @param {number} [height=600] - Canvas height in pixels
+ * @returns {Object} Complete game state object with all properties
+ */
+export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS.DEFAULT_HEIGHT) {
   const hasSeen = typeof window !== 'undefined' && window.localStorage && window.localStorage.getItem('pong:seenInstructions') === '1';
   // load settings and highScore from localStorage if available
   let persistedSettings = null;
@@ -24,21 +36,21 @@ export function createInitialState(width = 800, height = 600) {
 
   // Default settings with all options
   const defaultSettings = {
-    difficulty: 'medium',
+    difficulty: GAME.DEFAULT_DIFFICULTY,
     ballSpeed: 1.0,      // 0.5x to 2.0x multiplier
-    winScore: 11,        // Points needed to win
+    winScore: GAME.DEFAULT_WIN_SCORE,
     soundEnabled: true,  // Sound effects on/off
-    volume: 70           // 0-100
+    volume: AUDIO.DEFAULT_VOLUME
   };
   return {
     width,
     height,
     score: { left: 0, right: 0 },
     paddles: {
-      left: createPaddle(10, height / 2, 10, 80, 300),
-      right: createPaddle(width - 20, height / 2, 10, 80, 300),
+      left: createPaddle(PADDLE.DEFAULT_X_OFFSET_LEFT, height / 2, PADDLE.DEFAULT_WIDTH, PADDLE.DEFAULT_HEIGHT, PADDLE.DEFAULT_SPEED),
+      right: createPaddle(width - PADDLE.DEFAULT_X_OFFSET_RIGHT, height / 2, PADDLE.DEFAULT_WIDTH, PADDLE.DEFAULT_HEIGHT, PADDLE.DEFAULT_SPEED),
     },
-    ball: createBall(width / 2, height / 2, 6, 200),
+    ball: createBall(width / 2, height / 2, BALL.DEFAULT_RADIUS, BALL.DEFAULT_SPEED),
     running: false,
     paused: false,
     gameOver: false,
@@ -71,10 +83,10 @@ export function setDifficulty(state, level) {
 }
 
 export function setBallSpeed(state, multiplier) {
-  state.settings.ballSpeed = Math.max(0.5, Math.min(2.0, multiplier));
+  state.settings.ballSpeed = Math.max(BALL.SPEED_MULTIPLIER_MIN, Math.min(BALL.SPEED_MULTIPLIER_MAX, multiplier));
   // Apply to current ball if game is running
   if (state.ball) {
-    const baseSpeed = 200;
+    const baseSpeed = BALL.DEFAULT_SPEED;
     const currentSpeed = Math.sqrt(state.ball.vx * state.ball.vx + state.ball.vy * state.ball.vy);
     if (currentSpeed > 0) {
       const targetSpeed = baseSpeed * state.settings.ballSpeed;
@@ -98,7 +110,7 @@ export function setSoundEnabled(state, enabled) {
 }
 
 export function setVolume(state, volume) {
-  state.settings.volume = Math.max(0, Math.min(100, volume));
+  state.settings.volume = Math.max(AUDIO.VOLUME_MIN, Math.min(AUDIO.VOLUME_MAX, volume));
   persistSettings(state);
 }
 
@@ -175,8 +187,34 @@ function ensureBallNotInsidePaddles(state, maxAttempts = 5) {
   serveBall(ball, Math.random() < 0.5 ? 1 : -1);
 }
 
-// dt is seconds
-
+/**
+ * Main game update loop - processes all game logic for one physics step
+ * 
+ * Update order (critical for deterministic physics):
+ * 1. Check if game is active (skip if paused, game over, or not PLAYING)
+ * 2. Handle serve delay timer (countdown before ball is served)
+ * 3. Update paddle positions (player input or CPU AI)
+ * 4. Update ball position (integrate velocity)
+ * 5. Handle wall collisions (top/bottom bounds)
+ * 6. Handle paddle collisions with swept collision detection for fast balls
+ * 7. Handle corner cases (simultaneous wall + paddle collision)
+ * 8. Handle scoring (ball exits left/right bounds)
+ * 9. Check win condition
+ * 
+ * Collision system:
+ * - Swept collision: Catches fast balls crossing paddle front between frames
+ * - AABB collision: Fallback for overlapping collisions
+ * - Positional correction: Prevents tunneling and sticking
+ * - Corner handling: Detects simultaneous vertical wall + paddle collision
+ * 
+ * @param {Object} state - Game state object (modified in-place)
+ * @param {number} dt - Delta time in seconds (should be constant from fixed timestep)
+ * 
+ * @example
+ * // Called from fixed timestep game loop
+ * const MS_PER_UPDATE = 1000 / 60; // 60 Hz
+ * update(state, MS_PER_UPDATE / 1000);
+ */
 export function update(state, dt) {
   // Only update game when we're actively playing
   if (state.gameState !== 'PLAYING') return;
@@ -293,7 +331,7 @@ export function update(state, dt) {
       state.winner = 'right';
     } else {
       // Set serve delay (0.5 seconds)
-      state.serveTimer = 0.5;
+      state.serveTimer = PHYSICS.SERVE_DELAY_SEC;
     }
   }
 
@@ -307,7 +345,7 @@ export function update(state, dt) {
       state.winner = 'left';
     } else {
       // Set serve delay (0.5 seconds)
-      state.serveTimer = 0.5;
+      state.serveTimer = PHYSICS.SERVE_DELAY_SEC;
     }
   }
 }
@@ -329,7 +367,7 @@ export function restartGame(state) {
   state.winner = null;
 
   // Serve the ball after a brief delay
-  state.serveTimer = 0.5;
+  state.serveTimer = PHYSICS.SERVE_DELAY_SEC;
 }
 
 export function serialize(state) {

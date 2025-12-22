@@ -1,10 +1,36 @@
 // src/collision.js
 // Utilities for circle (ball) vs rectangle (paddle) collision with positional correction
 
+/**
+ * Clamps a value between min and max bounds
+ * @private
+ * @param {number} v - Value to clamp
+ * @param {number} a - Minimum bound
+ * @param {number} b - Maximum bound
+ * @returns {number} Clamped value
+ */
 function clamp(v, a, b) {
   return Math.max(a, Math.min(b, v));
 }
 
+/**
+ * AABB circle-rectangle collision detection
+ * 
+ * Uses the "closest point on rectangle" method:
+ * 1. Find the point on the rectangle closest to the circle's center
+ * 2. Check if distance from circle center to closest point ≤ radius
+ * 
+ * Note: Paddle Y is stored as center position, so rect bounds are computed as y ± h/2
+ * 
+ * @param {Object} ball - Ball object with x, y, r properties
+ * @param {Object} paddle - Paddle object with x, y (center), w, h properties
+ * @returns {boolean} True if ball and paddle are colliding
+ * 
+ * @example
+ * if (isCircleRectColliding(ball, leftPaddle)) {
+ *   // Handle collision
+ * }
+ */
 export function isCircleRectColliding(ball, paddle) {
   const rect = {
     left: paddle.x,
@@ -20,9 +46,29 @@ export function isCircleRectColliding(ball, paddle) {
   return dx * dx + dy * dy <= ball.r * ball.r;
 }
 
-// Resolve penetration by moving the ball out along the minimal penetration axis.
-// Uses closest-point overlap resolution to nudge the ball out along the collision normal without changing its velocity.
-// Returns { axis: 'x'|'y'|'both', penetration: number }
+/**
+ * Resolves circle-rectangle penetration by moving the ball out along collision normal
+ * 
+ * Uses closest-point overlap resolution to correct the ball's position without changing
+ * its velocity. This prevents the ball from getting stuck inside or tunneling through paddles.
+ * 
+ * Algorithm:
+ * 1. Find closest point on rectangle to circle center
+ * 2. Calculate penetration depth (radius - distance to closest point)
+ * 3. Move ball along collision normal by penetration depth + epsilon
+ * 4. Handle degenerate cases (ball center inside rect) with axis-based fallback
+ * 
+ * @param {Object} ball - Ball object with x, y, r properties (modified in-place)
+ * @param {Object} paddle - Paddle object with x, y (center), w, h properties
+ * @returns {Object|null} Resolution info with {axis: 'x'|'y', penetration: number} or null if no penetration
+ * 
+ * @example
+ * if (isCircleRectColliding(ball, paddle)) {
+ *   const result = resolveCircleRectPenetration(ball, paddle);
+ *   // Ball position is now corrected
+ *   // result.axis tells which axis had more penetration
+ * }
+ */
 export function resolveCircleRectPenetration(ball, paddle) {
   const rect = {
     left: paddle.x,

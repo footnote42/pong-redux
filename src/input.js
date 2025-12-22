@@ -3,6 +3,7 @@
 
 import { setPaddleDirection } from './paddle.js';
 import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume } from './game-state.js';
+import { UI, BALL, GAME } from './constants.js';
 
 let _state = null;
 let listeners = [];
@@ -192,13 +193,13 @@ export function detachInputHandlers() {
 function detectSettingsHover(x, y, state) {
   const w = state.width;
   const h = state.height;
-  const panelX = w * 0.15;
-  const panelY = h * 0.15;
+  const panelX = w * UI.SETTINGS_PANEL.WIDTH_RATIO;
+  const panelY = h * UI.SETTINGS_PANEL.HEIGHT_RATIO;
 
   // Check tabs
   const tabs = ['gameplay', 'audio', 'about'];
-  const tabW = 140;
-  const tabH = 36;
+  const tabW = UI.TAB_WIDTH;
+  const tabH = UI.TAB_HEIGHT;
   const tabY = panelY + 80;
   const tabStartX = w / 2 - (tabs.length * tabW) / 2;
 
@@ -224,10 +225,10 @@ function detectGameplayHover(x, y, state, panelX, panelY) {
   let yPos = contentY + 50;
 
   // Difficulty buttons
-  const difficulties = ['easy', 'medium', 'hard'];
-  const boxW = 140;
-  const boxH = 36;
-  const startX = panelX + 40;
+  const difficulties = GAME.DIFFICULTY_LEVELS;
+  const boxW = UI.TAB_WIDTH;
+  const boxH = UI.TAB_HEIGHT;
+  const startX = panelX + UI.PANEL_PADDING;
 
   for (let i = 0; i < difficulties.length; i++) {
     const boxX = startX + i * (boxW + 10);
@@ -246,9 +247,9 @@ function detectGameplayHover(x, y, state, panelX, panelY) {
   yPos += 80;
 
   // Win score buttons
-  const winScores = [5, 7, 11, 15, 21];
-  const scoreBoxW = 60;
-  const scoreBoxH = 36;
+  const winScores = GAME.WIN_SCORES;
+  const scoreBoxW = UI.WIN_SCORE_BUTTON_WIDTH;
+  const scoreBoxH = UI.WIN_SCORE_BUTTON_HEIGHT;
 
   for (let i = 0; i < winScores.length; i++) {
     const boxX = panelX + 40 + i * (scoreBoxW + 10);
@@ -286,10 +287,10 @@ function detectAudioHover(x, y, state, panelX, panelY) {
 function handleSettingsClick(x, y, state) {
   const w = state.width;
   const h = state.height;
-  const panelX = w * 0.15;
-  const panelY = h * 0.15;
-  const panelW = w * 0.7;
-  const panelH = h * 0.7;
+  const panelX = w * UI.SETTINGS_PANEL.WIDTH_RATIO;
+  const panelY = h * UI.SETTINGS_PANEL.HEIGHT_RATIO;
+  const panelW = w * UI.SETTINGS_PANEL.PANEL_WIDTH_RATIO;
+  const panelH = h * UI.SETTINGS_PANEL.PANEL_HEIGHT_RATIO;
 
   // Check if click is outside panel - close settings
   if (!pointInRect(x, y, { x: panelX, y: panelY, w: panelW, h: panelH })) {
@@ -300,8 +301,8 @@ function handleSettingsClick(x, y, state) {
 
   // Check tabs
   const tabs = ['gameplay', 'audio', 'about'];
-  const tabW = 140;
-  const tabH = 36;
+  const tabW = UI.TAB_WIDTH;
+  const tabH = UI.TAB_HEIGHT;
   const tabY = panelY + 80;
   const tabStartX = w / 2 - (tabs.length * tabW) / 2;
 
@@ -327,10 +328,10 @@ function handleGameplayClick(x, y, state, panelX, panelY) {
   console.log('[DEBUG] handleGameplayClick:', { x, y, panelX, panelY, contentY, yPos });
 
   // Difficulty buttons
-  const difficulties = ['easy', 'medium', 'hard'];
-  const boxW = 140;
-  const boxH = 36;
-  const startX = panelX + 40;
+  const difficulties = GAME.DIFFICULTY_LEVELS;
+  const boxW = UI.TAB_WIDTH;
+  const boxH = UI.TAB_HEIGHT;
+  const startX = panelX + UI.PANEL_PADDING;
 
   for (let i = 0; i < difficulties.length; i++) {
     const boxX = startX + i * (boxW + 10);
@@ -344,10 +345,10 @@ function handleGameplayClick(x, y, state, panelX, panelY) {
 
   // Ball speed slider
   const sliderX = panelX + 40;
-  const sliderW = 300;
+  const sliderW = UI.SLIDER_WIDTH;
   if (pointInRect(x, y, { x: sliderX, y: yPos, w: sliderW, h: 20 })) {
     const normalized = (x - sliderX) / sliderW;
-    const speed = 0.5 + normalized * 1.5; // 0.5 to 2.0
+    const speed = BALL.SPEED_MULTIPLIER_MIN + normalized * (BALL.SPEED_MULTIPLIER_MAX - BALL.SPEED_MULTIPLIER_MIN);
     setBallSpeed(state, speed);
     return;
   }
@@ -355,9 +356,9 @@ function handleGameplayClick(x, y, state, panelX, panelY) {
   yPos += 80;
 
   // Win score buttons
-  const winScores = [5, 7, 11, 15, 21];
-  const scoreBoxW = 60;
-  const scoreBoxH = 36;
+  const winScores = GAME.WIN_SCORES;
+  const scoreBoxW = UI.WIN_SCORE_BUTTON_WIDTH;
+  const scoreBoxH = UI.WIN_SCORE_BUTTON_HEIGHT;
 
   for (let i = 0; i < winScores.length; i++) {
     const boxX = panelX + 40 + i * (scoreBoxW + 10);
@@ -385,7 +386,7 @@ function handleAudioClick(x, y, state, panelX, panelY) {
   // Volume slider
   if (state.settings.soundEnabled) {
     const sliderX = panelX + 40;
-    const sliderW = 300;
+    const sliderW = UI.SLIDER_WIDTH;
     if (pointInRect(x, y, { x: sliderX, y: yPos, w: sliderW, h: 20 })) {
       const normalized = (x - sliderX) / sliderW;
       const volume = Math.round(normalized * 100);

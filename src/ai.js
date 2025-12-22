@@ -29,7 +29,11 @@ export const AI_CONFIG = {
 const DEAD_ZONE_PX = 5;  // Stop moving when within this range of target
 const RETURN_TO_CENTER_SPEED_MULT = 0.5;  // Slower movement when returning to center
 
-// Initialize CPU state in game state
+/**
+ * Initializes CPU opponent state for single-player mode
+ * @param {Object} state - Game state object (modified in-place)
+ * @param {string} [difficulty='medium'] - AI difficulty level: 'easy', 'medium', or 'hard'
+ */
 export function initCPU(state, difficulty = 'medium') {
   state.cpu = {
     enabled: state.gameMode === 'single',
@@ -42,7 +46,24 @@ export function initCPU(state, difficulty = 'medium') {
   };
 }
 
-// Update CPU state - call this on every game update
+/**
+ * Updates CPU opponent paddle position with reactive tracking and intentional flaws
+ * 
+ * AI Behavior:
+ * - Reaction delay: Waits before responding to ball direction changes
+ * - Targeting error: Adds random offset to target position for imperfect tracking
+ * - Update frequency: Recalculates target periodically, not every frame
+ * - Speed multiplier: Scales movement speed based on difficulty
+ * - Return to center: Returns to court center when ball moves away (easy/medium only)
+ * 
+ * Difficulty levels create distinct AI personalities:
+ * - Easy: Slow reaction, large errors, returns to center (beatable)
+ * - Medium: Moderate reaction, medium errors, returns to center (balanced)
+ * - Hard: Fast reaction, small errors, stays aggressive (challenging)
+ * 
+ * @param {Object} state - Game state with cpu, ball, paddles properties (modified in-place)
+ * @param {number} dt - Delta time in seconds
+ */
 export function updateCPU(state, dt) {
   if (!state.cpu || !state.cpu.enabled || state.gameOver || state.paused) {
     return;
@@ -137,7 +158,12 @@ export function updateCPU(state, dt) {
   paddle.vy = move / dt;
 }
 
-// Change CPU difficulty mid-game
+/**
+ * Changes CPU difficulty level during gameplay
+ * Resets reaction timer and tracking state for smooth transition
+ * @param {Object} state - Game state with cpu property
+ * @param {string} difficulty - New difficulty level: 'easy', 'medium', or 'hard'
+ */
 export function setCPUDifficulty(state, difficulty) {
   if (!state.cpu) return;
 

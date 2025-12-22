@@ -1,6 +1,14 @@
 // src/ball.js
 // Ball entity helpers and bounce-angle computation
 
+/**
+ * Creates a new ball entity with position, radius, and initial speed
+ * @param {number} x - Initial X position (center)
+ * @param {number} y - Initial Y position (center)
+ * @param {number} [r=6] - Ball radius in pixels
+ * @param {number} [speed=200] - Ball speed in pixels per second
+ * @returns {Object} Ball object with x, y, r, vx, vy, speed properties
+ */
 export function createBall(x, y, r = 6, speed = 200) {
   return {
     x,
@@ -12,6 +20,12 @@ export function createBall(x, y, r = 6, speed = 200) {
   };
 }
 
+/**
+ * Resets ball to specified position with zero velocity
+ * @param {Object} ball - Ball object to reset
+ * @param {number} cx - New center X position
+ * @param {number} cy - New center Y position
+ */
 export function resetBall(ball, cx, cy) {
   ball.x = cx;
   ball.y = cy;
@@ -19,19 +33,35 @@ export function resetBall(ball, cx, cy) {
   ball.vy = 0;
 }
 
+/**
+ * Serves the ball in a random direction within max angle range
+ * @param {Object} ball - Ball object to serve
+ * @param {number} [direction=1] - Serve direction: +1 for right, -1 for left
+ */
 export function serveBall(ball, direction = 1) {
-  // direction: +1 -> to the right, -1 -> to the left
   const maxAngle = (75 * Math.PI) / 180; // 75 degrees in radians
   const angle = (Math.random() * maxAngle * 2) - maxAngle; // -max..+max
   ball.vx = Math.cos(angle) * ball.speed * direction;
   ball.vy = Math.sin(angle) * ball.speed;
 }
 
+/**
+ * Updates ball position based on velocity and delta time
+ * @param {Object} ball - Ball object to update
+ * @param {number} dt - Delta time in seconds
+ */
 export function updateBall(ball, dt) {
   ball.x += ball.vx * dt;
   ball.y += ball.vy * dt;
 }
 
+/**
+ * Handles ball collision with top/bottom walls
+ * Clamps position and reflects vertical velocity
+ * @param {Object} ball - Ball object with x, y, r, vx, vy properties
+ * @param {number} boundsHeight - Height of play area in pixels
+ * @returns {boolean} True if ball bounced, false otherwise
+ */
 export function bounceOffHorizontalEdge(ball, boundsHeight) {
   const r = ball.r;
   if (ball.y - r <= 0) {
@@ -50,10 +80,26 @@ export function bounceOffHorizontalEdge(ball, boundsHeight) {
 export const DEFAULT_MAX_BOUNCE_DEG = 50;
 export const DEFAULT_CENTER_DEADZONE = 0.05; // relative offset deadzone around center that yields straight bounce
 
-// Compute new velocity after hitting a paddle using hit offset.
-// paddleY is center Y of paddle, paddleH is paddle height, direction is +1 if paddle is on left (ball should go right), -1 otherwise.
-// maxBounceDeg is the maximum deflection angle at the paddle edge (degrees)
-// centerDeadzone is a relative value (-1..1) around center that forces zero vertical deflection for more forgiving center hits
+/**
+ * Reflects ball velocity after paddle collision with angle variation based on hit offset
+ * 
+ * The bounce angle varies from straight (0°) at center to maxBounceDeg at paddle edges.
+ * A center deadzone provides more forgiving straight bounces near the paddle center.
+ * 
+ * @param {Object} ball - Ball object with x, y, vx, vy, r, speed properties (modified in-place)
+ * @param {number} paddleY - Paddle center Y position
+ * @param {number} paddleH - Paddle height in pixels
+ * @param {number} direction - Reflection direction: +1 for right (left paddle), -1 for left (right paddle)
+ * @param {number} [maxBounceDeg=50] - Maximum deflection angle at paddle edge in degrees
+ * @param {number} [centerDeadzone=0.05] - Relative offset around center (0-1) that yields straight bounce
+ * 
+ * @example
+ * // Ball hits left paddle near top edge, should deflect upward-right
+ * reflectFromPaddle(ball, paddleY, paddleH, +1);
+ * 
+ * // Ball hits right paddle at center, should go straight left
+ * reflectFromPaddle(ball, paddleY, paddleH, -1);
+ */
 export function reflectFromPaddle(ball, paddleY, paddleH, direction, maxBounceDeg = DEFAULT_MAX_BOUNCE_DEG, centerDeadzone = DEFAULT_CENTER_DEADZONE) {
   const relative = (ball.y - paddleY) / (paddleH / 2); // -1 .. +1
   const clampVal = Math.max(-1, Math.min(1, relative));
