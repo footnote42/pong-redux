@@ -2,7 +2,7 @@
 // Keyboard input handling - maps keys to paddle directions and pause
 
 import { setPaddleDirection } from './paddle.js';
-import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume } from './game-state.js';
+import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor } from './game-state.js';
 import { UI, BALL, GAME } from './constants.js';
 
 let _state = null;
@@ -90,6 +90,13 @@ function keydown(e) {
     if (k === '1') { setDifficulty(_state, 'easy'); return; }
     if (k === '2') { setDifficulty(_state, 'medium'); return; }
     if (k === '3') { setDifficulty(_state, 'hard'); return; }
+  }
+
+  // Toggle settings with S key (works during gameplay too)
+  if ((k === 's' || k === 'S') && _state.gameState === 'PLAYING') {
+    _state.showSettings = !_state.showSettings;
+    _state.settingsHover = null;
+    return;
   }
 
   // Prevent page scrolling for space / arrows
@@ -258,6 +265,40 @@ function detectGameplayHover(x, y, state, panelX, panelY) {
     }
   }
 
+  yPos += scoreBoxH + 70;
+
+  // Paddle style buttons
+  const paddleStyles = ['classic', 'retro', 'neon', 'custom'];
+  const styleBoxW = 100;
+  const styleBoxH = 36;
+
+  for (let i = 0; i < paddleStyles.length; i++) {
+    const style = paddleStyles[i];
+    const boxX = panelX + 40 + i * (styleBoxW + 10);
+    if (pointInRect(x, y, { x: boxX, y: yPos, w: styleBoxW, h: styleBoxH })) {
+      return 'paddleStyle_' + style;
+    }
+  }
+
+  // Color boxes (only for custom style)
+  if (state.settings.paddleStyle === 'custom') {
+    yPos += styleBoxH + 60;
+    const colorBoxSize = 40;
+    const labelWidth = 120;
+    
+    // Left paddle color box
+    const leftColorBoxX = panelX + 40 + labelWidth;
+    if (pointInRect(x, y, { x: leftColorBoxX, y: yPos, w: colorBoxSize, h: colorBoxSize })) {
+      return 'leftPaddleColor';
+    }
+    
+    // Right paddle color box
+    const rightColorBoxX = panelX + 40 + 240 + labelWidth;
+    if (pointInRect(x, y, { x: rightColorBoxX, y: yPos, w: colorBoxSize, h: colorBoxSize })) {
+      return 'rightPaddleColor';
+    }
+  }
+
   return null;
 }
 
@@ -367,6 +408,67 @@ function handleGameplayClick(x, y, state, panelX, panelY) {
       return;
     }
   }
+
+  yPos += scoreBoxH + 70;
+
+  // Paddle style buttons
+  const paddleStyles = ['classic', 'retro', 'neon', 'custom'];
+  const styleBoxW = 100;
+  const styleBoxH = 36;
+
+  for (let i = 0; i < paddleStyles.length; i++) {
+    const style = paddleStyles[i];
+    const boxX = panelX + 40 + i * (styleBoxW + 10);
+    if (pointInRect(x, y, { x: boxX, y: yPos, w: styleBoxW, h: styleBoxH })) {
+      setPaddleStyle(state, style);
+      return;
+    }
+  }
+
+  // Color boxes (only for custom style)
+  if (state.settings.paddleStyle === 'custom') {
+    yPos += styleBoxH + 60;
+    const colorBoxSize = 40;
+    const labelWidth = 120;
+    
+    // Left paddle color box
+    const leftColorBoxX = panelX + 40 + labelWidth;
+    if (pointInRect(x, y, { x: leftColorBoxX, y: yPos, w: colorBoxSize, h: colorBoxSize })) {
+      setLeftPaddleColor(state, cycleColor(state.settings.leftPaddleColor));
+      return;
+    }
+    
+    // Right paddle color box
+    const rightColorBoxX = panelX + 40 + 240 + labelWidth;
+    if (pointInRect(x, y, { x: rightColorBoxX, y: yPos, w: colorBoxSize, h: colorBoxSize })) {
+      setRightPaddleColor(state, cycleColor(state.settings.rightPaddleColor));
+      return;
+    }
+  }
+}
+
+/**
+ * Cycles through preset colors for paddle customization
+ * @param {string} currentColor - Current hex color
+ * @returns {string} Next color in the cycle
+ */
+function cycleColor(currentColor) {
+  const colors = [
+    '#ffffff', // White
+    '#ff0000', // Red
+    '#00ff00', // Green
+    '#0000ff', // Blue
+    '#ffff00', // Yellow
+    '#ff00ff', // Magenta
+    '#00ffff', // Cyan
+    '#ff8800', // Orange
+    '#8800ff', // Purple
+    '#00ff88', // Teal
+  ];
+  
+  const currentIndex = colors.indexOf(currentColor);
+  const nextIndex = (currentIndex + 1) % colors.length;
+  return colors[nextIndex];
 }
 
 function handleAudioClick(x, y, state, panelX, panelY) {

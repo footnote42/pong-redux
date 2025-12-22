@@ -40,7 +40,10 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
     ballSpeed: 1.0,      // 0.5x to 2.0x multiplier
     winScore: GAME.DEFAULT_WIN_SCORE,
     soundEnabled: true,  // Sound effects on/off
-    volume: AUDIO.DEFAULT_VOLUME
+    volume: AUDIO.DEFAULT_VOLUME,
+    paddleStyle: 'classic', // 'classic', 'retro', 'neon', 'custom'
+    leftPaddleColor: '#ffffff', // Custom color for left paddle
+    rightPaddleColor: '#ffffff' // Custom color for right paddle
   };
   return {
     width,
@@ -111,6 +114,24 @@ export function setSoundEnabled(state, enabled) {
 
 export function setVolume(state, volume) {
   state.settings.volume = Math.max(AUDIO.VOLUME_MIN, Math.min(AUDIO.VOLUME_MAX, volume));
+  persistSettings(state);
+}
+
+
+export function setPaddleStyle(state, style) {
+  if (['classic', 'retro', 'neon', 'custom'].includes(style)) {
+    state.settings.paddleStyle = style;
+    persistSettings(state);
+  }
+}
+
+export function setLeftPaddleColor(state, color) {
+  state.settings.leftPaddleColor = color;
+  persistSettings(state);
+}
+
+export function setRightPaddleColor(state, color) {
+  state.settings.rightPaddleColor = color;
   persistSettings(state);
 }
 

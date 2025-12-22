@@ -22,11 +22,10 @@ export function render(state, ctx, interp = 0) {
   ctx.setLineDash([]);
 
   // paddles
-  ctx.fillStyle = '#fff';
   const left = state.paddles.left;
   const right = state.paddles.right;
-  drawPaddle(ctx, left);
-  drawPaddle(ctx, right);
+  drawPaddle(ctx, left, state.settings.paddleStyle, state.settings.leftPaddleColor, 'left');
+  drawPaddle(ctx, right, state.settings.paddleStyle, state.settings.rightPaddleColor, 'right');
 
   // ball
   ctx.beginPath();
@@ -160,8 +159,85 @@ export function render(state, ctx, interp = 0) {
   }
 }
 
-function drawPaddle(ctx, p) {
+/**
+ * Draws a paddle with the specified style
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {Object} p - Paddle object with x, y, w, h properties
+ * @param {string} style - Paddle style ('classic', 'retro', 'neon', 'custom')
+ * @param {string} color - Paddle color (used for custom style)
+ * @param {string} side - Paddle side ('left' or 'right')
+ */
+function drawPaddle(ctx, p, style = 'classic', color = '#ffffff', side = 'left') {
+  switch (style) {
+    case 'retro':
+      drawRetroPaddle(ctx, p, color);
+      break;
+    case 'neon':
+      drawNeonPaddle(ctx, p, color);
+      break;
+    case 'custom':
+      drawCustomPaddle(ctx, p, color);
+      break;
+    case 'classic':
+    default:
+      drawClassicPaddle(ctx, p);
+      break;
+  }
+}
+
+/**
+ * Draws a classic simple rectangle paddle
+ */
+function drawClassicPaddle(ctx, p) {
+  ctx.fillStyle = '#fff';
   ctx.fillRect(p.x, p.y - p.h / 2, p.w, p.h);
+}
+
+/**
+ * Draws a retro segmented/pixelated paddle
+ */
+function drawRetroPaddle(ctx, p, color) {
+  const segments = 5;
+  const segmentHeight = p.h / segments;
+  const gap = 2;
+  
+  ctx.fillStyle = color;
+  for (let i = 0; i < segments; i++) {
+    const segY = p.y - p.h / 2 + i * segmentHeight;
+    ctx.fillRect(p.x, segY, p.w, segmentHeight - gap);
+  }
+}
+
+/**
+ * Draws a neon glowing paddle with edge effects
+ */
+function drawNeonPaddle(ctx, p, color) {
+  // Outer glow
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = color;
+  ctx.fillStyle = color;
+  ctx.fillRect(p.x, p.y - p.h / 2, p.w, p.h);
+  
+  // Inner bright core
+  ctx.shadowBlur = 10;
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(p.x + 2, p.y - p.h / 2 + 2, p.w - 4, p.h - 4);
+  
+  // Reset shadow
+  ctx.shadowBlur = 0;
+}
+
+/**
+ * Draws a custom colored paddle
+ */
+function drawCustomPaddle(ctx, p, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(p.x, p.y - p.h / 2, p.w, p.h);
+  
+  // Add subtle border
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(p.x, p.y - p.h / 2, p.w, p.h);
 }
 
 function drawSettingsIcon(ctx, x, y, size = 24, active = false) {
@@ -310,6 +386,74 @@ function drawGameplaySettings(state, ctx, w, h, panelX, contentY, panelW, conten
     ctx.font = '16px monospace';
     ctx.textAlign = 'center';
     ctx.fillText(score.toString(), boxX + scoreBoxW / 2, y + scoreBoxH / 2 + 6);
+  }
+
+  y += scoreBoxH + 40;
+
+  // Paddle Style
+  ctx.textAlign = 'left';
+  ctx.font = '18px monospace';
+  ctx.fillStyle = '#fff';
+  ctx.fillText('Paddle Style:', panelX + 40, y);
+  y += 30;
+
+  const paddleStyles = ['classic', 'retro', 'neon', 'custom'];
+  const styleBoxW = 100;
+  const styleBoxH = 36;
+
+  for (let i = 0; i < paddleStyles.length; i++) {
+    const style = paddleStyles[i];
+    const boxX = panelX + 40 + i * (styleBoxW + 10);
+    const isHovered = state.settingsHover === 'paddleStyle_' + style;
+    const isSelected = state.settings.paddleStyle === style;
+
+    ctx.fillStyle = isHovered ? '#444' : '#222';
+    ctx.fillRect(boxX, y, styleBoxW, styleBoxH);
+    ctx.strokeStyle = isSelected ? '#0f0' : '#666';
+    ctx.lineWidth = isSelected ? 2 : 1;
+    ctx.strokeRect(boxX, y, styleBoxW, styleBoxH);
+
+    ctx.fillStyle = isHovered || isSelected ? '#fff' : '#aaa';
+    ctx.font = '14px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(style.charAt(0).toUpperCase() + style.slice(1), boxX + styleBoxW / 2, y + styleBoxH / 2 + 6);
+  }
+
+  // Color pickers (only show for custom style)
+  if (state.settings.paddleStyle === 'custom') {
+    y += styleBoxH + 30;
+    ctx.textAlign = 'left';
+    ctx.font = '16px monospace';
+    ctx.fillStyle = '#fff';
+    ctx.fillText('Paddle Colors:', panelX + 40, y);
+    
+    y += 30;
+    
+    // Left paddle color
+    const colorBoxSize = 40;
+    const labelWidth = 120;
+    
+    ctx.fillText('Left:', panelX + 40, y + colorBoxSize / 2 + 6);
+    const leftColorBoxX = panelX + 40 + labelWidth;
+    const isLeftHovered = state.settingsHover === 'leftPaddleColor';
+    
+    ctx.fillStyle = state.settings.leftPaddleColor;
+    ctx.fillRect(leftColorBoxX, y, colorBoxSize, colorBoxSize);
+    ctx.strokeStyle = isLeftHovered ? '#fff' : '#666';
+    ctx.lineWidth = isLeftHovered ? 2 : 1;
+    ctx.strokeRect(leftColorBoxX, y, colorBoxSize, colorBoxSize);
+    
+    // Right paddle color
+    ctx.fillStyle = '#fff';
+    ctx.fillText('Right:', panelX + 40 + 240, y + colorBoxSize / 2 + 6);
+    const rightColorBoxX = panelX + 40 + 240 + labelWidth;
+    const isRightHovered = state.settingsHover === 'rightPaddleColor';
+    
+    ctx.fillStyle = state.settings.rightPaddleColor;
+    ctx.fillRect(rightColorBoxX, y, colorBoxSize, colorBoxSize);
+    ctx.strokeStyle = isRightHovered ? '#fff' : '#666';
+    ctx.lineWidth = isRightHovered ? 2 : 1;
+    ctx.strokeRect(rightColorBoxX, y, colorBoxSize, colorBoxSize);
   }
 }
 
