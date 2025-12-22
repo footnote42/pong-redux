@@ -22,6 +22,40 @@ This isn't just another Pong clone. It's a **learning exercise** in rebuilding a
 
 ---
 
+## 🎮 Try It Now
+
+**[▶️ Play Live Demo](https://footnote42.github.io/pong-redux/)** | **[📖 View Source](https://github.com/footnote42/pong-redux)**
+
+No installation required - runs directly in your browser!
+
+---
+
+## 📸 Screenshots
+
+<div align="center">
+
+### Landing Screen & Mode Selection
+![Landing Screen](assets/screenshots/01-landing-screen.png)
+
+### Gameplay in Action
+![Gameplay](assets/screenshots/02-gameplay-action.png)
+
+### Settings & Customization
+![Settings Menu](assets/screenshots/03-settings-gameplay.png)
+
+### Paddle Customization (4 Styles + Colors)
+![Paddle Customization](assets/screenshots/04-settings-paddle-custom.png)
+
+### Ball Customization (Styles, Trails, Effects)
+![Ball Customization](assets/screenshots/05-settings-ball-custom.png)
+
+### Victory Screen
+![Victory Screen](assets/screenshots/06-victory-screen.png)
+
+</div>
+
+---
+
 ## What's Been Built (So Far)
 
 ### ✅ Stage 1: Core Rendering & Game Loop
@@ -58,11 +92,59 @@ This isn't just another Pong clone. It's a **learning exercise** in rebuilding a
 - ✅ Difficulty tweaks (speed presets, paddle size, endless mode)
 - ✅ Sound effects system (Web Audio API, procedural synthesis)
 
-### 🚧 What's Next
-- **Stage 13**: Visual polish & animations
-- **Stage 15-16**: Final testing & portfolio prep
+### ✅ Stage 13: Visual Polish & Animations (Complete!)
+- Screen transitions with smooth fade effects
+- Button press animations (scale feedback)
+- Score counter animations (lerp-based)
+- Enhanced pause overlay with pulsing text
+- Particle effects on collisions (wall & paddle hits)
 
-See [build-plan.md](build-plan.md) for the complete roadmap (12 of 16 stages complete).
+### 🎯 Portfolio-Ready Features
+
+#### 🎮 **Core Gameplay**
+- ✨ Fixed-timestep game loop (60Hz, frame-rate independent)
+- 🎯 Precise AABB collision detection with positional correction
+- 🎾 Dynamic ball reflection (angle varies by paddle hit position)
+- ⏸️ Pause system with smooth overlay animations
+- 🏆 Configurable win conditions (5, 7, 11, 15, 21 points + endless mode)
+
+#### 🤖 **Game Modes**
+- 👤 **Single Player**: Face off against CPU opponents
+  - 🟢 Easy - Beatable for casual play
+  - 🟡 Medium - Challenging but fair
+  - 🔴 Hard - Lightning-fast reactions
+- 👥 **2-Player Local**: Classic couch multiplayer
+  - Player 1: W/S keys
+  - Player 2: Arrow keys
+
+#### 🎨 **Customization System**
+- 🎨 **Paddle Styles**: Classic, Retro, Neon, Custom
+  - 10 preset colors + custom color picker
+  - Real-time style preview
+- ⚡ **Ball Styles**: Classic, Retro, Glow, Soccer
+  - Trail effect with configurable length
+  - Collision flash effect
+  - Dynamic particles on impact
+- 🎚️ **Gameplay Tuning**:
+  - Ball speed presets (Slow/Normal/Fast/Insane) + slider (0.5x-2.0x)
+  - Paddle size adjustment (0.5x-1.5x)
+  - Endless mode toggle
+
+#### 🔊 **Sound System**
+- 🎵 Procedural Web Audio API synthesis (no external assets)
+- 5 distinct effects: Paddle hit, wall bounce, score, victory, UI click
+- Volume control + mute toggle
+- Smooth fade in/out
+
+#### ⚙️ **Polish & UX**
+- 💾 Settings persistence via localStorage
+- 🎬 Smooth state transitions with fade effects
+- ✨ Button press animations and visual feedback
+- 📊 Animated score counters
+- 🎆 Particle effects system
+- 🎯 Responsive controls with zero input lag
+
+See [build-plan.md](build-plan.md) for the complete roadmap (13 of 16 stages complete, 81%).
 
 ---
 
@@ -347,11 +429,11 @@ See [build-plan.md](build-plan.md) for detailed breakdown. High-level:
 - ⬜ Difficulty tuning sliders
 
 **Phase 4: Polish** (Stages 12-16)
-- ⬜ Sound effects (Web Audio API)
-- ⬜ Visual polish & animations
-- ⬜ Stats tracking (optional)
-- ⬜ Final testing & deployment
-- ⬜ Documentation & portfolio prep
+- ✅ Sound effects (Web Audio API)
+- ✅ Visual polish & animations
+- ⬜ Stats tracking (postponed)
+- 🔄 Final testing & deployment (in progress)
+- 🔄 Documentation & portfolio prep (in progress)
 
 **Out of Scope** (but architecturally prepared for):
 - Online multiplayer (WebSocket, client-side prediction, server reconciliation)
@@ -392,7 +474,7 @@ MIT License - Feel free to learn from, fork, or build upon this code.
 
 ---
 
-**Current Status**: Stage 12 complete (Sound Effects System) ✅
-**Progress**: 12 of 16 stages complete (75%)
-**Next Up**: Stage 13 (Visual Polish), then portfolio prep
+**Current Status**: Stage 13 complete (Visual Polish & Animations) ✅
+**Progress**: 13 of 16 stages complete (81%) - Portfolio Ready!
+**Next Up**: Deployment & final documentation
 **Last Updated**: 2025-12-22

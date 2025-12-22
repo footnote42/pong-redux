@@ -552,9 +552,10 @@ function drawGameplaySettings(state, ctx, w, h, panelX, contentY, panelW, conten
   ctx.fillStyle = '#fff';
 
   // Ball Speed
-  ctx.fillText('Ball Speed: ' + state.settings.ballSpeed.toFixed(1) + 'x', panelX + 40, y);
+  const ballSpeed = state.settings.ballSpeed || 1.0;
+  ctx.fillText('Ball Speed: ' + ballSpeed.toFixed(1) + 'x', panelX + 40, y);
   y += 30;
-  drawSlider(ctx, panelX + 40, y, 300, state.settings.ballSpeed, 0.5, 2.0, 'ballSpeed', state.settingsHover);
+  drawSlider(ctx, panelX + 40, y, 300, ballSpeed, 0.5, 2.0, 'ballSpeed', state.settingsHover);
 
   y += 30;
 
@@ -638,9 +639,10 @@ function drawGameplaySettings(state, ctx, w, h, panelX, contentY, panelW, conten
   ctx.textAlign = 'left';
   ctx.font = '18px monospace';
   ctx.fillStyle = '#fff';
-  ctx.fillText('Paddle Size: ' + state.settings.paddleSize.toFixed(1) + 'x', panelX + 40, y);
+  const paddleSize = state.settings.paddleSize || 1.0;
+  ctx.fillText('Paddle Size: ' + paddleSize.toFixed(1) + 'x', panelX + 40, y);
   y += 30;
-  drawSlider(ctx, panelX + 40, y, 300, state.settings.paddleSize, 0.5, 1.5, 'paddleSize', state.settingsHover);
+  drawSlider(ctx, panelX + 40, y, 300, paddleSize, 0.5, 1.5, 'paddleSize', state.settingsHover);
 }
 
 

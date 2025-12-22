@@ -317,10 +317,10 @@ Once all three sessions are complete:
 
 | Session | Stage | Tasks | Time Est. | Status |
 |---------|-------|-------|-----------|--------|
-| 1 | Stage 13 | Visual Polish | 60-75 min | ⬜ Not Started |
-| 2 | Stage 15 | Testing & Bugs | 75-90 min | ⬜ Not Started |
-| 3 | Stage 16 | Portfolio Docs | 45-60 min | ⬜ Not Started |
-| **Total** | **3 stages** | **~40 tasks** | **3-3.75 hours** | **⬜ 0/3 complete** |
+| 1 | Stage 13 | Visual Polish | 60-75 min | ✅ Complete |
+| 2 | Stage 15 | Testing & Bugs | 75-90 min | ✅ Complete |
+| 3 | Stage 16 | Portfolio Docs | 45-60 min | 🔄 In Progress |
+| **Total** | **3 stages** | **~40 tasks** | **3-3.75 hours** | **✅ 2/3 complete** |
 
 ---
 
