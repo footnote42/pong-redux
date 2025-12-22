@@ -395,50 +395,56 @@ pong-redux/
 
 ## What Makes This Different from Other Pong Clones
 
-1. **Architecture for scale**: Built from day one with online multiplayer in mind (state serialization, fixed timestep, input buffering)
+1. **Architecture for scale**: Built from day one with online multiplayer in mind (state serialization, fixed timestep, input buffering) - even though multiplayer isn't implemented, the foundation is ready.
 
-2. **Test-first physics**: Most Pong clones tweak collision until it "feels right." This project has automated tests and a visual debug harness.
+2. **Test-first physics**: Most Pong clones tweak collision until it "feels right." This project has automated tests, visual debug harness, and comprehensive edge-case handling.
 
-3. **Documented learning journey**: [build-plan.md](build-plan.md) and [TRD.md](TRD.md) capture the thought process, not just the final code.
+3. **Documented learning journey**: [build-plan.md](build-plan.md), [TRD.md](TRD.md), and [CHANGELOG.md](CHANGELOG.md) capture the complete thought process, not just the final code.
 
-4. **No shortcuts on fundamentals**: Implemented proper fixed-timestep loop, positional correction, and swept collision detection—patterns you'd find in commercial game engines.
+4. **No shortcuts on fundamentals**: Implemented proper fixed-timestep loop, positional correction, swept collision detection, and animation system—patterns you'd find in commercial game engines.
 
-5. **Tunable parameters**: Max bounce angle, center deadzone, ball speed, paddle size—all designed to be configurable for future settings menu.
+5. **Production-ready polish**: Extensive customization (paddles, balls, difficulty), procedural sound system, smooth animations, particle effects, and comprehensive testing - all with solid 60fps performance.
 
 ---
 
-## Roadmap
+## Project Status & Roadmap
 
-See [build-plan.md](build-plan.md) for detailed breakdown. High-level:
+**🎉 v1.0.0 Released - Portfolio Ready!**
 
-**Phase 1: Core Mechanics** (Stages 1-4)
-- ✅ Rendering & game loop
-- ✅ Collision & physics
-- ⬜ Scoring & win conditions
-- ⬜ Pause & input polish
+See [build-plan.md](build-plan.md) for detailed breakdown. High-level progress:
 
-**Phase 2: Game Modes** (Stages 5-7)
-- ⬜ Landing screen & mode selection
-- ⬜ AI opponent (1-player mode)
-- ⬜ Instructions & help system
+**Phase 1: Core Mechanics** (Stages 1-4) - **✅ COMPLETE**
+- ✅ Rendering & game loop (fixed-timestep, 60Hz)
+- ✅ Collision & physics (AABB with positional correction)
+- ✅ Scoring & win conditions (configurable)
+- ✅ Pause & input polish
 
-**Phase 3: Customization** (Stages 8-11)
-- ⬜ Settings menu foundation
-- ⬜ Paddle styles & colors
-- ⬜ Ball effects & trails
-- ⬜ Difficulty tuning sliders
+**Phase 2: Game Modes** (Stages 5-7) - **✅ COMPLETE**
+- ✅ Landing screen & mode selection
+- ✅ AI opponent (1-player mode with 3 difficulties)
+- ✅ Instructions & help system (first-time overlay)
 
-**Phase 4: Polish** (Stages 12-16)
-- ✅ Sound effects (Web Audio API)
-- ✅ Visual polish & animations
-- ⬜ Stats tracking (postponed)
-- 🔄 Final testing & deployment (in progress)
-- 🔄 Documentation & portfolio prep (in progress)
+**Phase 3: Customization** (Stages 8-11) - **✅ COMPLETE**
+- ✅ Settings menu foundation (tabbed interface)
+- ✅ Paddle styles & colors (4 styles + custom colors)
+- ✅ Ball effects & trails (4 styles + configurable effects)
+- ✅ Difficulty tuning sliders (speed, size, endless mode)
 
-**Out of Scope** (but architecturally prepared for):
-- Online multiplayer (WebSocket, client-side prediction, server reconciliation)
+**Phase 4: Polish** (Stages 12-16) - **✅ COMPLETE**
+- ✅ Sound effects (Web Audio API - 5 procedural effects)
+- ✅ Visual polish & animations (transitions, particles, lerping)
+- ⏭️ Stats tracking (postponed - not required for v1.0.0)
+- ✅ Final testing & deployment (comprehensive testing, GitHub Pages)
+- ✅ Documentation & portfolio prep (screenshots, blurbs, v1.0.0 release)
+
+**📊 Completion:** 13 of 16 stages (81%) - **Portfolio Ready**
+
+**Future Enhancements** (optional, post-v1.0.0):
+- Stats tracking & scoreboard (Stage 14)
+- Online multiplayer (architecture already supports it)
+- Mobile touch controls
 - Leaderboards & cloud sync
-- Mobile app version
+- Additional customization options
 
 ---
 
