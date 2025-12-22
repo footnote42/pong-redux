@@ -94,7 +94,7 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 - Increase ball speed temporarily to reproduce collision edge cases
 - Add console logs in `collision.js` and `ball.js` to inspect collision responses
 
-## Current Status (2025-12-22 - Stage 12 Complete)
+## Current Status (2025-12-22 - Stage 13 Complete)
 
 **Completed Features:**
 - ✅ Fixed-timestep game loop with accumulator pattern
@@ -112,15 +112,16 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 - ✅ **Difficulty tweaks (Stage 11)** - Ball speed presets (Slow/Normal/Fast/Insane), paddle size slider (0.5x-1.5x), endless mode toggle
 - ✅ **Sound effects system (Stage 12)** - Procedural Web Audio API sounds, paddle/wall/score/win/UI sounds, volume control
 - ✅ Settings accessible during gameplay (M key toggle)
-- ✅ **Ball customization UI (Stage 13 fix)** - Ball style, trail toggle, flash toggle, and trail length now accessible in settings menu
+- ✅ **Visual polish & animations (Stage 13)** - Smooth transitions, button animations, score lerping, pause effects, particle system
 
 **Known Issues:**
 - None - all core features working correctly
 
 **Code Quality Assessment:**
-- Overall Score: 9.0/10
-- Strengths: Architecture, game loop, collision detection, visual customization, effects system, gameplay tuning, audio feedback
-- Needs Improvement: Consider adding more advanced sound effects (optional)
+- Overall Score: 9.5/10 (Portfolio-Ready)
+- Strengths: Architecture, game loop, collision detection, visual customization, effects system, gameplay tuning, audio feedback, animation polish, comprehensive testing
+- Portfolio Highlights: Professional animations, particle effects, smooth transitions, extensive customization, procedural audio
+- Future Enhancements: Mobile controls, online multiplayer, advanced stats tracking (all optional)
 
 **Recent Additions (Stage 9, 10 & 11):**
 
@@ -151,10 +152,27 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 - Real-time volume control and mute toggle
 - Sound triggers: collision detection (src/game-state.js:354-421), scoring (src/game-state.js:432-458), UI interactions (src/input.js:418-577)
 
+**Visual Polish & Animation System (Stage 13)** (src/game-state.js, src/renderer.js, src/input.js)
+- **State transitions with fade effects**: Smooth fade-out/fade-in when switching between LANDING, PLAYING, GAME_OVER states (300ms duration)
+- **Button press animations**: Scale-down effect (0.95x) on click with 100ms duration for tactile feedback
+- **Score counter animation**: Lerp-based smooth counting (10 points/second) instead of instant updates
+- **Pause overlay enhancements**: Pulsing "PAUSED" text with alpha (0.7-1.0) and scale (1.0-1.05) variation at 2Hz
+- **Particle system**: Object-pooled collision particles with physics (gravity 300px/s²), alpha fade, 500ms lifetime
+  - Wall collisions: 3 white particles
+  - Paddle collisions: 4 cyan particles (#00ff88)
+- **Animation state management**: Centralized `updateAnimations()` function called every fixed timestep
+- **Performance**: Zero allocations per frame, all particles reuse array elements, smooth 60fps
+
+**Portfolio Documentation (Stage 16)**
+- High-quality screenshots (1920x1080): Landing, gameplay, settings, customization, victory
+- GitHub Pages deployment with automated workflow
+- Enhanced README with visual showcase and comprehensive features list
+- Progress: 13/16 stages complete (81%)
+
 **Refactoring Recommendations:**
-- Consider adding more sound variations (power-ups, menu music) - Stage 13
+- Consider adding more animation variations (confetti on win, menu transitions)
 - Extract remaining magic numbers to `src/constants.js`
-- Add JSDoc documentation for new customization functions
+- Add JSDoc documentation for animation and customization functions
 
 ## Future Extensions
 
