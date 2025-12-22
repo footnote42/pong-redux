@@ -2,7 +2,7 @@
 // Keyboard input handling - maps keys to paddle directions and pause
 
 import { setPaddleDirection } from './paddle.js';
-import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize } from './game-state.js';
+import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength } from './game-state.js';
 import { UI, BALL, GAME } from './constants.js';
 
 let _state = null;
@@ -592,5 +592,99 @@ function detectCustomizationHover(x, y, state, panelX, panelY) {
 }
 
 function handleCustomizationClick(x, y, state, panelX, panelY) {
-  // TODO: Implement customization click handling
+  const contentY = panelY + 80 + 36 + 20;
+  let yPos = contentY + 20;
+
+  // Paddle Style buttons
+  yPos += 30; // Account for "Paddle Style:" label
+  const paddleStyles = ['classic', 'retro', 'neon', 'custom'];
+  const styleBoxW = 100;
+  const styleBoxH = 36;
+
+  for (let i = 0; i < paddleStyles.length; i++) {
+    const style = paddleStyles[i];
+    const boxX = panelX + 40 + i * (styleBoxW + 10);
+    if (pointInRect(x, y, { x: boxX, y: yPos, w: styleBoxW, h: styleBoxH })) {
+      setPaddleStyle(state, style);
+      return;
+    }
+  }
+
+  // Color pickers (only if custom style is selected)
+  if (state.settings.paddleStyle === 'custom') {
+    yPos += styleBoxH + 30; // Account for style buttons
+    yPos += 30; // Account for "Paddle Colors:" label
+
+    const colorBoxSize = 40;
+    const labelWidth = 120;
+
+    // Left paddle color box
+    const leftColorBoxX = panelX + 40 + labelWidth;
+    if (pointInRect(x, y, { x: leftColorBoxX, y: yPos, w: colorBoxSize, h: colorBoxSize })) {
+      setLeftPaddleColor(state, cycleColor(state.settings.leftPaddleColor));
+      return;
+    }
+
+    // Right paddle color box
+    const rightColorBoxX = panelX + 40 + 240 + labelWidth;
+    if (pointInRect(x, y, { x: rightColorBoxX, y: yPos, w: colorBoxSize, h: colorBoxSize })) {
+      setRightPaddleColor(state, cycleColor(state.settings.rightPaddleColor));
+      return;
+    }
+
+    yPos += colorBoxSize + 30;
+  } else {
+    yPos += styleBoxH + 30;
+  }
+
+  // Ball Style buttons
+  yPos += 30; // Account for "Ball Style:" label
+  const ballStyles = ['classic', 'retro', 'glow', 'soccer'];
+  const ballStyleBoxW = 90;
+  const ballStyleBoxH = 36;
+
+  for (let i = 0; i < ballStyles.length; i++) {
+    const style = ballStyles[i];
+    const boxX = panelX + 40 + i * (ballStyleBoxW + 10);
+    if (pointInRect(x, y, { x: boxX, y: yPos, w: ballStyleBoxW, h: ballStyleBoxH })) {
+      setBallStyle(state, style);
+      return;
+    }
+  }
+
+  yPos += ballStyleBoxH + 40;
+
+  // Ball Trail Toggle
+  const trailToggleW = 100;
+  const trailToggleH = 36;
+  const trailToggleX = panelX + 40;
+
+  if (pointInRect(x, y, { x: trailToggleX, y: yPos, w: trailToggleW, h: trailToggleH })) {
+    setBallTrail(state, !state.settings.ballTrail);
+    return;
+  }
+
+  // Ball Flash Toggle
+  const flashToggleX = panelX + 40 + trailToggleW + 20;
+
+  if (pointInRect(x, y, { x: flashToggleX, y: yPos, w: trailToggleW, h: trailToggleH })) {
+    setBallFlash(state, !state.settings.ballFlash);
+    return;
+  }
+
+  yPos += trailToggleH + 40;
+
+  // Trail Length Slider (only show if trail is enabled)
+  if (state.settings.ballTrail) {
+    yPos += 30; // Account for "Trail Length:" label
+    const sliderX = panelX + 40;
+    const sliderW = UI.SLIDER_WIDTH;
+
+    if (pointInRect(x, y, { x: sliderX, y: yPos, w: sliderW, h: 20 })) {
+      const normalized = (x - sliderX) / sliderW;
+      const trailLength = Math.round(3 + normalized * 7); // 3 to 10
+      setTrailLength(state, trailLength);
+      return;
+    }
+  }
 }
