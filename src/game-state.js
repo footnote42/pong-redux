@@ -48,15 +48,19 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
     ballColor: '#ffffff', // Custom ball color
     ballTrail: false, // Trail effect on/off
     ballFlash: true, // Collision flash on/off
-    trailLength: 5 // Number of trail positions (3-10)
+    trailLength: 5, // Number of trail positions (3-10)
+    paddleSize: 1.0, // Paddle size multiplier (0.5x - 1.5x)
+    endlessMode: false // Endless mode (no win condition)
   };
+  const paddleHeight = PADDLE.DEFAULT_HEIGHT * ((persistedSettings && persistedSettings.paddleSize) || defaultSettings.paddleSize);
+  
   return {
     width,
     height,
     score: { left: 0, right: 0 },
     paddles: {
-      left: createPaddle(PADDLE.DEFAULT_X_OFFSET_LEFT, height / 2, PADDLE.DEFAULT_WIDTH, PADDLE.DEFAULT_HEIGHT, PADDLE.DEFAULT_SPEED),
-      right: createPaddle(width - PADDLE.DEFAULT_X_OFFSET_RIGHT, height / 2, PADDLE.DEFAULT_WIDTH, PADDLE.DEFAULT_HEIGHT, PADDLE.DEFAULT_SPEED),
+      left: createPaddle(PADDLE.DEFAULT_X_OFFSET_LEFT, height / 2, PADDLE.DEFAULT_WIDTH, paddleHeight, PADDLE.DEFAULT_SPEED),
+      right: createPaddle(width - PADDLE.DEFAULT_X_OFFSET_RIGHT, height / 2, PADDLE.DEFAULT_WIDTH, paddleHeight, PADDLE.DEFAULT_SPEED),
     },
     ball: createBall(width / 2, height / 2, BALL.DEFAULT_RADIUS, BALL.DEFAULT_SPEED),
     ballTrail: [], // Array of {x, y} positions for trail effect
@@ -171,6 +175,29 @@ export function setBallFlash(state, enabled) {
 
 export function setTrailLength(state, length) {
   state.settings.trailLength = Math.max(3, Math.min(10, length));
+  persistSettings(state);
+}
+
+
+export function setPaddleSize(state, multiplier) {
+  const newSize = Math.max(PADDLE.SIZE_MULTIPLIER_MIN, Math.min(PADDLE.SIZE_MULTIPLIER_MAX, multiplier));
+  state.settings.paddleSize = newSize;
+  
+  // Apply to current paddles if game is initialized
+  if (state.paddles) {
+    const baseHeight = PADDLE.DEFAULT_HEIGHT;
+    const newHeight = baseHeight * newSize;
+    state.paddles.left.h = newHeight;
+    state.paddles.right.h = newHeight;
+  }
+  
+  persistSettings(state);
+}
+
+export function setEndlessMode(state, enabled) {
+  state.settings.endlessMode = enabled;
+  // Update win score - use a very high number for endless mode
+  state.winScore = enabled ? 999 : state.settings.winScore;
   persistSettings(state);
 }
 

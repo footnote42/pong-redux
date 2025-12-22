@@ -1,0 +1,35 @@
+Starting up http-server, serving .
+
+http-server version: 14.1.1
+
+http-server settings: 
+CORS: disabled
+Cache: 3600 seconds
+Connection Timeout: 120 seconds
+Directory Listings: visible
+AutoIndex: visible
+Serve GZIP Files: false
+Serve Brotli Files: false
+Default File Extension: none
+
+Available on:
+  http://192.168.1.69:3000
+  http://127.0.0.1:3000
+Hit CTRL-C to stop the server
+
+[2025-12-22T09:37:01.527Z]  "GET /" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
+(node:26140) [DEP0066] DeprecationWarning: OutgoingMessage.prototype._headers is deprecated
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[2025-12-22T09:37:01.581Z]  "GET /styles.css" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
+[2025-12-22T09:37:01.623Z]  "GET /src/main.js" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
+[2025-12-22T09:37:01.634Z]  "GET /src/game-state.js" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
+[2025-12-22T09:37:01.637Z]  "GET /src/renderer.js" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
+[2025-12-22T09:37:01.637Z]  "GET /src/constants.js" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
+[2025-12-22T09:37:01.638Z]  "GET /src/input.js" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
+[2025-12-22T09:37:01.649Z]  "GET /src/paddle.js" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
+[2025-12-22T09:37:01.650Z]  "GET /src/ball.js" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
+[2025-12-22T09:37:01.651Z]  "GET /src/collision.js" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
+[2025-12-22T09:37:01.651Z]  "GET /src/ai.js" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
+[2025-12-22T09:37:01.666Z]  "GET /favicon.ico" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"
+[2025-12-22T09:37:01.667Z]  "GET /favicon.ico" Error (404): "Not found"
+[2025-12-22T09:37:24.210Z]  "GET /" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0"

@@ -12,9 +12,9 @@ export const UI = {
   BUTTON_GAP: 40,
   SETTINGS_PANEL: {
     WIDTH_RATIO: 0.15,
-    HEIGHT_RATIO: 0.15,
+    HEIGHT_RATIO: 0.1,
     PANEL_WIDTH_RATIO: 0.7,
-    PANEL_HEIGHT_RATIO: 0.7
+    PANEL_HEIGHT_RATIO: 0.8
   },
   TAB_WIDTH: 140,
   TAB_HEIGHT: 36,
@@ -41,7 +41,13 @@ export const BALL = {
   DEFAULT_SPEED: 200,
   MAX_SERVE_ANGLE_DEG: 75,
   SPEED_MULTIPLIER_MIN: 0.5,
-  SPEED_MULTIPLIER_MAX: 2.0
+  SPEED_MULTIPLIER_MAX: 2.0,
+  SPEED_PRESETS: {
+    slow: 0.7,
+    normal: 1.0,
+    fast: 1.3,
+    insane: 1.8
+  }
 };
 
 export const PADDLE = {
@@ -50,7 +56,9 @@ export const PADDLE = {
   DEFAULT_SPEED: 300,
   DEFAULT_ACCEL: 2000,
   DEFAULT_X_OFFSET_LEFT: 10,
-  DEFAULT_X_OFFSET_RIGHT: 20
+  DEFAULT_X_OFFSET_RIGHT: 20,
+  SIZE_MULTIPLIER_MIN: 0.5,
+  SIZE_MULTIPLIER_MAX: 1.5
 };
 
 export const GAME = {

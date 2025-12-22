@@ -380,20 +380,26 @@ function getSettingsLayout(w, h) {
 
 ## Future Enhancements
 
-### Stage 9: Paddle Customization
-- Paddle styles (Classic, Retro, Neon, Custom)
-- Color customization
-- Size options
+### ✅ Stage 9: Paddle Customization (Completed 2025-12-22)
+- ✅ Paddle styles (Classic, Retro, Neon, Custom)
+- ✅ Color customization
+- ✅ Size options (0.5x-1.5x multiplier)
+
+### ✅ Stage 10: Ball Customization & Effects (Completed 2025-12-22)
+- ✅ Ball trails with object pooling
+- ✅ Collision flash effects
+- ✅ Ball styles (Classic, Retro, Glow, Soccer)
+- Note: Ball style UI not yet integrated into settings menu
+
+### ✅ Stage 11: Difficulty & Gameplay Tweaks (Completed 2025-12-22)
+- ✅ Ball speed presets (Slow/Normal/Fast/Insane)
+- ✅ Paddle size slider
+- ✅ Endless mode toggle
 
 ### Stage 7: Instructions & Help System
 - Help overlay accessible during gameplay
 - Control reference
 - Tutorial mode (optional)
-
-### Stage 10-11: Ball Customization & Visual Effects
-- Ball trails
-- Particle effects on collision
-- Ball styles and colors
 
 ### Stage 12-16: Polish & Launch
 - Sound effects (Web Audio API)

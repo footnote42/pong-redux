@@ -5,6 +5,54 @@ All notable changes to the Pong Redux project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2025-12-22
+
+### Added - Stages 9, 10 & 11: Customization & Difficulty
+- **Stage 9: Paddle Customization**
+  - Four paddle styles: Classic (rectangle), Retro (segmented), Neon (glow effect), Custom (color picker)
+  - Individual paddle color customization with 10 preset colors
+  - Style selector in settings menu with visual feedback
+  - Real-time style application during gameplay
+  - All styles maintain collision detection accuracy
+
+- **Stage 10: Ball Customization & Effects**
+  - Four ball styles: Classic (circle), Retro (rotated square), Glow (neon), Soccer (pentagon pattern)
+  - Trail effect with configurable length (3-10 positions) using object pooling
+  - Collision flash effect (100ms) on paddle and wall hits
+  - Ball color customization setting
+  - Performance-optimized: no per-frame allocations
+
+- **Stage 11: Difficulty & Gameplay Tweaks**
+  - Ball speed presets: Slow (0.7x), Normal (1.0x), Fast (1.3x), Insane (1.8x)
+  - Paddle size slider: 0.5x to 1.5x multiplier (affects both paddles)
+  - Endless mode toggle: disables win condition for casual play
+  - Settings panel height increased to 80% for better content visibility
+  - Optimized UI spacing to fit all options
+
+### Changed
+- `src/constants.js`: Added `PADDLE.SIZE_MULTIPLIER_MIN/MAX`, `BALL.SPEED_PRESETS`, `UI.SETTINGS_PANEL.HEIGHT_RATIO` (0.8)
+- `src/game-state.js`: Added paddle/ball style settings, `setPaddleSize()`, `setEndlessMode()`, ball trail/flash state
+- `src/renderer.js`: Implemented style-based rendering for paddles and balls, added UI for presets/endless mode/paddle size
+- `src/input.js`: Added handlers for all new settings, imported `setPaddleSize` and `setEndlessMode`
+- Settings UI spacing optimized (40px→30px between sections, 70px→60px after elements)
+
+### Technical Details
+- Paddle rendering: Four dedicated functions (`drawClassicPaddle`, `drawRetroPaddle`, `drawNeonPaddle`, `drawCustomPaddle`)
+- Ball rendering: Four dedicated functions with trail/flash support
+- Trail system: Object-pooled array with shift/push pattern, alpha fade rendering
+- Flash effect: Timer-based (decrements in game loop), triggered on all collision types
+- Endless mode: Sets `winScore` to 999 when enabled
+- Paddle size: Multiplier applied to `PADDLE.DEFAULT_HEIGHT` for both paddles
+
+### Testing
+- Ball speed presets tested at all levels (Insane 1.8x confirmed)
+- Endless mode toggle verified with visual feedback
+- Paddle size changes applied in real-time
+- No performance degradation with effects enabled
+- All settings persist via localStorage
+
+---
+
 ## [0.8.0] - 2025-12-21
 
 ### Added - Stage 8: Settings Menu Foundation

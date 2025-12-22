@@ -2,7 +2,7 @@
 // Keyboard input handling - maps keys to paddle directions and pause
 
 import { setPaddleDirection } from './paddle.js';
-import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor } from './game-state.js';
+import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize } from './game-state.js';
 import { UI, BALL, GAME } from './constants.js';
 
 let _state = null;
@@ -244,14 +244,34 @@ function detectGameplayHover(x, y, state, panelX, panelY) {
     }
   }
 
-  yPos += boxH + 70;
+  yPos += boxH + 60;
 
   // Ball speed slider
   if (pointInRect(x, y, { x: panelX + 40, y: yPos, w: 300, h: 20 })) {
     return 'ballSpeed';
   }
 
-  yPos += 80;
+  yPos += 30;
+
+  // Ball speed preset buttons
+  const presets = [
+    { key: 'speedSlow' },
+    { key: 'speedNormal' },
+    { key: 'speedFast' },
+    { key: 'speedInsane' }
+  ];
+  const presetBoxW = 90;
+  const presetBoxH = 32;
+
+  for (let i = 0; i < presets.length; i++) {
+    const preset = presets[i];
+    const boxX = panelX + 40 + i * (presetBoxW + 10);
+    if (pointInRect(x, y, { x: boxX, y: yPos, w: presetBoxW, h: presetBoxH })) {
+      return preset.key;
+    }
+  }
+
+  yPos += presetBoxH + 60;
 
   // Win score buttons
   const winScores = GAME.WIN_SCORES;
@@ -265,7 +285,18 @@ function detectGameplayHover(x, y, state, panelX, panelY) {
     }
   }
 
-  yPos += scoreBoxH + 70;
+  yPos += scoreBoxH + 30;
+
+  // Endless mode toggle
+  const endlessToggleW = 120;
+  const endlessToggleH = 36;
+  const endlessToggleX = panelX + 40;
+
+  if (pointInRect(x, y, { x: endlessToggleX, y: yPos, w: endlessToggleW, h: endlessToggleH })) {
+    return 'endlessMode';
+  }
+
+  yPos += endlessToggleH + 60;
 
   // Paddle style buttons
   const paddleStyles = ['classic', 'retro', 'neon', 'custom'];
@@ -297,6 +328,14 @@ function detectGameplayHover(x, y, state, panelX, panelY) {
     if (pointInRect(x, y, { x: rightColorBoxX, y: yPos, w: colorBoxSize, h: colorBoxSize })) {
       return 'rightPaddleColor';
     }
+
+    yPos += colorBoxSize + 40;
+  }
+
+  // Paddle size slider (always shown after custom colors or paddle styles)
+  yPos += (state.settings.paddleStyle === 'custom' ? 0 : styleBoxH + 70);
+  if (pointInRect(x, y, { x: panelX + 40, y: yPos, w: 300, h: 20 })) {
+    return 'paddleSize';
   }
 
   return null;
@@ -382,7 +421,7 @@ function handleGameplayClick(x, y, state, panelX, panelY) {
     }
   }
 
-  yPos += boxH + 70;
+  yPos += boxH + 60;
 
   // Ball speed slider
   const sliderX = panelX + 40;
@@ -394,7 +433,28 @@ function handleGameplayClick(x, y, state, panelX, panelY) {
     return;
   }
 
-  yPos += 80;
+  yPos += 30;
+
+  // Ball speed preset buttons
+  const presets = [
+    { value: 0.7, key: 'speedSlow' },
+    { value: 1.0, key: 'speedNormal' },
+    { value: 1.3, key: 'speedFast' },
+    { value: 1.8, key: 'speedInsane' }
+  ];
+  const presetBoxW = 90;
+  const presetBoxH = 32;
+
+  for (let i = 0; i < presets.length; i++) {
+    const preset = presets[i];
+    const boxX = panelX + 40 + i * (presetBoxW + 10);
+    if (pointInRect(x, y, { x: boxX, y: yPos, w: presetBoxW, h: presetBoxH })) {
+      setBallSpeed(state, preset.value);
+      return;
+    }
+  }
+
+  yPos += presetBoxH + 60;
 
   // Win score buttons
   const winScores = GAME.WIN_SCORES;
@@ -409,7 +469,19 @@ function handleGameplayClick(x, y, state, panelX, panelY) {
     }
   }
 
-  yPos += scoreBoxH + 70;
+  yPos += scoreBoxH + 30;
+
+  // Endless mode toggle
+  const endlessToggleW = 120;
+  const endlessToggleH = 36;
+  const endlessToggleX = panelX + 40;
+
+  if (pointInRect(x, y, { x: endlessToggleX, y: yPos, w: endlessToggleW, h: endlessToggleH })) {
+    setEndlessMode(state, !state.settings.endlessMode);
+    return;
+  }
+
+  yPos += endlessToggleH + 60;
 
   // Paddle style buttons
   const paddleStyles = ['classic', 'retro', 'neon', 'custom'];
@@ -444,6 +516,18 @@ function handleGameplayClick(x, y, state, panelX, panelY) {
       setRightPaddleColor(state, cycleColor(state.settings.rightPaddleColor));
       return;
     }
+
+    yPos += colorBoxSize + 40;
+  }
+
+  // Paddle size slider (always shown after custom colors or paddle styles)
+  yPos += (state.settings.paddleStyle === 'custom' ? 0 : styleBoxH + 70);
+  const paddleSizeSliderX = panelX + 40;
+  if (pointInRect(x, y, { x: paddleSizeSliderX, y: yPos, w: sliderW, h: 20 })) {
+    const normalized = (x - paddleSizeSliderX) / sliderW;
+    const size = PADDLE.SIZE_MULTIPLIER_MIN + normalized * (PADDLE.SIZE_MULTIPLIER_MAX - PADDLE.SIZE_MULTIPLIER_MIN);
+    setPaddleSize(state, size);
+    return;
   }
 }
 

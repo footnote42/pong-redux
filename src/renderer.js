@@ -480,7 +480,7 @@ function drawGameplaySettings(state, ctx, w, h, panelX, contentY, panelW, conten
     ctx.fillText(diff.charAt(0).toUpperCase() + diff.slice(1), boxX + boxW / 2, y + boxH / 2 + 6);
   }
 
-  y += boxH + 40;
+  y += boxH + 30;
   ctx.textAlign = 'left';
   ctx.font = '18px monospace';
   ctx.fillStyle = '#fff';
@@ -490,7 +490,37 @@ function drawGameplaySettings(state, ctx, w, h, panelX, contentY, panelW, conten
   y += 30;
   drawSlider(ctx, panelX + 40, y, 300, state.settings.ballSpeed, 0.5, 2.0, 'ballSpeed', state.settingsHover);
 
-  y += 50;
+  y += 30;
+
+  // Ball Speed Presets
+  const presets = [
+    { name: 'Slow', value: 0.7, key: 'speedSlow' },
+    { name: 'Normal', value: 1.0, key: 'speedNormal' },
+    { name: 'Fast', value: 1.3, key: 'speedFast' },
+    { name: 'Insane', value: 1.8, key: 'speedInsane' }
+  ];
+  const presetBoxW = 90;
+  const presetBoxH = 32;
+
+  for (let i = 0; i < presets.length; i++) {
+    const preset = presets[i];
+    const boxX = panelX + 40 + i * (presetBoxW + 10);
+    const isHovered = state.settingsHover === preset.key;
+    const isSelected = Math.abs(state.settings.ballSpeed - preset.value) < 0.01;
+
+    ctx.fillStyle = isHovered ? '#444' : '#222';
+    ctx.fillRect(boxX, y, presetBoxW, presetBoxH);
+    ctx.strokeStyle = isSelected ? '#0f0' : '#666';
+    ctx.lineWidth = isSelected ? 2 : 1;
+    ctx.strokeRect(boxX, y, presetBoxW, presetBoxH);
+
+    ctx.fillStyle = isHovered || isSelected ? '#fff' : '#aaa';
+    ctx.font = '14px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(preset.name, boxX + presetBoxW / 2, y + presetBoxH / 2 + 5);
+  }
+
+  y += presetBoxH + 30;
 
   // Win Score
   ctx.fillText('Win Score:', panelX + 40, y);
@@ -517,7 +547,26 @@ function drawGameplaySettings(state, ctx, w, h, panelX, contentY, panelW, conten
     ctx.fillText(score.toString(), boxX + scoreBoxW / 2, y + scoreBoxH / 2 + 6);
   }
 
-  y += scoreBoxH + 40;
+  y += scoreBoxH + 30;
+
+  // Endless Mode Toggle
+  const endlessToggleW = 120;
+  const endlessToggleH = 36;
+  const endlessToggleX = panelX + 40;
+  const isEndlessHovered = state.settingsHover === 'endlessMode';
+
+  ctx.fillStyle = isEndlessHovered ? '#444' : '#222';
+  ctx.fillRect(endlessToggleX, y, endlessToggleW, endlessToggleH);
+  ctx.strokeStyle = state.settings.endlessMode ? '#0f0' : '#666';
+  ctx.lineWidth = state.settings.endlessMode ? 2 : 1;
+  ctx.strokeRect(endlessToggleX, y, endlessToggleW, endlessToggleH);
+
+  ctx.fillStyle = state.settings.endlessMode ? '#0f0' : '#aaa';
+  ctx.font = '14px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Endless Mode', endlessToggleX + endlessToggleW / 2, y + endlessToggleH / 2 + 5);
+
+  y += endlessToggleH + 30;
 
   // Paddle Style
   ctx.textAlign = 'left';
@@ -584,6 +633,17 @@ function drawGameplaySettings(state, ctx, w, h, panelX, contentY, panelW, conten
     ctx.lineWidth = isRightHovered ? 2 : 1;
     ctx.strokeRect(rightColorBoxX, y, colorBoxSize, colorBoxSize);
   }
+
+  // Add spacing before paddle size
+  y += (state.settings.paddleStyle === 'custom' ? colorBoxSize + 40 : 0);
+
+  // Paddle Size
+  ctx.textAlign = 'left';
+  ctx.font = '18px monospace';
+  ctx.fillStyle = '#fff';
+  ctx.fillText('Paddle Size: ' + state.settings.paddleSize.toFixed(1) + 'x', panelX + 40, y);
+  y += 30;
+  drawSlider(ctx, panelX + 40, y, 300, state.settings.paddleSize, 0.5, 1.5, 'paddleSize', state.settingsHover);
 }
 
 function drawAudioSettings(state, ctx, w, h, panelX, contentY, panelW, contentH) {

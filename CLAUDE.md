@@ -105,22 +105,23 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 - ✅ Score tracking and high score persistence
 - ✅ Win condition (configurable: 5, 7, 11, 15, 21 points)
 - ✅ Swept collision detection for corner cases
-- ✅ Ball speed customization (0.5x - 2.0x)
+- ✅ Ball speed customization (0.5x - 2.0x slider + presets)
 - ✅ **Paddle customization (Stage 9)** - Four styles: Classic, Retro, Neon, Custom with color pickers
 - ✅ **Ball customization (Stage 10)** - Four styles: Classic, Retro, Glow, Soccer
 - ✅ **Ball effects (Stage 10)** - Trail effect with configurable length, collision flash effect
+- ✅ **Difficulty tweaks (Stage 11)** - Ball speed presets (Slow/Normal/Fast/Insane), paddle size slider (0.5x-1.5x), endless mode toggle
 - ✅ Settings accessible during gameplay (S key toggle)
 
 **Known Issues:**
 - Ball customization UI incomplete (settings added to state, rendering implemented, UI pending)
-- Settings menu may need scrolling for all options
+- Consider adding more visual feedback for settings changes
 
 **Code Quality Assessment:**
-- Overall Score: 8.5/10 (+0.5 from customization features)
-- Strengths: Architecture, game loop, collision detection, visual customization, effects system
-- Needs Improvement: Settings UI organization (consider tabs or scrolling), complete ball settings UI
+- Overall Score: 8.5/10
+- Strengths: Architecture, game loop, collision detection, visual customization, effects system, gameplay tuning
+- Needs Improvement: Complete ball settings UI, add more player feedback
 
-**Recent Additions (Stage 9 & 10):**
+**Recent Additions (Stage 9, 10 & 11):**
 
 **Paddle Customization** (src/renderer.js:163-251, src/game-state.js:125-142)
 - Four rendering styles with distinct visual characteristics
@@ -134,10 +135,17 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 - Collision flash: 100ms flash on paddle/wall collisions
 - Performance-optimized: No per-frame allocations
 
+**Difficulty & Gameplay Tweaks** (src/constants.js, src/game-state.js:182-201, src/renderer.js:489-608)
+- Ball speed presets: Four clickable buttons (Slow 0.7x, Normal 1.0x, Fast 1.3x, Insane 1.8x)
+- Paddle size slider: 0.5x to 1.5x multiplier affecting both paddles
+- Endless mode toggle: Disables win condition (sets winScore to 999)
+- Settings panel height increased (80%) with optimized spacing
+- All settings persist via localStorage and update in real-time
+
 **Refactoring Recommendations:**
 - Complete ball settings UI in settings menu
 - Consider adding a "Visual" tab to settings for ball/paddle customization
-- Extract magic numbers to `src/constants.js`
+- Extract remaining magic numbers to `src/constants.js`
 - Add JSDoc documentation for new customization functions
 
 ## Future Extensions
