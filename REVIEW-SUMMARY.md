@@ -15,10 +15,10 @@ Your Pong Redux codebase demonstrates solid understanding of game development pa
 ## Quick Win Checklist (Start Here Tomorrow)
 
 ### Immediate Fixes (< 1 hour total)
-- [ ] Fix settings menu non-responsive issue (CRITICAL - see TODO.md #1)
-- [ ] Add canvas initialization error handling (15 min - see TODO.md #2)
-- [ ] Add console.warn to localStorage catch blocks (10 min - see TODO.md #3)
-- [ ] Unminify styles.css (5 min - see TODO.md #4)
+- [x] Fix settings menu non-responsive issue (CRITICAL - see TODO.md #1)
+- [x] Add canvas initialization error handling (15 min - see TODO.md #2)
+- [x] Add console.warn to localStorage catch blocks (10 min - see TODO.md #3)
+- [x] Unminify styles.css (5 min - see TODO.md #4)
 
 ### Weekend Refactor (4-8 hours)
 - [ ] Extract magic numbers to src/constants.js (2 hours - see TODO.md #5)
