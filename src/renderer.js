@@ -102,7 +102,7 @@ export function render(state, ctx, interp = 0) {
     // Small settings hint
     ctx.fillStyle = '#666';
     ctx.font = '12px monospace';
-    ctx.fillText('Open Settings: S or click gear', w / 2, h * 0.82);
+    ctx.fillText('Open Settings: Tab or click gear', w / 2, h * 0.82);
   }
 
   // instructions overlay (first-time) - only show if not on landing

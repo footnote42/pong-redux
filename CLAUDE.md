@@ -36,7 +36,7 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 **Input Buffering** (src/input.js)
 - Attaches/detaches event listeners to prevent memory leaks
 - Input applied in fixed update step, not render loop (avoids 1-frame lag)
-- Supports W/S (left paddle), Arrow Up/Down (right paddle), P/ESC (pause)
+- Supports W/S (left paddle), Arrow Up/Down (right paddle), P/ESC (pause), Tab (settings toggle)
 
 **Module Structure**
 - `main.js` - Entry point, game loop
@@ -110,7 +110,7 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 - ✅ **Ball customization (Stage 10)** - Four styles: Classic, Retro, Glow, Soccer
 - ✅ **Ball effects (Stage 10)** - Trail effect with configurable length, collision flash effect
 - ✅ **Difficulty tweaks (Stage 11)** - Ball speed presets (Slow/Normal/Fast/Insane), paddle size slider (0.5x-1.5x), endless mode toggle
-- ✅ Settings accessible during gameplay (S key toggle)
+- ✅ Settings accessible during gameplay (Tab key toggle)
 
 **Known Issues:**
 - Ball customization UI incomplete (settings added to state, rendering implemented, UI pending)

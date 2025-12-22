@@ -57,7 +57,7 @@ function keydown(e) {
 
   // Settings overlay keyboard controls
   if (_state.showSettings) {
-    if (k === 'Escape' || k === 's' || k === 'S') {
+    if (k === 'Escape' || k === 'Tab') {
       _state.showSettings = false;
       _state.settingsHover = null;
       return;
@@ -78,7 +78,7 @@ function keydown(e) {
       startPlaying(_state, 'versus');
       return;
     }
-    if (k === 's' || k === 'S') {
+    if (k === 'Tab') {
       _state.showSettings = !_state.showSettings;
       _state.settingsHover = null;
       return;
@@ -92,15 +92,15 @@ function keydown(e) {
     if (k === '3') { setDifficulty(_state, 'hard'); return; }
   }
 
-  // Toggle settings with S key (works during gameplay too)
-  if ((k === 's' || k === 'S') && _state.gameState === 'PLAYING') {
+  // Toggle settings with Tab key (works during gameplay too)
+  if (k === 'Tab' && _state.gameState === 'PLAYING') {
     _state.showSettings = !_state.showSettings;
     _state.settingsHover = null;
     return;
   }
 
-  // Prevent page scrolling for space / arrows
-  if (k === ' ' || k === 'ArrowUp' || k === 'ArrowDown') e.preventDefault();
+  // Prevent page scrolling for space / arrows / Tab
+  if (k === ' ' || k === 'ArrowUp' || k === 'ArrowDown' || k === 'Tab') e.preventDefault();
 
   switch (k) {
     case 'p':
