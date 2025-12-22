@@ -43,7 +43,12 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
     volume: AUDIO.DEFAULT_VOLUME,
     paddleStyle: 'classic', // 'classic', 'retro', 'neon', 'custom'
     leftPaddleColor: '#ffffff', // Custom color for left paddle
-    rightPaddleColor: '#ffffff' // Custom color for right paddle
+    rightPaddleColor: '#ffffff', // Custom color for right paddle
+    ballStyle: 'classic', // 'classic', 'retro', 'glow', 'soccer'
+    ballColor: '#ffffff', // Custom ball color
+    ballTrail: false, // Trail effect on/off
+    ballFlash: true, // Collision flash on/off
+    trailLength: 5 // Number of trail positions (3-10)
   };
   return {
     width,
@@ -54,6 +59,8 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
       right: createPaddle(width - PADDLE.DEFAULT_X_OFFSET_RIGHT, height / 2, PADDLE.DEFAULT_WIDTH, PADDLE.DEFAULT_HEIGHT, PADDLE.DEFAULT_SPEED),
     },
     ball: createBall(width / 2, height / 2, BALL.DEFAULT_RADIUS, BALL.DEFAULT_SPEED),
+    ballTrail: [], // Array of {x, y} positions for trail effect
+    ballFlashTimer: 0, // Timer for collision flash effect (seconds)
     running: false,
     paused: false,
     gameOver: false,
@@ -132,6 +139,38 @@ export function setLeftPaddleColor(state, color) {
 
 export function setRightPaddleColor(state, color) {
   state.settings.rightPaddleColor = color;
+  persistSettings(state);
+}
+
+
+export function setBallStyle(state, style) {
+  if (['classic', 'retro', 'glow', 'soccer'].includes(style)) {
+    state.settings.ballStyle = style;
+    persistSettings(state);
+  }
+}
+
+export function setBallColor(state, color) {
+  state.settings.ballColor = color;
+  persistSettings(state);
+}
+
+export function setBallTrail(state, enabled) {
+  state.settings.ballTrail = enabled;
+  // Initialize trail array if enabling
+  if (enabled && !state.ballTrail) {
+    state.ballTrail = [];
+  }
+  persistSettings(state);
+}
+
+export function setBallFlash(state, enabled) {
+  state.settings.ballFlash = enabled;
+  persistSettings(state);
+}
+
+export function setTrailLength(state, length) {
+  state.settings.trailLength = Math.max(3, Math.min(10, length));
   persistSettings(state);
 }
 
@@ -271,8 +310,26 @@ export function update(state, dt) {
   ball.prevVy = ball.vy;
   updateBall(ball, dt);
 
+  // Update ball trail (if enabled)
+  if (state.settings.ballTrail) {
+    if (!state.ballTrail) state.ballTrail = [];
+    state.ballTrail.push({ x: ball.x, y: ball.y });
+    // Keep trail at max length
+    while (state.ballTrail.length > state.settings.trailLength) {
+      state.ballTrail.shift();
+    }
+  }
+
+  // Update flash timer
+  if (state.ballFlashTimer > 0) {
+    state.ballFlashTimer -= dt;
+  }
+
   // Wall collisions (top/bottom)
-  bounceOffHorizontalEdge(ball, state.height);
+  const wallBounce = bounceOffHorizontalEdge(ball, state.height);
+  if (wallBounce && state.settings.ballFlash) {
+    state.ballFlashTimer = 0.1; // 100ms flash
+  }
 
   // Paddle collisions
   const left = state.paddles.left;
@@ -298,6 +355,7 @@ export function update(state, dt) {
     } else {
       // reflect based on hit location - ball should go right after hitting left paddle
       reflectFromPaddle(ball, left.y, left.h, +1);
+      if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
     }
     // nudge ball to front to avoid re-collision
     ball.x = left.x + left.w + ball.r;
@@ -315,6 +373,7 @@ export function update(state, dt) {
       }
     } else {
       reflectFromPaddle(ball, right.y, right.h, -1);
+      if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
     }
     ball.x = right.x - ball.r;
     bounceOffHorizontalEdge(ball, state.height);
@@ -323,6 +382,7 @@ export function update(state, dt) {
     const res = resolveCircleRectPenetration(ball, left);
     // reflect based on hit location - ball should go right after hitting left paddle
     reflectFromPaddle(ball, left.y, left.h, +1);
+    if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
     // ensure no sticking (nudge slightly out)
     ball.x = left.x + left.w + ball.r + 0.5;
     // If the ball was touching top/bottom this frame, invert vy as well (corner case)
@@ -335,6 +395,7 @@ export function update(state, dt) {
     const res = resolveCircleRectPenetration(ball, right);
     // reflect to left
     reflectFromPaddle(ball, right.y, right.h, -1);
+    if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
     ball.x = right.x - ball.r - 0.5;
     if (ball.prevY - ball.r <= 0 || ball.prevY + ball.r >= state.height || ball.y - ball.r <= 0 || ball.y + ball.r >= state.height) {
       ball.vy = -ball.vy;

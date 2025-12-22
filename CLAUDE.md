@@ -94,7 +94,7 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 - Increase ball speed temporarily to reproduce collision edge cases
 - Add console logs in `collision.js` and `ball.js` to inspect collision responses
 
-## Current Status (2025-12-21)
+## Current Status (2025-12-22)
 
 **Completed Features:**
 - ✅ Fixed-timestep game loop with accumulator pattern
@@ -106,29 +106,44 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 - ✅ Win condition (configurable: 5, 7, 11, 15, 21 points)
 - ✅ Swept collision detection for corner cases
 - ✅ Ball speed customization (0.5x - 2.0x)
+- ✅ **Paddle customization (Stage 9)** - Four styles: Classic, Retro, Neon, Custom with color pickers
+- ✅ **Ball customization (Stage 10)** - Four styles: Classic, Retro, Glow, Soccer
+- ✅ **Ball effects (Stage 10)** - Trail effect with configurable length, collision flash effect
+- ✅ Settings accessible during gameplay (S key toggle)
 
-**Known Issues (See TODO.md for details):**
-- ~~Settings menu non-responsive~~ ✅ **FIXED** (2025-12-22) - Was fully functional, misdiagnosis
-- ~~No error handling for canvas initialization~~ ✅ **FIXED** (2025-12-22)
-- ~~localStorage errors silently swallowed~~ ✅ **FIXED** (2025-12-22) - Added console.warn
-- ~~CSS minified~~ ✅ **FIXED** (2025-12-22) - Properly formatted
+**Known Issues:**
+- Ball customization UI incomplete (settings added to state, rendering implemented, UI pending)
+- Settings menu may need scrolling for all options
 
 **Code Quality Assessment:**
-- Overall Score: 8.0/10 (+0.5 from improved error handling)
-- Strengths: Architecture, game loop, collision detection, error handling
-- Needs Improvement: File organization, documentation, magic numbers
+- Overall Score: 8.5/10 (+0.5 from customization features)
+- Strengths: Architecture, game loop, collision detection, visual customization, effects system
+- Needs Improvement: Settings UI organization (consider tabs or scrolling), complete ball settings UI
+
+**Recent Additions (Stage 9 & 10):**
+
+**Paddle Customization** (src/renderer.js:163-251, src/game-state.js:125-142)
+- Four rendering styles with distinct visual characteristics
+- Custom color support with color cycling (10 preset colors)
+- Settings persist via localStorage
+- No impact on collision detection or physics
+
+**Ball Customization** (src/renderer.js:252-366, src/game-state.js:145-169)
+- Four ball styles: Classic (circle), Retro (rotated square), Glow (neon effect), Soccer (pentagon pattern)
+- Trail effect: Object-pooled array of positions with alpha fade
+- Collision flash: 100ms flash on paddle/wall collisions
+- Performance-optimized: No per-frame allocations
 
 **Refactoring Recommendations:**
+- Complete ball settings UI in settings menu
+- Consider adding a "Visual" tab to settings for ball/paddle customization
 - Extract magic numbers to `src/constants.js`
-- Split large files (renderer.js, input.js, game-state.js) into smaller modules
-- Add JSDoc documentation for complex functions
-- Reduce tight coupling between input.js and game-state.js
-- Implement or remove unused `interp` parameter
+- Add JSDoc documentation for new customization functions
 
 ## Future Extensions
 
-- Sound effects (Web Audio API) - Stage 10-11
-- Paddle customization (styles, colors) - Stage 9
-- Visual effects (trails, particles) - Stage 10-11
+- Sound effects (Web Audio API) - Stage 12
+- Ball rotation animation - Stage 10 (optional)
+- Speed lines effect - Stage 10 (optional)
 - Touch/mobile controls
 - Online multiplayer (WebSocket, state sync, input buffering already architected for this)

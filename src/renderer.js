@@ -27,10 +27,13 @@ export function render(state, ctx, interp = 0) {
   drawPaddle(ctx, left, state.settings.paddleStyle, state.settings.leftPaddleColor, 'left');
   drawPaddle(ctx, right, state.settings.paddleStyle, state.settings.rightPaddleColor, 'right');
 
+  // ball trail (if enabled)
+  if (state.settings.ballTrail && state.ballTrail && state.ballTrail.length > 0) {
+    drawBallTrail(ctx, state.ballTrail, state.ball.r, state.settings.ballColor);
+  }
+  
   // ball
-  ctx.beginPath();
-  ctx.arc(state.ball.x, state.ball.y, state.ball.r, 0, Math.PI * 2);
-  ctx.fill();
+  drawBall(ctx, state.ball, state.settings.ballStyle, state.settings.ballColor, state.ballFlashTimer > 0);
 
   // score
   ctx.font = '24px monospace';
@@ -238,6 +241,132 @@ function drawCustomPaddle(ctx, p, color) {
   ctx.strokeStyle = '#fff';
   ctx.lineWidth = 1;
   ctx.strokeRect(p.x, p.y - p.h / 2, p.w, p.h);
+}
+
+
+/**
+ * Draws a ball with the specified style and effects
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {Object} ball - Ball object with x, y, r properties
+ * @param {string} style - Ball style ('classic', 'retro', 'glow', 'soccer')
+ * @param {string} color - Ball color
+ * @param {boolean} flash - Whether to show collision flash
+ */
+function drawBall(ctx, ball, style = 'classic', color = '#ffffff', flash = false) {
+  ctx.save();
+  
+  // Apply flash effect if active
+  if (flash) {
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = color;
+  }
+  
+  switch (style) {
+    case 'retro':
+      drawRetroBall(ctx, ball, color);
+      break;
+    case 'glow':
+      drawGlowBall(ctx, ball, color);
+      break;
+    case 'soccer':
+      drawSoccerBall(ctx, ball, color);
+      break;
+    case 'classic':
+    default:
+      drawClassicBall(ctx, ball, color);
+      break;
+  }
+  
+  ctx.restore();
+}
+
+/**
+ * Draws a classic simple circle ball
+ */
+function drawClassicBall(ctx, ball, color) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/**
+ * Draws a retro pixelated/8-bit style ball
+ */
+function drawRetroBall(ctx, ball, color) {
+  ctx.fillStyle = color;
+  
+  // Draw as a square rotated 45 degrees for retro look
+  const size = ball.r * 1.4;
+  ctx.save();
+  ctx.translate(ball.x, ball.y);
+  ctx.rotate(Math.PI / 4);
+  ctx.fillRect(-size / 2, -size / 2, size, size);
+  ctx.restore();
+}
+
+/**
+ * Draws a glowing ball with neon effect
+ */
+function drawGlowBall(ctx, ball, color) {
+  // Outer glow
+  ctx.shadowBlur = 15;
+  ctx.shadowColor = color;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Inner bright core
+  ctx.shadowBlur = 8;
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.r * 0.6, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/**
+ * Draws a soccer ball pattern
+ */
+function drawSoccerBall(ctx, ball, color) {
+  // Base circle
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Pentagon pattern
+  ctx.fillStyle = '#000';
+  const pentSize = ball.r * 0.5;
+  ctx.beginPath();
+  for (let i = 0; i < 5; i++) {
+    const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+    const x = ball.x + Math.cos(angle) * pentSize;
+    const y = ball.y + Math.sin(angle) * pentSize;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+/**
+ * Draws the ball trail effect
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {Array} trail - Array of {x, y} positions
+ * @param {number} radius - Ball radius
+ * @param {string} color - Ball color
+ */
+function drawBallTrail(ctx, trail, radius, color) {
+  const len = trail.length;
+  for (let i = 0; i < len; i++) {
+    const alpha = (i + 1) / len; // Fade from 0 to 1
+    const size = radius * alpha * 0.8;
+    ctx.fillStyle = color + Math.floor(alpha * 128).toString(16).padStart(2, '0');
+    ctx.beginPath();
+    ctx.arc(trail[i].x, trail[i].y, size, 0, Math.PI * 2);
+    ctx.fill();
+  }
 }
 
 function drawSettingsIcon(ctx, x, y, size = 24, active = false) {
