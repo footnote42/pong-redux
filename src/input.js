@@ -2,7 +2,7 @@
 // Keyboard input handling - maps keys to paddle directions and pause
 
 import { setPaddleDirection } from './paddle.js';
-import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength } from './game-state.js';
+import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, triggerButtonPress } from './game-state.js';
 import { UI, BALL, GAME } from './constants.js';
 
 let _state = null;
@@ -170,9 +170,19 @@ export function attachInputHandlers(state, canvas = null) {
 
       if (_state.gameState === 'LANDING') {
         const btns = getLandingButtons(_state);
-        if (pointInRect(x, y, btns.single)) startPlaying(_state, 'single');
-        else if (pointInRect(x, y, btns.versus)) startPlaying(_state, 'versus');
-        else if (pointInRect(x, y, btns.settings)) { _state.showSettings = true; _state.settingsHover = null; }
+        if (pointInRect(x, y, btns.single)) {
+          triggerButtonPress(_state, 'single');
+          startPlaying(_state, 'single');
+        }
+        else if (pointInRect(x, y, btns.versus)) {
+          triggerButtonPress(_state, 'versus');
+          startPlaying(_state, 'versus');
+        }
+        else if (pointInRect(x, y, btns.settings)) {
+          triggerButtonPress(_state, 'settings');
+          _state.showSettings = true;
+          _state.settingsHover = null;
+        }
       }
     };
     canvas.addEventListener('pointermove', pmove);

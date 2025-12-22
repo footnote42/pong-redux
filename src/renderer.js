@@ -34,12 +34,17 @@ export function render(state, ctx, interp = 0) {
   
   // ball
   drawBall(ctx, state.ball, state.settings.ballStyle, state.settings.ballColor, state.ballFlashTimer > 0);
+  
+  // particles
+  drawParticles(ctx, state.particles);
 
-  // score
+  // score (with animation)
   ctx.font = '24px monospace';
   ctx.textAlign = 'center';
-  ctx.fillText(state.score.left, w * 0.25, 40);
-  ctx.fillText(state.score.right, w * 0.75, 40);
+  const displayLeft = Math.round(state.scoreDisplay.left);
+  const displayRight = Math.round(state.scoreDisplay.right);
+  ctx.fillText(displayLeft, w * 0.25, 40);
+  ctx.fillText(displayRight, w * 0.75, 40);
 
   // high score (top-right)
   if (state.highScore && state.highScore.score > 0) {
@@ -73,7 +78,18 @@ export function render(state, ctx, interp = 0) {
     const single = { x: cx - btnW - gap / 2, y, w: btnW, h: btnH };
     const versus = { x: cx + gap / 2, y, w: btnW, h: btnH };
 
-    function drawBtn(b, label, hovered) {
+    function drawBtn(b, label, hovered, buttonName) {
+      // Button press animation (scale down when pressed)
+      const isPressed = state.buttonPressAnim.active && state.buttonPressAnim.buttonName === buttonName;
+      const scale = isPressed ? 0.95 : 1.0;
+      
+      ctx.save();
+      if (isPressed) {
+        ctx.translate(b.x + b.w / 2, b.y + b.h / 2);
+        ctx.scale(scale, scale);
+        ctx.translate(-(b.x + b.w / 2), -(b.y + b.h / 2));
+      }
+      
       ctx.fillStyle = hovered ? '#fff' : '#222';
       ctx.fillRect(b.x, b.y, b.w, b.h);
       ctx.strokeStyle = '#fff';
@@ -83,10 +99,12 @@ export function render(state, ctx, interp = 0) {
       ctx.font = '18px monospace';
       ctx.textAlign = 'center';
       ctx.fillText(label, b.x + b.w / 2, b.y + b.h / 2 + 6);
+      
+      ctx.restore();
     }
 
-    drawBtn(single, '1 Player (vs CPU)', state.landingHover === 'single');
-    drawBtn(versus, '2 Players (Local)', state.landingHover === 'versus');
+    drawBtn(single, '1 Player (vs CPU)', state.landingHover === 'single', 'single');
+    drawBtn(versus, '2 Players (Local)', state.landingHover === 'versus', 'versus');
 
     // High score display on landing screen
     if (state.highScore && state.highScore.score > 0) {
@@ -126,11 +144,25 @@ export function render(state, ctx, interp = 0) {
   if (state.paused && state.gameState !== 'LANDING') {
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
     ctx.fillRect(0, 0, w, h);
+    
+    // Pulsing "PAUSED" text
+    const pulsePhase = state.pauseAnim.pulseTimer * state.pauseAnim.pulseSpeed;
+    const pulseAlpha = 0.7 + 0.3 * Math.sin(pulsePhase * Math.PI * 2);
+    const pulseScale = 1.0 + 0.05 * Math.sin(pulsePhase * Math.PI * 2);
+    
+    ctx.save();
+    ctx.globalAlpha = pulseAlpha;
+    ctx.translate(w / 2, h / 2);
+    ctx.scale(pulseScale, pulseScale);
     ctx.fillStyle = '#fff';
     ctx.font = '32px monospace';
-    ctx.fillText('PAUSED', w / 2, h / 2);
-    ctx.font = '18px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('PAUSED', 0, 0);
+    ctx.restore();
+    
     ctx.fillStyle = '#aaa';
+    ctx.font = '18px monospace';
+    ctx.textAlign = 'center';
     ctx.fillText('Player 1: W/S  |  Player 2: Arrow Up/Down', w / 2, h / 2 + 40);
     ctx.fillText('Press P or ESC to resume', w / 2, h / 2 + 70);
   }
@@ -159,6 +191,21 @@ export function render(state, ctx, interp = 0) {
   // settings overlay (drawn on top of everything else)
   if (state.showSettings) {
     drawSettingsOverlay(state, ctx, w, h);
+  }
+  
+  // Fade transition overlay (drawn last, on top of everything)
+  if (state.transitions.active) {
+    const progress = 1 - (state.transitions.timer / state.transitions.duration);
+    let alpha;
+    
+    if (state.transitions.type === 'fadeOut') {
+      alpha = progress; // 0 to 1
+    } else {
+      alpha = 1 - progress; // 1 to 0
+    }
+    
+    ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+    ctx.fillRect(0, 0, w, h);
   }
 }
 
@@ -348,6 +395,23 @@ function drawSoccerBall(ctx, ball, color) {
   }
   ctx.closePath();
   ctx.fill();
+}
+
+/**
+ * Draws particles
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {Array} particles - Array of particle objects
+ */
+function drawParticles(ctx, particles) {
+  for (const p of particles) {
+    const alpha = p.life / p.maxLife;
+    const size = 2 + alpha * 2;
+    
+    ctx.fillStyle = p.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+    ctx.fill();
+  }
 }
 
 /**

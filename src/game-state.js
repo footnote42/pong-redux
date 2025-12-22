@@ -84,6 +84,34 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
     showSettings: false,
     settingsHover: null,
     settingsTab: 'gameplay', // 'gameplay', 'audio', 'about'
+    
+    // Stage 13: Animation state for visual polish
+    transitions: {
+      active: false,
+      type: null, // 'fadeIn' | 'fadeOut'
+      duration: 0.3, // seconds
+      timer: 0,
+      fromState: null,
+      toState: null
+    },
+    buttonPressAnim: {
+      active: false,
+      buttonName: null,
+      timer: 0,
+      duration: 0.1 // seconds
+    },
+    scoreDisplay: {
+      left: 0,
+      right: 0,
+      leftTarget: 0,
+      rightTarget: 0,
+      animSpeed: 10 // points per second
+    },
+    pauseAnim: {
+      pulseTimer: 0,
+      pulseSpeed: 2.0 // Hz
+    },
+    particles: [] // Array of particle objects: {x, y, vx, vy, life, maxLife, color}
   };
 }
 
@@ -235,15 +263,64 @@ export function recordHighScore(state, score, holder = 'Player') {
 }
 
 
+/**
+ * Spawns particles at a given position
+ * @param {Object} state - Game state
+ * @param {number} x - X position
+ * @param {number} y - Y position
+ * @param {string} color - Particle color
+ * @param {number} count - Number of particles to spawn
+ */
+export function spawnParticles(state, x, y, color = '#ffffff', count = 5) {
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 50 + Math.random() * 100;
+    state.particles.push({
+      x,
+      y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 0.5, // seconds
+      maxLife: 0.5,
+      color
+    });
+  }
+}
+
+/**
+ * Triggers a button press animation
+ * @param {Object} state - Game state
+ * @param {string} buttonName - Name of the button being pressed
+ */
+export function triggerButtonPress(state, buttonName) {
+  state.buttonPressAnim.active = true;
+  state.buttonPressAnim.buttonName = buttonName;
+  state.buttonPressAnim.timer = state.buttonPressAnim.duration;
+}
+
+/**
+ * Starts a fade transition between game states
+ * @param {Object} state - Game state
+ * @param {string} fromState - Current game state
+ * @param {string} toState - Target game state
+ */
+export function startTransition(state, fromState, toState) {
+  state.transitions.active = true;
+  state.transitions.type = 'fadeOut';
+  state.transitions.timer = state.transitions.duration;
+  state.transitions.fromState = fromState;
+  state.transitions.toState = toState;
+}
+
 export function showLanding(state) {
-  state.gameState = 'LANDING';
+  startTransition(state, state.gameState, 'LANDING');
   state.showInstructions = false; // don't show instruction overlay on top of landing
   state.landingHover = null;
 }
 
 export function startPlaying(state, mode = 'versus') {
   state.gameMode = mode; // 'single' or 'versus'
-  state.gameState = 'PLAYING';
+  startTransition(state, state.gameState, 'PLAYING');
   state.showInstructions = false;
   state.landingHover = null;
   // Persist that user has seen landing so it won't show automatically again
@@ -284,6 +361,74 @@ function ensureBallNotInsidePaddles(state, maxAttempts = 5) {
 }
 
 /**
+ * Updates all visual animation timers and states
+ * @param {Object} state - Game state
+ * @param {number} dt - Delta time in seconds
+ */
+function updateAnimations(state, dt) {
+  // Update transition timer
+  if (state.transitions.active) {
+    state.transitions.timer -= dt;
+    
+    if (state.transitions.timer <= 0) {
+      if (state.transitions.type === 'fadeOut') {
+        // Switch to fade in
+        state.transitions.type = 'fadeIn';
+        state.transitions.timer = state.transitions.duration;
+        // Actually change the state
+        state.gameState = state.transitions.toState;
+      } else {
+        // Transition complete
+        state.transitions.active = false;
+        state.transitions.type = null;
+      }
+    }
+  }
+  
+  // Update button press animation
+  if (state.buttonPressAnim.active) {
+    state.buttonPressAnim.timer -= dt;
+    if (state.buttonPressAnim.timer <= 0) {
+      state.buttonPressAnim.active = false;
+      state.buttonPressAnim.buttonName = null;
+    }
+  }
+  
+  // Update score display lerping
+  if (state.scoreDisplay.leftTarget !== state.score.left) {
+    state.scoreDisplay.leftTarget = state.score.left;
+  }
+  if (state.scoreDisplay.rightTarget !== state.score.right) {
+    state.scoreDisplay.rightTarget = state.score.right;
+  }
+  
+  // Lerp displayed scores toward targets
+  const lerpSpeed = state.scoreDisplay.animSpeed * dt;
+  if (state.scoreDisplay.left < state.scoreDisplay.leftTarget) {
+    state.scoreDisplay.left = Math.min(state.scoreDisplay.left + lerpSpeed, state.scoreDisplay.leftTarget);
+  }
+  if (state.scoreDisplay.right < state.scoreDisplay.rightTarget) {
+    state.scoreDisplay.right = Math.min(state.scoreDisplay.right + lerpSpeed, state.scoreDisplay.rightTarget);
+  }
+  
+  // Update pause pulse animation
+  state.pauseAnim.pulseTimer += dt;
+  
+  // Update particles
+  for (let i = state.particles.length - 1; i >= 0; i--) {
+    const p = state.particles[i];
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vy += 300 * dt; // Gravity
+    p.life -= dt;
+    
+    if (p.life <= 0) {
+      state.particles.splice(i, 1);
+    }
+  }
+}
+
+/**
  * Main game update loop - processes all game logic for one physics step
  * 
  * Update order (critical for deterministic physics):
@@ -312,6 +457,9 @@ function ensureBallNotInsidePaddles(state, maxAttempts = 5) {
  * update(state, MS_PER_UPDATE / 1000);
  */
 export function update(state, dt) {
+  // Update animations (always run, even when paused or on other screens)
+  updateAnimations(state, dt);
+
   // Only update game when we're actively playing
   if (state.gameState !== 'PLAYING') return;
   if (state.paused || state.gameOver) return;
@@ -366,6 +514,9 @@ export function update(state, dt) {
   if (wallBounce) {
     if (state.settings.ballFlash) state.ballFlashTimer = 0.1; // 100ms flash
     soundManager.playWallBounce(); // Sound effect for wall bounce
+    // Spawn particles at wall collision
+    const wallY = ball.y < state.height / 2 ? 0 : state.height;
+    spawnParticles(state, ball.x, wallY, '#ffffff', 3);
   }
 
   // Paddle collisions
@@ -394,6 +545,8 @@ export function update(state, dt) {
       reflectFromPaddle(ball, left.y, left.h, +1);
       if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
       soundManager.playPaddleHit(); // Sound effect for paddle hit
+      // Spawn particles at paddle collision
+      spawnParticles(state, left.x + left.w, ball.y, '#00ff88', 4);
     }
     // nudge ball to front to avoid re-collision
     ball.x = left.x + left.w + ball.r;
@@ -413,6 +566,8 @@ export function update(state, dt) {
       reflectFromPaddle(ball, right.y, right.h, -1);
       if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
       soundManager.playPaddleHit(); // Sound effect for paddle hit
+      // Spawn particles at paddle collision
+      spawnParticles(state, right.x, ball.y, '#00ff88', 4);
     }
     ball.x = right.x - ball.r;
     bounceOffHorizontalEdge(ball, state.height);
@@ -423,6 +578,8 @@ export function update(state, dt) {
     reflectFromPaddle(ball, left.y, left.h, +1);
     if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
     soundManager.playPaddleHit(); // Sound effect for paddle hit
+    // Spawn particles at paddle collision
+    spawnParticles(state, left.x + left.w, ball.y, '#00ff88', 4);
     // ensure no sticking (nudge slightly out)
     ball.x = left.x + left.w + ball.r + 0.5;
     // If the ball was touching top/bottom this frame, invert vy as well (corner case)
@@ -437,6 +594,8 @@ export function update(state, dt) {
     reflectFromPaddle(ball, right.y, right.h, -1);
     if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
     soundManager.playPaddleHit(); // Sound effect for paddle hit
+    // Spawn particles at paddle collision
+    spawnParticles(state, right.x, ball.y, '#00ff88', 4);
     ball.x = right.x - ball.r - 0.5;
     if (ball.prevY - ball.r <= 0 || ball.prevY + ball.r >= state.height || ball.y - ball.r <= 0 || ball.y + ball.r >= state.height) {
       ball.vy = -ball.vy;
