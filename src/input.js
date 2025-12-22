@@ -324,6 +324,7 @@ function handleSettingsClick(x, y, state) {
 function handleGameplayClick(x, y, state, panelX, panelY) {
   const contentY = panelY + 80 + 36 + 20;
   let yPos = contentY + 50;
+  console.log('[DEBUG] handleGameplayClick:', { x, y, panelX, panelY, contentY, yPos });
 
   // Difficulty buttons
   const difficulties = ['easy', 'medium', 'hard'];

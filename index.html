@@ -12,6 +12,17 @@
     import { createGame } from './src/main.js';
 
     const canvas = document.getElementById('gameCanvas');
+    if (!canvas) {
+      console.error('Canvas element not found');
+      throw new Error('Failed to initialize game: canvas element missing');
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Failed to get 2D context');
+      throw new Error('Canvas 2D context not supported');
+    }
+
     const game = createGame(canvas);
 
     // Start the game (landing screen will be shown if first time)

@@ -18,7 +18,7 @@ export function createInitialState(width = 800, height = 600) {
       const h = window.localStorage.getItem('pong:highScore');
       if (h) persistedHigh = JSON.parse(h);
     } catch (e) {
-      // ignore parse errors
+      console.warn('Failed to load settings from localStorage:', e);
     }
   }
 
@@ -108,7 +108,7 @@ function persistSettings(state) {
       const s = JSON.stringify(state.settings);
       window.localStorage.setItem('pong:settings', s);
     } catch (e) {
-      // noop
+      console.warn('Failed to save settings to localStorage:', e);
     }
   }
 }
@@ -120,7 +120,7 @@ export function recordHighScore(state, score, holder = 'Player') {
       try {
         window.localStorage.setItem('pong:highScore', JSON.stringify(state.highScore));
       } catch (e) {
-        // noop
+        console.warn('Failed to save high score to localStorage:', e);
       }
     }
   }
