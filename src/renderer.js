@@ -83,12 +83,12 @@ export function render(state, ctx, interp = 0) {
     ctx.font = '48px monospace';
     ctx.fillText('PONG REDUX', w / 2, h * 0.25);
 
-    // Buttons
+    // Buttons - moved up to make room for rugby buttons
     const btnW = UI.BUTTON_WIDTH;
     const btnH = UI.BUTTON_HEIGHT;
     const gap = 40;
     const cx = w / 2;
-    const y = h * 0.5 - btnH / 2;
+    const y = h * 0.42 - btnH / 2; // Moved up from 0.5 to 0.42
     const single = { x: cx - btnW - gap / 2, y, w: btnW, h: btnH };
     const versus = { x: cx + gap / 2, y, w: btnW, h: btnH };
 
