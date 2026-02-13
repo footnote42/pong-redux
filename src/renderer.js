@@ -65,6 +65,11 @@ export function render(state, ctx, interp = 0) {
     ctx.textAlign = 'center';
   }
 
+  // Rugby mode: Draw rugby-specific UI
+  if (state.rugbyMode?.enabled && state.gameState === 'PLAYING') {
+    drawRugbyUI(ctx, state);
+  }
+
   // settings icon (top-right corner) - aligned with click area from input.js
   drawSettingsIcon(ctx, w - 64 + 24, 8 + 24, 24, state.settingsHover === 'settings' || state.showSettings);
 
@@ -494,6 +499,45 @@ function drawGoalPost(ctx, goalPost, canvasWidth) {
   // Draw center marker (optional - helps visualize the zone)
   ctx.fillStyle = `rgba(255, 215, 0, ${fillAlpha * 0.5})`;
   ctx.fillRect(0, goalPost.y - 2, canvasWidth, 4);
+}
+
+/**
+ * Draw rugby mode UI (multiplier, rally count, timer)
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {Object} state - Game state
+ */
+function drawRugbyUI(ctx, state) {
+  const rm = state.rugbyMode;
+  const rs = state.rugbySettings;
+
+  // Draw multiplier (top center)
+  ctx.fillStyle = '#FFD700'; // Gold
+  ctx.font = 'bold 24px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${rm.multiplier}x MULTIPLIER`, state.width / 2, 40);
+
+  // Draw rally count (below multiplier)
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '16px monospace';
+  ctx.fillText(`Rally: ${rm.rallyCount}`, state.width / 2, 65);
+
+  // Draw timer (top right)
+  const timeRemaining = Math.max(0, rs.timeLimit - rs.elapsedTime);
+  const minutes = Math.floor(timeRemaining / 60);
+  const seconds = Math.floor(timeRemaining % 60);
+  ctx.textAlign = 'right';
+  ctx.font = '18px monospace';
+
+  // Color timer red if less than 30 seconds
+  ctx.fillStyle = timeRemaining < 30 ? '#FF4444' : '#FFFFFF';
+  ctx.fillText(`${minutes}:${seconds.toString().padStart(2, '0')}`, state.width - 20, 40);
+
+  // Draw goal post countdown if active
+  if (rm.goalPost.active) {
+    ctx.fillStyle = '#FFD700';
+    ctx.font = '14px monospace';
+    ctx.fillText(`Goal Post: ${rm.goalPost.timer.toFixed(1)}s`, state.width - 20, 65);
+  }
 }
 
 /**
