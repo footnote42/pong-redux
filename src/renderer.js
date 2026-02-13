@@ -646,6 +646,9 @@ function drawSettingsOverlay(state, ctx, w, h) {
 
   // Tabs
   const tabs = ['gameplay', 'custom', 'audio', 'about'];
+  if (state.rugbyMode?.enabled) {
+    tabs.splice(2, 0, 'rugby'); // Insert before 'about'
+  }
   const tabW = UI.TAB_WIDTH;
   const tabH = UI.TAB_HEIGHT;
   const tabY = panelY + 80;
@@ -677,6 +680,8 @@ function drawSettingsOverlay(state, ctx, w, h) {
     drawGameplaySettings(state, ctx, w, h, panelX, contentY, panelW, contentH);
   } else if (state.settingsTab === 'custom') {
     drawCustomizationSettings(state, ctx, w, h, panelX, contentY, panelW, contentH);
+  } else if (state.settingsTab === 'rugby') {
+    drawRugbySettings(state, ctx, w, h, panelX, contentY, panelW, contentH);
   } else if (state.settingsTab === 'audio') {
     drawAudioSettings(state, ctx, w, h, panelX, contentY, panelW, contentH);
   } else if (state.settingsTab === 'about') {
@@ -1014,6 +1019,76 @@ function drawAudioSettings(state, ctx, w, h, panelX, contentY, panelW, contentH)
     ctx.font = '16px monospace';
     ctx.textAlign = 'left';
     ctx.fillText('(Enable sound to adjust volume)', panelX + 40, y);
+  }
+}
+
+function drawRugbySettings(state, ctx, w, h, panelX, contentY, panelW, contentH) {
+  let y = contentY + 20;
+  ctx.textAlign = 'left';
+  ctx.font = '18px monospace';
+
+  // Target Score Section
+  ctx.fillStyle = '#fff';
+  ctx.fillText('Target Score:', panelX + 40, y);
+  y += 30;
+
+  const targetScores = [25, 50, 75, 100];
+  const scoreBoxW = 60;
+  const scoreBoxH = 36;
+  const scoreSpacing = 70;
+  const contentX = panelX + 40;
+
+  for (let i = 0; i < targetScores.length; i++) {
+    const score = targetScores[i];
+    const boxX = contentX + i * scoreSpacing;
+    const isSelected = state.rugbySettings.targetScore === score;
+
+    ctx.fillStyle = isSelected ? '#00ff88' : '#333333';
+    ctx.fillRect(boxX, y, scoreBoxW, scoreBoxH);
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(boxX, y, scoreBoxW, scoreBoxH);
+
+    ctx.fillStyle = '#fff';
+    ctx.font = '16px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(score.toString(), boxX + scoreBoxW / 2, y + scoreBoxH / 2 + 6);
+  }
+
+  y += scoreBoxH + 60;
+
+  // Time Limit Section
+  ctx.textAlign = 'left';
+  ctx.font = '18px monospace';
+  ctx.fillStyle = '#fff';
+  ctx.fillText('Time Limit:', panelX + 40, y);
+  y += 30;
+
+  const timeLimits = [
+    { label: '2 min', value: 120 },
+    { label: '3 min', value: 180 },
+    { label: '5 min', value: 300 },
+    { label: '10 min', value: 600 }
+  ];
+  const timeBoxW = 70;
+  const timeBoxH = 36;
+  const timeSpacing = 80;
+
+  for (let i = 0; i < timeLimits.length; i++) {
+    const timeLimit = timeLimits[i];
+    const boxX = contentX + i * timeSpacing;
+    const isSelected = state.rugbySettings.timeLimit === timeLimit.value;
+
+    ctx.fillStyle = isSelected ? '#00ff88' : '#333333';
+    ctx.fillRect(boxX, y, timeBoxW, timeBoxH);
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(boxX, y, timeBoxW, timeBoxH);
+
+    ctx.fillStyle = '#fff';
+    ctx.font = '14px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(timeLimit.label, boxX + timeBoxW / 2, y + timeBoxH / 2 + 5);
   }
 }
 
