@@ -73,3 +73,26 @@ export const AUDIO = {
   VOLUME_MIN: 0,
   VOLUME_MAX: 100
 };
+
+export const RUGBY = {
+  SPIN_DECAY_RATE: 0.98,           // Spin multiplier per second
+  SPIN_SNAP_THRESHOLD: 0.01,       // Snap to zero below this value
+  MAX_BOUNCE_VARIANCE_DEG: 20,     // Max bounce angle variance in degrees
+  MOMENTUM_FACTOR_DIVISOR: 1000,   // Paddle velocity divisor for momentum
+  MAX_BALL_SPEED_MULTIPLIER: 2.5,  // Cap ball speed at 2.5x base
+  SPIN_GAIN_FACTOR: 0.5,           // Spin gain multiplier
+  GOAL_POST_HEIGHT: 120,           // Goal post zone height in pixels
+  GOAL_POST_DURATION: 5.0,         // Active duration in seconds
+  GOAL_POST_SPAWN_MIN: 8,          // Min spawn timer in seconds
+  GOAL_POST_SPAWN_MAX: 12,         // Max spawn timer in seconds
+  GOAL_POST_BONUS_BASE: 10,        // Base bonus points for hitting goal post
+  RALLY_THRESHOLDS: {              // Rally count → multiplier thresholds
+    MULT_2X: 3,
+    MULT_3X: 6,
+    MULT_5X: 10
+  },
+  TARGET_SCORES: [25, 50, 75, 100], // Available target scores
+  TIME_LIMITS: [120, 180, 300, 600], // Available time limits (seconds)
+  DEFAULT_TARGET_SCORE: 50,
+  DEFAULT_TIME_LIMIT: 180
+};
