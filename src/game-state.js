@@ -690,6 +690,14 @@ export function update(state, dt) {
     } else {
       // reflect based on hit location - ball should go right after hitting left paddle
       reflectFromPaddle(ball, left.y, left.h, +1);
+
+      // Rugby mode: apply momentum impact and update rally
+      if (state.rugbyMode?.enabled) {
+        const hitOffset = (ball.y - left.y) / (left.h / 2); // -1 to +1
+        rugby.applyMomentumImpact(ball, left, hitOffset);
+        rugby.updateRallyMultiplier(state);
+      }
+
       if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
       soundManager.playPaddleHit(); // Sound effect for paddle hit
       // Spawn particles at paddle collision
@@ -711,6 +719,14 @@ export function update(state, dt) {
       }
     } else {
       reflectFromPaddle(ball, right.y, right.h, -1);
+
+      // Rugby mode: apply momentum impact and update rally
+      if (state.rugbyMode?.enabled) {
+        const hitOffset = (ball.y - right.y) / (right.h / 2); // -1 to +1
+        rugby.applyMomentumImpact(ball, right, hitOffset);
+        rugby.updateRallyMultiplier(state);
+      }
+
       if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
       soundManager.playPaddleHit(); // Sound effect for paddle hit
       // Spawn particles at paddle collision
@@ -723,6 +739,14 @@ export function update(state, dt) {
     const res = resolveCircleRectPenetration(ball, left);
     // reflect based on hit location - ball should go right after hitting left paddle
     reflectFromPaddle(ball, left.y, left.h, +1);
+
+    // Rugby mode: apply momentum impact and update rally
+    if (state.rugbyMode?.enabled) {
+      const hitOffset = (ball.y - left.y) / (left.h / 2);
+      rugby.applyMomentumImpact(ball, left, hitOffset);
+      rugby.updateRallyMultiplier(state);
+    }
+
     if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
     soundManager.playPaddleHit(); // Sound effect for paddle hit
     // Spawn particles at paddle collision
@@ -739,6 +763,14 @@ export function update(state, dt) {
     const res = resolveCircleRectPenetration(ball, right);
     // reflect to left
     reflectFromPaddle(ball, right.y, right.h, -1);
+
+    // Rugby mode: apply momentum impact and update rally
+    if (state.rugbyMode?.enabled) {
+      const hitOffset = (ball.y - right.y) / (right.h / 2);
+      rugby.applyMomentumImpact(ball, right, hitOffset);
+      rugby.updateRallyMultiplier(state);
+    }
+
     if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
     soundManager.playPaddleHit(); // Sound effect for paddle hit
     // Spawn particles at paddle collision
