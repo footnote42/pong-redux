@@ -458,6 +458,16 @@ export function showLanding(state) {
   startTransition(state, state.gameState, 'LANDING');
   state.showInstructions = false; // don't show instruction overlay on top of landing
   state.landingHover = null;
+
+  // Reset rugby state when returning to landing
+  if (state.rugbyMode) {
+    state.rugbyMode.enabled = false;
+    state.rugbyMode.spin = 0;
+    state.rugbyMode.rallyCount = 0;
+    state.rugbyMode.multiplier = 1;
+    state.rugbyMode.goalPost.active = false;
+    if (state.ball) state.ball.spin = 0;
+  }
 }
 
 export function startPlaying(state, mode = 'versus') {
