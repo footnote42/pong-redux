@@ -19,7 +19,7 @@ function getLandingButtons(state) {
   const btnH = 60;
   const gap = 40;
   const cx = w / 2;
-  const y = h * 0.5;
+  const y = h * 0.30;
   // settings gear rect (top-right)
   const gear = { x: w - 64, y: 8, w: 48, h: 48 };
   return {
@@ -206,14 +206,22 @@ export function attachInputHandlers(state, canvas = null) {
           if (rugbySingle && pointInRect(x, y, rugbySingle)) {
             triggerButtonPress(_state, 'rugby-single');
             soundManager.playUIClick();
-            startRugbyMode(_state, 'rugby-single');
+            try {
+              startRugbyMode(_state, 'rugby-single');
+            } catch (e) {
+              console.error('Failed to start Rugby Single:', e);
+            }
             return;
           }
 
           if (rugbyVersus && pointInRect(x, y, rugbyVersus)) {
             triggerButtonPress(_state, 'rugby-versus');
             soundManager.playUIClick();
-            startRugbyMode(_state, 'rugby-versus');
+            try {
+              startRugbyMode(_state, 'rugby-versus');
+            } catch (e) {
+              console.error('Failed to start Rugby Versus:', e);
+            }
             return;
           }
         }
@@ -249,6 +257,9 @@ function detectSettingsHover(x, y, state) {
 
   // Check tabs
   const tabs = ['gameplay', 'custom', 'audio', 'about'];
+  if (state.rugbyMode?.enabled) {
+    tabs.splice(2, 0, 'rugby');
+  }
   const tabW = UI.TAB_WIDTH;
   const tabH = UI.TAB_HEIGHT;
   const tabY = panelY + 80;
@@ -362,13 +373,13 @@ function detectGameplayHover(x, y, state, panelX, panelY) {
     yPos += styleBoxH + 60;
     const colorBoxSize = 40;
     const labelWidth = 120;
-    
+
     // Left paddle color box
     const leftColorBoxX = panelX + 40 + labelWidth;
     if (pointInRect(x, y, { x: leftColorBoxX, y: yPos, w: colorBoxSize, h: colorBoxSize })) {
       return 'leftPaddleColor';
     }
-    
+
     // Right paddle color box
     const rightColorBoxX = panelX + 40 + 240 + labelWidth;
     if (pointInRect(x, y, { x: rightColorBoxX, y: yPos, w: colorBoxSize, h: colorBoxSize })) {
@@ -427,6 +438,9 @@ function handleSettingsClick(x, y, state) {
 
   // Check tabs
   const tabs = ['gameplay', 'custom', 'audio', 'about'];
+  if (state.rugbyMode?.enabled) {
+    tabs.splice(2, 0, 'rugby');
+  }
   const tabW = UI.TAB_WIDTH;
   const tabH = UI.TAB_HEIGHT;
   const tabY = panelY + 80;
@@ -552,14 +566,14 @@ function handleGameplayClick(x, y, state, panelX, panelY) {
     yPos += styleBoxH + 60;
     const colorBoxSize = 40;
     const labelWidth = 120;
-    
+
     // Left paddle color box
     const leftColorBoxX = panelX + 40 + labelWidth;
     if (pointInRect(x, y, { x: leftColorBoxX, y: yPos, w: colorBoxSize, h: colorBoxSize })) {
       setLeftPaddleColor(state, cycleColor(state.settings.leftPaddleColor));
       return;
     }
-    
+
     // Right paddle color box
     const rightColorBoxX = panelX + 40 + 240 + labelWidth;
     if (pointInRect(x, y, { x: rightColorBoxX, y: yPos, w: colorBoxSize, h: colorBoxSize })) {
@@ -599,7 +613,7 @@ function cycleColor(currentColor) {
     '#8800ff', // Purple
     '#00ff88', // Teal
   ];
-  
+
   const currentIndex = colors.indexOf(currentColor);
   const nextIndex = (currentIndex + 1) % colors.length;
   return colors[nextIndex];

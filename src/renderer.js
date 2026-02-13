@@ -81,14 +81,14 @@ export function render(state, ctx, interp = 0) {
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
     ctx.font = '48px monospace';
-    ctx.fillText('PONG REDUX', w / 2, h * 0.25);
+    ctx.fillText('PONG REDUX', w / 2, h * 0.15);
 
     // Buttons - moved up to make room for rugby buttons
     const btnW = UI.BUTTON_WIDTH;
     const btnH = UI.BUTTON_HEIGHT;
     const gap = 40;
     const cx = w / 2;
-    const y = h * 0.42 - btnH / 2; // Moved up from 0.5 to 0.42
+    const y = h * 0.30 - btnH / 2; // Moved up to 0.30
     const single = { x: cx - btnW - gap / 2, y, w: btnW, h: btnH };
     const versus = { x: cx + gap / 2, y, w: btnW, h: btnH };
 
@@ -123,7 +123,7 @@ export function render(state, ctx, interp = 0) {
     // Rugby mode buttons
     const rugbySingleBtn = {
       x: cx - btnW / 2,
-      y: versus.y + btnH + gap + 20, // Extra gap after regular modes
+      y: versus.y + btnH + 20, // Reduced gap
       w: btnW,
       h: btnH,
       text: 'Rugby Mode (1P)',
@@ -132,7 +132,7 @@ export function render(state, ctx, interp = 0) {
 
     const rugbyVersusBtn = {
       x: cx - btnW / 2,
-      y: rugbySingleBtn.y + btnH + gap,
+      y: rugbySingleBtn.y + btnH + 20, // Reduced gap
       w: btnW,
       h: btnH,
       text: 'Rugby Mode (2P)',
@@ -158,17 +158,17 @@ export function render(state, ctx, interp = 0) {
     if (state.highScore && state.highScore.score > 0) {
       ctx.fillStyle = '#aaa';
       ctx.font = '16px monospace';
-      ctx.fillText(`High Score: ${state.highScore.score} (${state.highScore.holder || '---'})`, w / 2, h * 0.65 + 40);
+      ctx.fillText(`High Score: ${state.highScore.score} (${state.highScore.holder || '---'})`, w / 2, h * 0.80);
     }
 
     ctx.fillStyle = '#aaa';
     ctx.font = '16px monospace';
-    ctx.fillText('Press 1 or 2, or click a button to start', w / 2, h * 0.75);
+    ctx.fillText('Press 1 or 2, or click a button to start', w / 2, h * 0.90);
 
     // Small settings hint
     ctx.fillStyle = '#666';
     ctx.font = '12px monospace';
-    ctx.fillText('Open Settings: Tab or click gear', w / 2, h * 0.82);
+    ctx.fillText('Open Settings: Tab or click gear', w / 2, h * 0.95);
   }
 
   // instructions overlay (first-time) - only show if not on landing
