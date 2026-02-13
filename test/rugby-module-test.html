@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rugby Module Tests</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #00ff00;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #333;
+      background: #0a0a0a;
+    }
+    .pass { color: #00ff00; }
+    .fail { color: #ff0000; }
+    h2 { color: #00aaff; }
+    h3 { color: #ffaa00; }
+    pre {
+      background: #000;
+      padding: 10px;
+      border-left: 3px solid #00ff00;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rugby Module Tests</h1>
+  <div id="output"></div>
+
+  <script type="module">
+    import {
+      calculateSpinGain,
+      updateSpin,
+      applySpinToBounce,
+      updatePaddleVelocity,
+      applyMomentumImpact,
+      spawnGoalPost,
+      updateGoalPost,
+      checkGoalPostHit,
+      updateRallyMultiplier,
+      resetRally,
+      calculateGoalPostBonus,
+      calculateScore
+    } from '../src/rugby.js';
+
+    import { BALL, RUGBY } from '../src/constants.js';
+
+    const output = document.getElementById('output');
+
+    function log(html) {
+      output.innerHTML += html;
+    }
+
+    function testSection(title) {
+      log(`<div class="test-section"><h2>${title}</h2>`);
+    }
+
+    function endSection() {
+      log('</div>');
+    }
+
+    function assert(condition, message) {
+      const status = condition ? '<span class="pass">✓ PASS</span>' : '<span class="fail">✗ FAIL</span>';
+      log(`<div>${status}: ${message}</div>`);
+      return condition;
+    }
+
+    function assertClose(actual, expected, tolerance, message) {
+      const diff = Math.abs(actual - expected);
+      const passed = diff <= tolerance;
+      const status = passed ? '<span class="pass">✓ PASS</span>' : '<span class="fail">✗ FAIL</span>';
+      log(`<div>${status}: ${message} (expected: ${expected.toFixed(4)}, got: ${actual.toFixed(4)}, diff: ${diff.toFixed(6)})</div>`);
+      return passed;
+    }
+
+    // TEST 1: Spin Calculation
+    testSection('Test 1: Spin Calculation');
+    log('<h3>Testing calculateSpinGain()</h3>');
+
+    // Normalized: velocity 100 / 1000 = 0.1, * 0.5 offset * 0.5 factor = 0.025 spin gain
+    let spin = calculateSpinGain(100, 0.5, 0);
+    const expected0 = (100 / 1000) * 0.5 * RUGBY.SPIN_GAIN_FACTOR;
+    assertClose(spin, expected0, 0.0001, `Spin gain from velocity=100, offset=0.5`);
+
+    // Normalized: velocity 200 / 1000 = 0.2, * -0.3 offset * 0.5 factor = -0.03, + 0.2 = 0.17
+    spin = calculateSpinGain(200, -0.3, 0.2);
+    const expected1 = 0.2 + ((200 / 1000) * -0.3 * RUGBY.SPIN_GAIN_FACTOR);
+    assertClose(spin, expected1, 0.0001, `Spin with current=0.2`);
+
+    // Clamping tests
+    spin = calculateSpinGain(5000, 1.0, 0);
+    assert(spin === 1.0, `Spin clamped to max: ${spin} (expected 1.0)`);
+
+    spin = calculateSpinGain(-5000, 1.0, 0);
+    assert(spin === -1.0, `Spin clamped to min: ${spin} (expected -1.0)`);
+
+    endSection();
+
+    // TEST 2: Spin Decay
+    testSection('Test 2: Spin Decay');
+    log('<h3>Testing updateSpin()</h3>');
+
+    const rugbyMode = { spin: 0.5 };
+    const ball = {};
+
+    updateSpin(ball, rugbyMode, 1.0);
+    const expectedDecay = 0.5 * Math.pow(RUGBY.SPIN_DECAY_RATE, 1.0);
+    assertClose(rugbyMode.spin, expectedDecay, 0.0001, 'Spin decay after 1 second');
+
+    rugbyMode.spin = 0.005;
+    updateSpin(ball, rugbyMode, 1.0);
+    assert(rugbyMode.spin === 0, `Spin snapped to zero: ${rugbyMode.spin}`);
+
+    endSection();
+
+    // TEST 3: Bounce Variance
+    testSection('Test 3: Bounce Variance');
+    log('<h3>Testing applySpinToBounce()</h3>');
+
+    const baseAngle = 0;
+    const maxVarianceRad = (RUGBY.MAX_BOUNCE_VARIANCE_DEG * Math.PI) / 180;
+
+    let angle = applySpinToBounce(baseAngle, 1.0);
+    assertClose(angle, maxVarianceRad, 0.0001, 'Max positive spin variance');
+
+    angle = applySpinToBounce(baseAngle, -1.0);
+    assertClose(angle, -maxVarianceRad, 0.0001, 'Max negative spin variance');
+
+    angle = applySpinToBounce(baseAngle, 0);
+    assert(angle === 0, `No variance with zero spin: ${angle}`);
+
+    angle = applySpinToBounce(Math.PI / 4, 0.5);
+    const expectedAngle = Math.PI / 4 + (0.5 * maxVarianceRad);
+    assertClose(angle, expectedAngle, 0.0001, 'Partial spin with base angle');
+
+    endSection();
+
+    // TEST 4: Paddle Velocity Tracking
+    testSection('Test 4: Paddle Velocity Tracking');
+    log('<h3>Testing updatePaddleVelocity()</h3>');
+
+    const paddle = { y: 300 };
+
+    updatePaddleVelocity(paddle, 0.016);
+    assert(paddle.prevY === 300, `Initial prevY: ${paddle.prevY}`);
+    assert(paddle.velocity === 0, `Initial velocity: ${paddle.velocity}`);
+
+    paddle.y = 320;
+    updatePaddleVelocity(paddle, 0.016);
+    const expectedVel = (320 - 300) / 0.016;
+    assertClose(paddle.velocity, expectedVel, 0.01, 'Velocity after movement');
+    assert(paddle.prevY === 320, `Updated prevY: ${paddle.prevY}`);
+
+    endSection();
+
+    // TEST 5: Momentum Impact
+    testSection('Test 5: Momentum Impact');
+    log('<h3>Testing applyMomentumImpact()</h3>');
+
+    const testBall = { vx: 200, vy: 0, speed: 200 };
+    const testPaddle = { velocity: 500 };
+
+    applyMomentumImpact(testBall, testPaddle, 0.5);
+    const speedAfter = Math.hypot(testBall.vx, testBall.vy);
+    assert(speedAfter > 200, `Ball speed increased: ${speedAfter.toFixed(1)} > 200`);
+
+    // Test speed cap
+    const fastBall = { vx: 400, vy: 0, speed: 200 };
+    const fastPaddle = { velocity: 2000 };
+    applyMomentumImpact(fastBall, fastPaddle, 0.5);
+    const cappedSpeed = Math.hypot(fastBall.vx, fastBall.vy);
+    const maxSpeed = BALL.DEFAULT_SPEED * RUGBY.MAX_BALL_SPEED_MULTIPLIER;
+    assert(cappedSpeed <= maxSpeed, `Speed capped at ${maxSpeed}: ${cappedSpeed.toFixed(1)}`);
+
+    endSection();
+
+    // TEST 6: Goal Post Spawning
+    testSection('Test 6: Goal Post Spawning');
+    log('<h3>Testing spawnGoalPost()</h3>');
+
+    const state = {
+      width: 800,
+      height: 600,
+      rugbyMode: {
+        goalPost: {
+          active: false,
+          y: 0,
+          height: RUGBY.GOAL_POST_HEIGHT,
+          timer: 0,
+          spawnTimer: 0
+        }
+      }
+    };
+
+    log('<pre>Spawning 10 goal posts to verify random Y positions:\n');
+    for (let i = 0; i < 10; i++) {
+      spawnGoalPost(state);
+      const gp = state.rugbyMode.goalPost;
+      const padding = BALL.DEFAULT_RADIUS * 2;
+      const minY = padding + gp.height / 2;
+      const maxY = state.height - padding - gp.height / 2;
+      log(`  #${i + 1}: y=${gp.y.toFixed(1)} (bounds: ${minY.toFixed(1)}-${maxY.toFixed(1)})`);
+      assert(gp.y >= minY && gp.y <= maxY, `Y within bounds`);
+      assert(gp.active === true, `Goal post active`);
+      assert(gp.timer === RUGBY.GOAL_POST_DURATION, `Timer set to ${RUGBY.GOAL_POST_DURATION}s`);
+      log('\n');
+    }
+    log('</pre>');
+
+    endSection();
+
+    // TEST 7: Goal Post Lifecycle
+    testSection('Test 7: Goal Post Lifecycle');
+    log('<h3>Testing updateGoalPost()</h3>');
+
+    state.rugbyMode.goalPost.active = true;
+    state.rugbyMode.goalPost.timer = 2.0;
+
+    updateGoalPost(state, 1.0);
+    assert(state.rugbyMode.goalPost.timer === 1.0, `Timer countdown: ${state.rugbyMode.goalPost.timer}s`);
+
+    updateGoalPost(state, 1.5);
+    assert(state.rugbyMode.goalPost.active === false, `Goal post deactivated after expiry`);
+    assert(state.rugbyMode.goalPost.spawnTimer >= RUGBY.GOAL_POST_SPAWN_MIN,
+      `Spawn timer set: ${state.rugbyMode.goalPost.spawnTimer.toFixed(1)}s >= ${RUGBY.GOAL_POST_SPAWN_MIN}s`);
+    assert(state.rugbyMode.goalPost.spawnTimer <= RUGBY.GOAL_POST_SPAWN_MAX,
+      `Spawn timer set: ${state.rugbyMode.goalPost.spawnTimer.toFixed(1)}s <= ${RUGBY.GOAL_POST_SPAWN_MAX}s`);
+
+    const spawnTime = state.rugbyMode.goalPost.spawnTimer;
+    updateGoalPost(state, spawnTime + 0.1);
+    assert(state.rugbyMode.goalPost.active === true, `Goal post respawned after timer`);
+
+    endSection();
+
+    // TEST 8: Goal Post Collision Detection
+    testSection('Test 8: Goal Post Collision Detection');
+    log('<h3>Testing checkGoalPostHit()</h3>');
+
+    state.rugbyMode.goalPost.active = true;
+    state.rugbyMode.goalPost.y = 300;
+    state.rugbyMode.goalPost.height = RUGBY.GOAL_POST_HEIGHT;
+
+    // Ball in zone, crossed left boundary
+    let testBall2 = { x: 5, y: 300, r: 6 };
+    let hit = checkGoalPostHit(state, testBall2);
+    assert(hit === true, `Hit detected: ball at (5, 300) in zone at y=300`);
+
+    // Ball in zone, crossed right boundary
+    testBall2 = { x: 795, y: 300, r: 6 };
+    hit = checkGoalPostHit(state, testBall2);
+    assert(hit === true, `Hit detected: ball at (795, 300) in zone at y=300`);
+
+    // Ball in zone, NOT at boundary
+    testBall2 = { x: 400, y: 300, r: 6 };
+    hit = checkGoalPostHit(state, testBall2);
+    assert(hit === false, `No hit: ball at (400, 300) not at boundary`);
+
+    // Ball at boundary, NOT in zone
+    testBall2 = { x: 5, y: 100, r: 6 };
+    hit = checkGoalPostHit(state, testBall2);
+    assert(hit === false, `No hit: ball at (5, 100) outside zone at y=300`);
+
+    // Goal post inactive
+    state.rugbyMode.goalPost.active = false;
+    testBall2 = { x: 5, y: 300, r: 6 };
+    hit = checkGoalPostHit(state, testBall2);
+    assert(hit === false, `No hit: goal post inactive`);
+
+    endSection();
+
+    // TEST 9: Rally Multiplier Progression
+    testSection('Test 9: Rally Multiplier Progression');
+    log('<h3>Testing updateRallyMultiplier()</h3>');
+
+    state.rugbyMode.rallyCount = 0;
+    state.rugbyMode.multiplier = 1;
+
+    log('<pre>Rally progression test (15 hits):\n');
+    for (let i = 0; i < 15; i++) {
+      updateRallyMultiplier(state);
+      const expectedMult =
+        state.rugbyMode.rallyCount >= RUGBY.RALLY_THRESHOLDS.MULT_5X ? 5 :
+        state.rugbyMode.rallyCount >= RUGBY.RALLY_THRESHOLDS.MULT_3X ? 3 :
+        state.rugbyMode.rallyCount >= RUGBY.RALLY_THRESHOLDS.MULT_2X ? 2 : 1;
+      log(`  Hit ${i + 1}: rally=${state.rugbyMode.rallyCount}, mult=${state.rugbyMode.multiplier}x (expected ${expectedMult}x)\n`);
+      assert(state.rugbyMode.multiplier === expectedMult, `Multiplier correct`);
+    }
+    log('</pre>');
+
+    endSection();
+
+    // TEST 10: Rally Reset
+    testSection('Test 10: Rally Reset & Score Calculation');
+    log('<h3>Testing resetRally()</h3>');
+
+    state.rugbyMode.rallyCount = 15;
+    state.rugbyMode.multiplier = 5;
+
+    resetRally(state);
+    assert(state.rugbyMode.rallyCount === 0, `Rally count reset: ${state.rugbyMode.rallyCount}`);
+    assert(state.rugbyMode.multiplier === 1, `Multiplier reset: ${state.rugbyMode.multiplier}x`);
+
+    log('<h3>Testing calculateGoalPostBonus()</h3>');
+    let bonus = calculateGoalPostBonus(1);
+    assert(bonus === RUGBY.GOAL_POST_BONUS_BASE, `Base bonus: ${bonus} = ${RUGBY.GOAL_POST_BONUS_BASE}`);
+
+    bonus = calculateGoalPostBonus(3);
+    assert(bonus === RUGBY.GOAL_POST_BONUS_BASE * 3, `3x multiplier bonus: ${bonus} = ${RUGBY.GOAL_POST_BONUS_BASE * 3}`);
+
+    log('<h3>Testing calculateScore()</h3>');
+    let score = calculateScore(1, 1, false);
+    assert(score === 1, `Base score (1pt, 1x, no GP): ${score}`);
+
+    score = calculateScore(1, 3, false);
+    assert(score === 3, `Multiplied score (1pt, 3x, no GP): ${score}`);
+
+    score = calculateScore(1, 3, true);
+    const expectedScore = 3 + (RUGBY.GOAL_POST_BONUS_BASE * 3);
+    assert(score === expectedScore, `Score with GP bonus (1pt, 3x, GP): ${score} = ${expectedScore}`);
+
+    endSection();
+
+    // Summary
+    testSection('Test Summary');
+    log('<h3>All Tests Complete!</h3>');
+    log('<p>Check console for detailed logs from rugby module functions.</p>');
+    endSection();
+  </script>
+</body>
+</html>
