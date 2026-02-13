@@ -95,23 +95,26 @@ export function applyMomentumImpact(ball, paddle, hitOffset) {
 }
 
 /**
- * Spawns a goal post at a random vertical position
+ * Spawns a goal post at a random position on the field
  * @param {Object} state - Game state with rugbyMode.goalPost properties
  */
 export function spawnGoalPost(state) {
   const gp = state.rugbyMode.goalPost;
+  const padding = 100; // Keep away from edges and paddles
 
   // Calculate spawn bounds with padding
-  const padding = BALL.DEFAULT_RADIUS * 2;
-  const minY = padding + gp.height / 2;
-  const maxY = state.height - padding - gp.height / 2;
+  const minX = padding;
+  const maxX = state.width - padding;
+  const minY = padding;
+  const maxY = state.height - padding;
 
-  // Set random Y position
+  // Set random X and Y position
+  gp.x = minX + Math.random() * (maxX - minX);
   gp.y = minY + Math.random() * (maxY - minY);
   gp.active = true;
   gp.timer = RUGBY.GOAL_POST_DURATION;
 
-  console.log(`[Rugby] Goal post spawned at y=${gp.y.toFixed(1)}, duration=${gp.timer}s`);
+  console.log(`[Rugby] Goal post spawned at (${gp.x.toFixed(1)}, ${gp.y.toFixed(1)}), duration=${gp.timer}s`);
 }
 
 /**
@@ -129,9 +132,16 @@ export function updateGoalPost(state, dt) {
     if (gp.timer <= 0) {
       // Deactivate and set random spawn timer
       gp.active = false;
-      gp.spawnTimer = RUGBY.GOAL_POST_SPAWN_MIN +
-                      Math.random() * (RUGBY.GOAL_POST_SPAWN_MAX - RUGBY.GOAL_POST_SPAWN_MIN);
-      console.log(`[Rugby] Goal post expired, next spawn in ${gp.spawnTimer.toFixed(1)}s`);
+
+      // Check if goal posts are disabled (Infinity spawn timers)
+      if (RUGBY.GOAL_POST_SPAWN_MIN === Infinity) {
+        gp.spawnTimer = Infinity; // Keep disabled
+        console.log(`[Rugby] Goal post expired, feature disabled`);
+      } else {
+        gp.spawnTimer = RUGBY.GOAL_POST_SPAWN_MIN +
+          Math.random() * (RUGBY.GOAL_POST_SPAWN_MAX - RUGBY.GOAL_POST_SPAWN_MIN);
+        console.log(`[Rugby] Goal post expired, next spawn in ${gp.spawnTimer.toFixed(1)}s`);
+      }
     }
   } else {
     // Countdown spawn timer
@@ -144,7 +154,7 @@ export function updateGoalPost(state, dt) {
 }
 
 /**
- * Checks if ball hit the goal post zone
+ * Checks if ball hit the goal post
  * @param {Object} state - Game state with rugbyMode.goalPost properties
  * @param {Object} ball - Ball object with x, y, r properties
  * @returns {boolean} True if goal post was hit
@@ -155,13 +165,14 @@ export function checkGoalPostHit(state, ball) {
   // Goal post must be active
   if (!gp.active) return false;
 
-  // Check vertical zone
-  const inVerticalZone = Math.abs(ball.y - gp.y) <= gp.height / 2;
+  // Check if ball is within goal post bounds (rectangle collision)
+  const halfWidth = gp.width / 2;
+  const halfHeight = gp.height / 2;
 
-  // Check if ball crossed boundary (left or right)
-  const crossedBoundary = (ball.x - ball.r <= 0) || (ball.x + ball.r >= state.width);
+  const inXRange = Math.abs(ball.x - gp.x) <= halfWidth + ball.r;
+  const inYRange = Math.abs(ball.y - gp.y) <= halfHeight + ball.r;
 
-  return inVerticalZone && crossedBoundary;
+  return inXRange && inYRange;
 }
 
 /**

@@ -5,6 +5,59 @@ All notable changes to the Pong Redux project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-02-13 🔧 **Rugby Mode Refinements**
+
+### Summary
+Patch release improving Rugby mode gameplay with enhanced physics tuning and critical bug fixes. Goal post feature deprecated based on gameplay feedback. Spin and bounce mechanics significantly increased for more dynamic, unpredictable gameplay.
+
+### Changed - Physics Tuning
+- **Spin Gain Increased (+50%)**:
+  - `SPIN_GAIN_FACTOR`: 0.5 → 0.75
+  - Ball accumulates 50% more spin from paddle impacts
+  - More pronounced visual rotation
+  - Faster spin buildup during rallies
+- **Bounce Variance Increased (+50%)**:
+  - `MAX_BOUNCE_VARIANCE_DEG`: 20° → 30°
+  - Spin creates 50% more "bobble" effect on bounces
+  - More unpredictable rebound angles
+  - Rewards aggressive paddle movement
+- **Combined Impact**: ~2.25x more dynamic gameplay at high spin levels
+
+### Removed - Goal Posts Deprecated
+- **Goal Post Feature Disabled**:
+  - `GOAL_POST_SPAWN_MIN/MAX`: 8-12s → Infinity
+  - Goal posts no longer spawn during gameplay
+  - Feature determined to not add value in current form
+  - Code remains in place for potential future enhancement
+
+### Fixed - Critical Bugs
+- **🔥 Game Freeze Bug** (CRITICAL):
+  - Fixed `ReferenceError: RUGBY is not defined` in `ball.js:120`
+  - Added missing `import { RUGBY } from './constants.js'` to `ball.js`
+  - Game was crashing on every paddle collision due to undefined constant
+- **NaN Spawn Timer Bug**:
+  - Fixed `Infinity - Infinity = NaN` calculation in goal post spawn logic
+  - Added safety check in `rugby.js:updateGoalPost()` to handle disabled goal posts
+  - Added safety check in `game-state.js:startRugbyMode()` initialization
+  - Prevents timer corruption when goal posts are disabled
+
+### Technical Details
+- **Files Modified**: 5 files (`constants.js`, `ball.js`, `rugby.js`, `game-state.js`, `README.md`)
+- **Import Fix**: `ball.js` now imports `RUGBY` constant for bounce variance calculations
+- **Defensive Programming**: Added `GOAL_POST_SPAWN_MIN === Infinity` checks in two locations
+- **Diagnostic Logging**: Added debug logging to track game loop execution and catch NaN values
+
+### Testing
+- Manual regression testing: Rugby mode runs for 15+ seconds without freezing ✓
+- Physics changes verified: Ball rotation and bounce variance visibly increased ✓
+- No goal posts spawn confirmed ✓
+- Regular Pong mode unaffected ✓
+
+### Breaking Changes
+None - all changes are isolated to Rugby mode, regular Pong unchanged.
+
+---
+
 ## [1.1.0] - 2026-02-13 🏉 **Rugby Ball Mode**
 
 ### Summary

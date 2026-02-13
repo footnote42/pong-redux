@@ -2,7 +2,7 @@
 // Fixed-timestep game loop with requestAnimationFrame + accumulator
 
 import { createInitialState, update as updateState, showLanding } from './game-state.js';
-import * as renderer from './renderer.js';
+import * as renderer from './renderer-core.js';
 import { attachInputHandlers, detachInputHandlers } from './input.js';
 import { PHYSICS } from './constants.js';
 import { soundManager } from './sound.js';
@@ -50,12 +50,12 @@ export function createGame(canvas) {
     running = true;
     lastTime = performance.now();
     accumulator = 0;
-    
+
     // Initialize sound system (must be called after user interaction)
     soundManager.init();
     soundManager.setEnabled(state.settings.soundEnabled);
     soundManager.setVolume(state.settings.volume);
-    
+
     // attach input handlers (pass canvas for pointer events)
     attachInputHandlers(state, canvas);
 

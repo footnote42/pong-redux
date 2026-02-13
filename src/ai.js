@@ -36,7 +36,7 @@ const RETURN_TO_CENTER_SPEED_MULT = 0.5;  // Slower movement when returning to c
  */
 export function initCPU(state, difficulty = 'medium') {
   state.cpu = {
-    enabled: state.gameMode === 'single',
+    enabled: state.gameMode === 'single' || state.gameMode === 'rugby-single',
     difficulty,
     reactionTimer: AI_CONFIG[difficulty].reactionMs,
     updateTimer: 0,

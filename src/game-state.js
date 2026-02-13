@@ -59,7 +59,7 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
   };
   const paddleHeight = PADDLE.DEFAULT_HEIGHT * ((persistedSettings && persistedSettings.paddleSize) || defaultSettings.paddleSize);
   const ballSpeed = BALL.DEFAULT_SPEED * ((persistedSettings && persistedSettings.ballSpeed) || defaultSettings.ballSpeed);
-  
+
   return {
     width,
     height,
@@ -88,7 +88,7 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
     showSettings: false,
     settingsHover: null,
     settingsTab: 'gameplay', // 'gameplay', 'audio', 'about'
-    
+
     // Stage 13: Animation state for visual polish
     transitions: {
       active: false,
@@ -116,6 +116,7 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
       pulseSpeed: 2.0 // Hz
     },
     particles: [], // Array of particle objects: {x, y, vx, vy, life, maxLife, color}
+    confetti: [], // Victory confetti array
 
     // Rugby mode state
     rugbyMode: {
@@ -125,7 +126,9 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
       multiplier: 1,
       goalPost: {
         active: false,
+        x: 0,  // X position on field
         y: 0,
+        width: RUGBY.GOAL_POST_WIDTH,
         height: RUGBY.GOAL_POST_HEIGHT,
         timer: 0,
         spawnTimer: RUGBY.GOAL_POST_SPAWN_MIN
@@ -133,11 +136,12 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
     },
 
     // Rugby settings
-    rugbySettings: persistedRugby || {
-      targetScore: RUGBY.DEFAULT_TARGET_SCORE,
-      timeLimit: RUGBY.DEFAULT_TIME_LIMIT,
+    rugbySettings: {
+      targetScore: (persistedRugby && persistedRugby.targetScore) || RUGBY.DEFAULT_TARGET_SCORE,
+      timeLimit: (persistedRugby && persistedRugby.timeLimit) || RUGBY.DEFAULT_TIME_LIMIT,
       elapsedTime: 0
     }
+
   };
 }
 
@@ -158,10 +162,10 @@ export function setBallSpeed(state, multiplier) {
   if (state.ball) {
     const baseSpeed = BALL.DEFAULT_SPEED;
     const targetSpeed = baseSpeed * state.settings.ballSpeed;
-    
+
     // Update the ball's speed property so future serves use the correct speed
     state.ball.speed = targetSpeed;
-    
+
     // Also update current velocity if ball is moving
     const currentSpeed = Math.sqrt(state.ball.vx * state.ball.vx + state.ball.vy * state.ball.vy);
     if (currentSpeed > 0) {
@@ -245,7 +249,7 @@ export function setTrailLength(state, length) {
 export function setPaddleSize(state, multiplier) {
   const newSize = Math.max(PADDLE.SIZE_MULTIPLIER_MIN, Math.min(PADDLE.SIZE_MULTIPLIER_MAX, multiplier));
   state.settings.paddleSize = newSize;
-  
+
   // Apply to current paddles if game is initialized
   if (state.paddles) {
     const baseHeight = PADDLE.DEFAULT_HEIGHT;
@@ -253,7 +257,7 @@ export function setPaddleSize(state, multiplier) {
     state.paddles.left.h = newHeight;
     state.paddles.right.h = newHeight;
   }
-  
+
   persistSettings(state);
 }
 
@@ -270,14 +274,23 @@ export function setEndlessMode(state, enabled) {
  * @param {string} mode - 'rugby-single' or 'rugby-versus'
  */
 export function startRugbyMode(state, mode) {
+  console.log('[DEBUG] Starting Rugby mode...');
   state.gameMode = mode;
   state.rugbyMode.enabled = true;
   state.rugbyMode.spin = 0;
   state.rugbyMode.rallyCount = 0;
   state.rugbyMode.multiplier = 1;
   state.rugbyMode.goalPost.active = false;
-  state.rugbyMode.goalPost.spawnTimer = RUGBY.GOAL_POST_SPAWN_MIN +
-                                        Math.random() * (RUGBY.GOAL_POST_SPAWN_MAX - RUGBY.GOAL_POST_SPAWN_MIN);
+
+  // Check if goal posts are disabled to prevent NaN
+  if (RUGBY.GOAL_POST_SPAWN_MIN === Infinity) {
+    state.rugbyMode.goalPost.spawnTimer = Infinity;
+    console.log('[DEBUG] Goal posts disabled - spawnTimer set to Infinity');
+  } else {
+    state.rugbyMode.goalPost.spawnTimer = RUGBY.GOAL_POST_SPAWN_MIN +
+      Math.random() * (RUGBY.GOAL_POST_SPAWN_MAX - RUGBY.GOAL_POST_SPAWN_MIN);
+    console.log('[DEBUG] Goal post spawnTimer:', state.rugbyMode.goalPost.spawnTimer);
+  }
   state.rugbySettings.elapsedTime = 0;
 
   // Initialize ball spin property
@@ -303,15 +316,30 @@ export function startRugbyMode(state, mode) {
  * @param {number} dt - Delta time in seconds
  */
 export function updateRugbyPhysics(state, dt) {
+  // Diagnostic logging
+  const frameLog = Math.random() < 0.1; // Log 10% of frames to avoid spam
+  if (frameLog) console.log('[DEBUG] updateRugbyPhysics START - dt:', dt);
+
   // Update paddle velocities for momentum calculations
   rugby.updatePaddleVelocity(state.paddles.left, dt);
   rugby.updatePaddleVelocity(state.paddles.right, dt);
 
   // Update spin decay
-  rugby.updateSpin(state.ball, dt);
+  rugby.updateSpin(state.ball, state.rugbyMode, dt);
+  if (frameLog) console.log('[DEBUG] Spin after decay:', state.rugbyMode.spin);
+
+  // Update ball visual rotation based on spin and velocity
+  if (!state.ball.angle) state.ball.angle = 0;
+  const speed = Math.hypot(state.ball.vx, state.ball.vy);
+  const rotationSpeed = state.rugbyMode.spin * 3.0; // radians per second from spin
+  state.ball.angle += rotationSpeed * dt + (speed / 500) * dt; // Base rotation from movement
+
+  if (frameLog) console.log('[DEBUG] Ball angle:', state.ball.angle, 'speed:', speed);
 
   // Update goal post system
+  if (frameLog) console.log('[DEBUG] About to update goal post, spawnTimer:', state.rugbyMode.goalPost.spawnTimer);
   rugby.updateGoalPost(state, dt);
+  if (frameLog) console.log('[DEBUG] Goal post updated, spawnTimer:', state.rugbyMode.goalPost.spawnTimer);
 
   // Update elapsed time
   state.rugbySettings.elapsedTime += dt;
@@ -319,7 +347,7 @@ export function updateRugbyPhysics(state, dt) {
   // Check time limit win condition
   if (state.rugbySettings.elapsedTime >= state.rugbySettings.timeLimit) {
     const winner = state.score.left > state.score.right ? 'left' :
-                   state.score.right > state.score.left ? 'right' : null;
+      state.score.right > state.score.left ? 'right' : null;
 
     if (winner) {
       state.gameOver = true;
@@ -430,6 +458,26 @@ export function spawnParticles(state, x, y, color = '#ffffff', count = 5) {
 }
 
 /**
+ * Spawns confetti for victory celebration
+ * @param {Object} state - Game state
+ * @param {number} count - Number of confetti pieces
+ */
+export function spawnConfetti(state, count = 100) {
+  const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff', '#ffffff'];
+  for (let i = 0; i < count; i++) {
+    state.confetti.push({
+      x: state.width / 2,
+      y: state.height / 2,
+      vx: (Math.random() - 0.5) * 600,
+      vy: (Math.random() - 0.5) * 600 - 100, // Slight upward bias
+      size: 4 + Math.random() * 6,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      life: 3 + Math.random() * 2 // Seconds
+    });
+  }
+}
+
+/**
  * Triggers a button press animation
  * @param {Object} state - Game state
  * @param {string} buttonName - Name of the button being pressed
@@ -521,7 +569,7 @@ function updateAnimations(state, dt) {
   // Update transition timer
   if (state.transitions.active) {
     state.transitions.timer -= dt;
-    
+
     if (state.transitions.timer <= 0) {
       if (state.transitions.type === 'fadeOut') {
         // Switch to fade in
@@ -536,7 +584,7 @@ function updateAnimations(state, dt) {
       }
     }
   }
-  
+
   // Update button press animation
   if (state.buttonPressAnim.active) {
     state.buttonPressAnim.timer -= dt;
@@ -545,7 +593,7 @@ function updateAnimations(state, dt) {
       state.buttonPressAnim.buttonName = null;
     }
   }
-  
+
   // Update score display lerping
   if (state.scoreDisplay.leftTarget !== state.score.left) {
     state.scoreDisplay.leftTarget = state.score.left;
@@ -553,7 +601,7 @@ function updateAnimations(state, dt) {
   if (state.scoreDisplay.rightTarget !== state.score.right) {
     state.scoreDisplay.rightTarget = state.score.right;
   }
-  
+
   // Lerp displayed scores toward targets
   const lerpSpeed = state.scoreDisplay.animSpeed * dt;
   if (state.scoreDisplay.left < state.scoreDisplay.leftTarget) {
@@ -562,10 +610,10 @@ function updateAnimations(state, dt) {
   if (state.scoreDisplay.right < state.scoreDisplay.rightTarget) {
     state.scoreDisplay.right = Math.min(state.scoreDisplay.right + lerpSpeed, state.scoreDisplay.rightTarget);
   }
-  
+
   // Update pause pulse animation
   state.pauseAnim.pulseTimer += dt;
-  
+
   // Update particles
   for (let i = state.particles.length - 1; i >= 0; i--) {
     const p = state.particles[i];
@@ -573,9 +621,24 @@ function updateAnimations(state, dt) {
     p.y += p.vy * dt;
     p.vy += 300 * dt; // Gravity
     p.life -= dt;
-    
+
     if (p.life <= 0) {
       state.particles.splice(i, 1);
+    }
+  }
+
+  // Update confetti
+  if (state.confetti) {
+    for (let i = state.confetti.length - 1; i >= 0; i--) {
+      const p = state.confetti[i];
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += 200 * dt; // Gravity
+      p.life -= dt;
+
+      if (p.life <= 0) {
+        state.confetti.splice(i, 1);
+      }
     }
   }
 }
@@ -698,15 +761,16 @@ export function update(state, dt) {
         ball.y = state.height - ball.r - 0.5;
       }
     } else {
-      // reflect based on hit location - ball should go right after hitting left paddle
-      reflectFromPaddle(ball, left.y, left.h, +1);
-
-      // Rugby mode: apply momentum impact and update rally
+      // Rugby mode: calculate spin and apply momentum before reflection
       if (state.rugbyMode?.enabled) {
         const hitOffset = (ball.y - left.y) / (left.h / 2); // -1 to +1
+        state.rugbyMode.spin = rugby.calculateSpinGain(left.velocity || 0, hitOffset, state.rugbyMode.spin);
         rugby.applyMomentumImpact(ball, left, hitOffset);
         rugby.updateRallyMultiplier(state);
       }
+
+      // reflect based on hit location - ball should go right after hitting left paddle
+      reflectFromPaddle(ball, left.y, left.h, +1, 50, 0.05, state.rugbyMode?.spin || 0);
 
       if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
       soundManager.playPaddleHit(); // Sound effect for paddle hit
@@ -728,14 +792,15 @@ export function update(state, dt) {
         ball.y = state.height - ball.r - 0.5;
       }
     } else {
-      reflectFromPaddle(ball, right.y, right.h, -1);
-
-      // Rugby mode: apply momentum impact and update rally
+      // Rugby mode: calculate spin and apply momentum before reflection
       if (state.rugbyMode?.enabled) {
         const hitOffset = (ball.y - right.y) / (right.h / 2); // -1 to +1
+        state.rugbyMode.spin = rugby.calculateSpinGain(right.velocity || 0, hitOffset, state.rugbyMode.spin);
         rugby.applyMomentumImpact(ball, right, hitOffset);
         rugby.updateRallyMultiplier(state);
       }
+
+      reflectFromPaddle(ball, right.y, right.h, -1, 50, 0.05, state.rugbyMode?.spin || 0);
 
       if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
       soundManager.playPaddleHit(); // Sound effect for paddle hit
@@ -747,15 +812,17 @@ export function update(state, dt) {
   } else if (isCircleRectColliding(ball, left)) {
     // positional correction
     const res = resolveCircleRectPenetration(ball, left);
-    // reflect based on hit location - ball should go right after hitting left paddle
-    reflectFromPaddle(ball, left.y, left.h, +1);
 
-    // Rugby mode: apply momentum impact and update rally
+    // Rugby mode: calculate spin and apply momentum before reflection
     if (state.rugbyMode?.enabled) {
       const hitOffset = (ball.y - left.y) / (left.h / 2);
+      state.rugbyMode.spin = rugby.calculateSpinGain(left.velocity || 0, hitOffset, state.rugbyMode.spin);
       rugby.applyMomentumImpact(ball, left, hitOffset);
       rugby.updateRallyMultiplier(state);
     }
+
+    // reflect based on hit location - ball should go right after hitting left paddle
+    reflectFromPaddle(ball, left.y, left.h, +1, 50, 0.05, state.rugbyMode?.spin || 0);
 
     if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
     soundManager.playPaddleHit(); // Sound effect for paddle hit
@@ -771,15 +838,17 @@ export function update(state, dt) {
     bounceOffHorizontalEdge(ball, state.height);
   } else if (isCircleRectColliding(ball, right)) {
     const res = resolveCircleRectPenetration(ball, right);
-    // reflect to left
-    reflectFromPaddle(ball, right.y, right.h, -1);
 
-    // Rugby mode: apply momentum impact and update rally
+    // Rugby mode: calculate spin and apply momentum before reflection
     if (state.rugbyMode?.enabled) {
       const hitOffset = (ball.y - right.y) / (right.h / 2);
+      state.rugbyMode.spin = rugby.calculateSpinGain(right.velocity || 0, hitOffset, state.rugbyMode.spin);
       rugby.applyMomentumImpact(ball, right, hitOffset);
       rugby.updateRallyMultiplier(state);
     }
+
+    // reflect to left
+    reflectFromPaddle(ball, right.y, right.h, -1, 50, 0.05, state.rugbyMode?.spin || 0);
 
     if (state.settings.ballFlash) state.ballFlashTimer = 0.1;
     soundManager.playPaddleHit(); // Sound effect for paddle hit
@@ -825,6 +894,7 @@ export function update(state, dt) {
     if (state.score.right >= winScore) {
       state.gameOver = true;
       state.winner = 'right';
+      spawnConfetti(state, 150);
       soundManager.playWin(); // Sound effect for winning
     } else {
       soundManager.playScore(); // Sound effect for scoring
@@ -866,6 +936,7 @@ export function update(state, dt) {
     if (state.score.left >= winScore) {
       state.gameOver = true;
       state.winner = 'left';
+      spawnConfetti(state, 150);
       soundManager.playWin(); // Sound effect for winning
     } else {
       soundManager.playScore(); // Sound effect for scoring
@@ -890,6 +961,7 @@ export function restartGame(state) {
   // Clear game over state
   state.gameOver = false;
   state.winner = null;
+  state.confetti = [];
 
   // Serve the ball after a brief delay
   state.serveTimer = PHYSICS.SERVE_DELAY_SEC;

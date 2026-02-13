@@ -116,10 +116,11 @@ No installation required - runs directly in your browser!
 - 👥 **2-Player Local**: Classic couch multiplayer
   - Player 1: W/S keys
   - Player 2: Arrow keys
-- 🏉 **Rugby Ball Mode** (NEW in v1.1.0)
-  - Oval ball physics with spin mechanics
+- 🏉 **Rugby Ball Mode** (v1.1.0)
+  - Oval ball physics with dynamic spin mechanics
   - Rally combo system (1x → 5x multiplier)
-  - Dynamic goal posts for bonus points
+  - Enhanced spin-based bounce physics (50% more dynamic than v1.1.0)
+  - Visual ball rotation based on spin and velocity
   - Hybrid win conditions (target score OR time limit)
   - Arcade-style skill-based gameplay
   - Available in both 1P and 2P modes
@@ -487,7 +488,6 @@ MIT License - Feel free to learn from, fork, or build upon this code.
 
 ---
 
-**Current Status**: Stage 13 complete (Visual Polish & Animations) ✅
+**Current Status**: Rugby Mode Refinements Complete ✅
 **Progress**: 13 of 16 stages complete (81%) - Portfolio Ready!
-**Next Up**: Deployment & final documentation
-**Last Updated**: 2025-12-22
+**Last Updated**: 2026-02-13

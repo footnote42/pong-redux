@@ -56,7 +56,7 @@ export const PADDLE = {
   DEFAULT_SPEED: 300,
   DEFAULT_ACCEL: 2000,
   DEFAULT_X_OFFSET_LEFT: 10,
-  DEFAULT_X_OFFSET_RIGHT: 20,
+  DEFAULT_X_OFFSET_RIGHT: 10,  // Changed from 20 to 10 for symmetry
   SIZE_MULTIPLIER_MIN: 0.5,
   SIZE_MULTIPLIER_MAX: 1.5
 };
@@ -77,14 +77,18 @@ export const AUDIO = {
 export const RUGBY = {
   SPIN_DECAY_RATE: 0.98,           // Spin multiplier per second
   SPIN_SNAP_THRESHOLD: 0.01,       // Snap to zero below this value
-  MAX_BOUNCE_VARIANCE_DEG: 20,     // Max bounce angle variance in degrees
+  MAX_BOUNCE_VARIANCE_DEG: 30,     // Max bounce angle variance in degrees (increased from 20)
   MOMENTUM_FACTOR_DIVISOR: 1000,   // Paddle velocity divisor for momentum
   MAX_BALL_SPEED_MULTIPLIER: 2.5,  // Cap ball speed at 2.5x base
-  SPIN_GAIN_FACTOR: 0.5,           // Spin gain multiplier
-  GOAL_POST_HEIGHT: 120,           // Goal post zone height in pixels
+  SPIN_GAIN_FACTOR: 0.75,          // Spin gain multiplier (increased from 0.5)
+  GOAL_POST_WIDTH: 40,             // Width of H-shaped goal post
+  GOAL_POST_HEIGHT: 60,            // Height of H-shaped goal post
+  GOAL_POST_CROSSBAR_HEIGHT: 30,   // Height of crossbar above ground
+  GOAL_POST_POST_WIDTH: 4,         // Width of vertical posts
+  GOAL_POST_CROSSBAR_WIDTH: 3,     // Width of horizontal crossbar
   GOAL_POST_DURATION: 5.0,         // Active duration in seconds
-  GOAL_POST_SPAWN_MIN: 8,          // Min spawn timer in seconds
-  GOAL_POST_SPAWN_MAX: 12,         // Max spawn timer in seconds
+  GOAL_POST_SPAWN_MIN: Infinity,   // DEPRECATED: Goal posts disabled
+  GOAL_POST_SPAWN_MAX: Infinity,   // DEPRECATED: Goal posts disabled
   GOAL_POST_BONUS_BASE: 10,        // Base bonus points for hitting goal post
   RALLY_THRESHOLDS: {              // Rally count → multiplier thresholds
     MULT_2X: 3,
@@ -96,3 +100,4 @@ export const RUGBY = {
   DEFAULT_TARGET_SCORE: 50,
   DEFAULT_TIME_LIMIT: 180
 };
+

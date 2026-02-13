@@ -1,6 +1,8 @@
 // src/ball.js
 // Ball entity helpers and bounce-angle computation
 
+import { RUGBY } from './constants.js';
+
 /**
  * Creates a new ball entity with position, radius, and initial speed
  * @param {number} x - Initial X position (center)
@@ -85,6 +87,7 @@ export const DEFAULT_CENTER_DEADZONE = 0.05; // relative offset deadzone around 
  * 
  * The bounce angle varies from straight (0°) at center to maxBounceDeg at paddle edges.
  * A center deadzone provides more forgiving straight bounces near the paddle center.
+ * In rugby mode, spin adds additional random variance to bounce angle.
  * 
  * @param {Object} ball - Ball object with x, y, vx, vy, r, speed properties (modified in-place)
  * @param {number} paddleY - Paddle center Y position
@@ -92,6 +95,7 @@ export const DEFAULT_CENTER_DEADZONE = 0.05; // relative offset deadzone around 
  * @param {number} direction - Reflection direction: +1 for right (left paddle), -1 for left (right paddle)
  * @param {number} [maxBounceDeg=50] - Maximum deflection angle at paddle edge in degrees
  * @param {number} [centerDeadzone=0.05] - Relative offset around center (0-1) that yields straight bounce
+ * @param {number} [rugbyModeSpin=0] - Rugby mode spin value (-1 to +1) for bounce variance
  * 
  * @example
  * // Ball hits left paddle near top edge, should deflect upward-right
@@ -99,8 +103,11 @@ export const DEFAULT_CENTER_DEADZONE = 0.05; // relative offset deadzone around 
  * 
  * // Ball hits right paddle at center, should go straight left
  * reflectFromPaddle(ball, paddleY, paddleH, -1);
+ * 
+ * // Rugby mode: add spin-based variance
+ * reflectFromPaddle(ball, paddleY, paddleH, +1, 50, 0.05, state.rugbyMode.spin);
  */
-export function reflectFromPaddle(ball, paddleY, paddleH, direction, maxBounceDeg = DEFAULT_MAX_BOUNCE_DEG, centerDeadzone = DEFAULT_CENTER_DEADZONE) {
+export function reflectFromPaddle(ball, paddleY, paddleH, direction, maxBounceDeg = DEFAULT_MAX_BOUNCE_DEG, centerDeadzone = DEFAULT_CENTER_DEADZONE, rugbyModeSpin = 0) {
   const relative = (ball.y - paddleY) / (paddleH / 2); // -1 .. +1
   const clampVal = Math.max(-1, Math.min(1, relative));
 
@@ -108,7 +115,14 @@ export function reflectFromPaddle(ball, paddleY, paddleH, direction, maxBounceDe
   const effective = Math.abs(clampVal) <= Math.abs(centerDeadzone) ? 0 : clampVal;
 
   const maxBounce = (maxBounceDeg * Math.PI) / 180; // convert to radians
-  const angle = effective * maxBounce;
+  let angle = effective * maxBounce;
+
+  // Apply spin-based variance for rugby mode
+  if (rugbyModeSpin !== 0) {
+    const maxVariance = (RUGBY.MAX_BOUNCE_VARIANCE_DEG * Math.PI) / 180;
+    angle += rugbyModeSpin * maxVariance;
+  }
+
   const speed = Math.hypot(ball.vx, ball.vy) || ball.speed;
   ball.vx = Math.cos(angle) * speed * direction;
   ball.vy = Math.sin(angle) * speed;
