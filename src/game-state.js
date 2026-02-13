@@ -297,6 +297,42 @@ export function startRugbyMode(state, mode) {
   console.log('[Rugby] Mode started:', mode);
 }
 
+/**
+ * Update rugby physics (called from main update loop)
+ * @param {Object} state - Game state
+ * @param {number} dt - Delta time in seconds
+ */
+export function updateRugbyPhysics(state, dt) {
+  // Update paddle velocities for momentum calculations
+  rugby.updatePaddleVelocity(state.paddles.left, dt);
+  rugby.updatePaddleVelocity(state.paddles.right, dt);
+
+  // Update spin decay
+  rugby.updateSpin(state.ball, dt);
+
+  // Update goal post system
+  rugby.updateGoalPost(state, dt);
+
+  // Update elapsed time
+  state.rugbySettings.elapsedTime += dt;
+
+  // Check time limit win condition
+  if (state.rugbySettings.elapsedTime >= state.rugbySettings.timeLimit) {
+    const winner = state.score.left > state.score.right ? 'left' :
+                   state.score.right > state.score.left ? 'right' : null;
+
+    if (winner) {
+      state.gameOver = true;
+      state.winner = winner;
+      soundManager.playWin();
+      console.log('[Rugby] Time limit reached, winner:', winner);
+    } else {
+      // Tied - continue playing (overtime)
+      console.log('[Rugby] Time limit reached, tied - continuing');
+    }
+  }
+}
+
 function persistSettings(state) {
   if (typeof window !== 'undefined' && window.localStorage) {
     try {
