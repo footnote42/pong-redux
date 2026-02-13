@@ -7,6 +7,7 @@ import { isCircleRectColliding, resolveCircleRectPenetration } from './collision
 import { initCPU, updateCPU, setCPUDifficulty } from './ai.js';
 import { CANVAS, PADDLE, BALL, GAME, AUDIO, PHYSICS, RUGBY } from './constants.js';
 import { soundManager } from './sound.js';
+import * as rugby from './rugby.js';
 
 /**
  * Creates the initial game state with default values
@@ -261,6 +262,39 @@ export function setEndlessMode(state, enabled) {
   // Update win score - use a very high number for endless mode
   state.winScore = enabled ? 999 : state.settings.winScore;
   persistSettings(state);
+}
+
+/**
+ * Initialize rugby mode state and start game
+ * @param {Object} state - Game state
+ * @param {string} mode - 'rugby-single' or 'rugby-versus'
+ */
+export function startRugbyMode(state, mode) {
+  state.gameMode = mode;
+  state.rugbyMode.enabled = true;
+  state.rugbyMode.spin = 0;
+  state.rugbyMode.rallyCount = 0;
+  state.rugbyMode.multiplier = 1;
+  state.rugbyMode.goalPost.active = false;
+  state.rugbyMode.goalPost.spawnTimer = RUGBY.GOAL_POST_SPAWN_MIN +
+                                        Math.random() * (RUGBY.GOAL_POST_SPAWN_MAX - RUGBY.GOAL_POST_SPAWN_MIN);
+  state.rugbySettings.elapsedTime = 0;
+
+  // Initialize ball spin property
+  state.ball.spin = 0;
+
+  // Initialize CPU if single player
+  if (mode === 'rugby-single') {
+    initCPU(state, state.settings.difficulty);
+  } else {
+    state.cpu = { enabled: false };
+  }
+
+  // Reset and start game
+  restartGame(state);
+  startTransition(state, state.gameState, 'PLAYING');
+
+  console.log('[Rugby] Mode started:', mode);
 }
 
 function persistSettings(state) {
