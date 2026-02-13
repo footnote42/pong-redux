@@ -2,8 +2,9 @@
 // Keyboard input handling - maps keys to paddle directions and pause
 
 import { setPaddleDirection } from './paddle.js';
-import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, triggerButtonPress } from './game-state.js';
+import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, triggerButtonPress, startRugbyMode } from './game-state.js';
 import { UI, BALL, GAME } from './constants.js';
+import { soundManager } from './sound.js';
 
 let _state = null;
 let listeners = [];
@@ -154,7 +155,20 @@ export function attachInputHandlers(state, canvas = null) {
         if (pointInRect(x, y, btns.single)) { _state.landingHover = 'single'; _state.settingsHover = null; }
         else if (pointInRect(x, y, btns.versus)) { _state.landingHover = 'versus'; _state.settingsHover = null; }
         else if (pointInRect(x, y, btns.settings)) { _state.landingHover = 'settings'; _state.settingsHover = 'settings'; _state.landingHover = null; }
-        else { _state.landingHover = null; _state.settingsHover = null; }
+        else {
+          // Check rugby buttons
+          if (_state.landingButtons) {
+            if (pointInRect(x, y, _state.landingButtons['rugby-single'])) {
+              _state.landingHover = 'rugby-single';
+              return;
+            }
+            if (pointInRect(x, y, _state.landingButtons['rugby-versus'])) {
+              _state.landingHover = 'rugby-versus';
+              return;
+            }
+          }
+          _state.landingHover = null; _state.settingsHover = null;
+        }
       }
     };
     const pdown = (e) => {
@@ -182,6 +196,26 @@ export function attachInputHandlers(state, canvas = null) {
           triggerButtonPress(_state, 'settings');
           _state.showSettings = true;
           _state.settingsHover = null;
+        }
+
+        // Handle rugby mode buttons
+        if (_state.landingButtons) {
+          const rugbySingle = _state.landingButtons['rugby-single'];
+          const rugbyVersus = _state.landingButtons['rugby-versus'];
+
+          if (rugbySingle && pointInRect(x, y, rugbySingle)) {
+            triggerButtonPress(_state, 'rugby-single');
+            soundManager.playUIClick();
+            startRugbyMode(_state, 'rugby-single');
+            return;
+          }
+
+          if (rugbyVersus && pointInRect(x, y, rugbyVersus)) {
+            triggerButtonPress(_state, 'rugby-versus');
+            soundManager.playUIClick();
+            startRugbyMode(_state, 'rugby-versus');
+            return;
+          }
         }
       }
     };
