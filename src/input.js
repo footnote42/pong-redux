@@ -2,7 +2,7 @@
 // Keyboard input handling - maps keys to paddle directions and pause
 
 import { setPaddleDirection } from './paddle.js';
-import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, triggerButtonPress, startRugbyMode } from './game-state.js';
+import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, triggerButtonPress, startRugbyMode, setRugbyTargetScore, setRugbyTimeLimit } from './game-state.js';
 import { UI, BALL, GAME } from './constants.js';
 import { soundManager } from './sound.js';
 
@@ -445,6 +445,8 @@ function handleSettingsClick(x, y, state) {
     handleGameplayClick(x, y, state, panelX, panelY);
   } else if (state.settingsTab === 'custom') {
     handleCustomizationClick(x, y, state, panelX, panelY);
+  } else if (state.settingsTab === 'rugby') {
+    handleRugbyClick(x, y, state, panelX, panelY);
   } else if (state.settingsTab === 'audio') {
     handleAudioClick(x, y, state, panelX, panelY);
   }
@@ -629,6 +631,51 @@ function handleAudioClick(x, y, state, panelX, panelY) {
     }
   }
 }
+
+function handleRugbyClick(x, y, state, panelX, panelY) {
+  if (!state.rugbyMode?.enabled) return;
+
+  const contentY = panelY + 80 + 36 + 20;
+  const contentX = panelX + 40;
+  let yPos = contentY + 20;
+
+  // Target score buttons
+  yPos += 30; // Account for "Target Score:" label
+
+  const targetScores = [25, 50, 75, 100];
+  const scoreBoxW = 60;
+  const scoreBoxH = 36;
+  const scoreSpacing = 70;
+
+  for (let i = 0; i < targetScores.length; i++) {
+    const boxX = contentX + i * scoreSpacing;
+    if (pointInRect(x, y, { x: boxX, y: yPos, w: scoreBoxW, h: scoreBoxH })) {
+      setRugbyTargetScore(state, targetScores[i]);
+      soundManager.playUIClick();
+      return;
+    }
+  }
+
+  yPos += scoreBoxH + 60;
+
+  // Time limit buttons
+  yPos += 30; // Account for "Time Limit:" label
+
+  const timeLimits = [120, 180, 300, 600];
+  const timeBoxW = 70;
+  const timeBoxH = 36;
+  const timeSpacing = 80;
+
+  for (let i = 0; i < timeLimits.length; i++) {
+    const boxX = contentX + i * timeSpacing;
+    if (pointInRect(x, y, { x: boxX, y: yPos, w: timeBoxW, h: timeBoxH })) {
+      setRugbyTimeLimit(state, timeLimits[i]);
+      soundManager.playUIClick();
+      return;
+    }
+  }
+}
+
 // Stub functions - to be implemented
 function detectCustomizationHover(x, y, state, panelX, panelY) {
   // TODO: Implement customization hover detection
