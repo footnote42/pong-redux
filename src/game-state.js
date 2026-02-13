@@ -555,6 +555,11 @@ export function update(state, dt) {
   // Update animations (always run, even when paused or on other screens)
   updateAnimations(state, dt);
 
+  // Update rugby physics if enabled (before regular game logic)
+  if (state.rugbyMode?.enabled && state.gameState === 'PLAYING' && !state.paused && !state.gameOver) {
+    updateRugbyPhysics(state, dt);
+  }
+
   // Only update game when we're actively playing
   if (state.gameState !== 'PLAYING') return;
   if (state.paused || state.gameOver) return;
