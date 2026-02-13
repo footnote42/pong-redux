@@ -5,7 +5,7 @@ import { createPaddle, updatePaddle } from './paddle.js';
 import { createBall, updateBall, bounceOffHorizontalEdge, resetBall, serveBall, reflectFromPaddle } from './ball.js';
 import { isCircleRectColliding, resolveCircleRectPenetration } from './collision.js';
 import { initCPU, updateCPU, setCPUDifficulty } from './ai.js';
-import { CANVAS, PADDLE, BALL, GAME, AUDIO, PHYSICS } from './constants.js';
+import { CANVAS, PADDLE, BALL, GAME, AUDIO, PHYSICS, RUGBY } from './constants.js';
 import { soundManager } from './sound.js';
 
 /**
@@ -24,12 +24,15 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
   // load settings and highScore from localStorage if available
   let persistedSettings = null;
   let persistedHigh = null;
+  let persistedRugby = null;
   if (typeof window !== 'undefined' && window.localStorage) {
     try {
       const s = window.localStorage.getItem('pong:settings');
       if (s) persistedSettings = JSON.parse(s);
       const h = window.localStorage.getItem('pong:highScore');
       if (h) persistedHigh = JSON.parse(h);
+      const r = window.localStorage.getItem('pong:rugbySettings');
+      if (r) persistedRugby = JSON.parse(r);
     } catch (e) {
       console.warn('Failed to load settings from localStorage:', e);
     }
@@ -111,7 +114,29 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
       pulseTimer: 0,
       pulseSpeed: 2.0 // Hz
     },
-    particles: [] // Array of particle objects: {x, y, vx, vy, life, maxLife, color}
+    particles: [], // Array of particle objects: {x, y, vx, vy, life, maxLife, color}
+
+    // Rugby mode state
+    rugbyMode: {
+      enabled: false,
+      spin: 0,
+      rallyCount: 0,
+      multiplier: 1,
+      goalPost: {
+        active: false,
+        y: 0,
+        height: RUGBY.GOAL_POST_HEIGHT,
+        timer: 0,
+        spawnTimer: RUGBY.GOAL_POST_SPAWN_MIN
+      }
+    },
+
+    // Rugby settings
+    rugbySettings: persistedRugby || {
+      targetScore: RUGBY.DEFAULT_TARGET_SCORE,
+      timeLimit: RUGBY.DEFAULT_TIME_LIMIT,
+      elapsedTime: 0
+    }
   };
 }
 
