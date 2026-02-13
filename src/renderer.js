@@ -21,6 +21,11 @@ export function render(state, ctx, interp = 0) {
   ctx.stroke();
   ctx.setLineDash([]);
 
+  // Rugby mode: Draw goal post zones
+  if (state.rugbyMode?.enabled && state.gameState === 'PLAYING') {
+    drawGoalPost(ctx, state.rugbyMode.goalPost, state.width);
+  }
+
   // paddles
   const left = state.paddles.left;
   const right = state.paddles.right;
@@ -452,6 +457,43 @@ function drawRugbyBall(ctx, ball) {
   }
 
   ctx.restore();
+}
+
+/**
+ * Draw goal post zone with pulsing effect
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {Object} goalPost - Goal post object
+ * @param {number} canvasWidth - Canvas width
+ */
+function drawGoalPost(ctx, goalPost, canvasWidth) {
+  if (!goalPost.active) return;
+
+  // Pulsing effect based on timer (faster pulse as timer runs out)
+  const pulse = 0.7 + 0.3 * Math.sin(goalPost.timer * Math.PI * 2);
+
+  // Draw on both scoring boundaries (left and right)
+  const fillAlpha = pulse * 0.3;
+  const strokeAlpha = pulse;
+
+  ctx.fillStyle = `rgba(255, 215, 0, ${fillAlpha})`; // Golden with alpha
+  ctx.strokeStyle = `rgba(255, 215, 0, ${strokeAlpha})`;
+  ctx.lineWidth = 3;
+
+  const y = goalPost.y - goalPost.height / 2;
+  const h = goalPost.height;
+  const barWidth = 10;
+
+  // Left boundary goal post
+  ctx.fillRect(0, y, barWidth, h);
+  ctx.strokeRect(0, y, barWidth, h);
+
+  // Right boundary goal post
+  ctx.fillRect(canvasWidth - barWidth, y, barWidth, h);
+  ctx.strokeRect(canvasWidth - barWidth, y, barWidth, h);
+
+  // Draw center marker (optional - helps visualize the zone)
+  ctx.fillStyle = `rgba(255, 215, 0, ${fillAlpha * 0.5})`;
+  ctx.fillRect(0, goalPost.y - 2, canvasWidth, 4);
 }
 
 /**
