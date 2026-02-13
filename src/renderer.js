@@ -1,7 +1,7 @@
 // src/renderer.js
 // Simple canvas renderer for Pong
 
-import { UI, GAME, PHYSICS } from './constants.js';
+import { CANVAS, UI, PADDLE, BALL, RUGBY, GAME, PHYSICS } from './constants.js';
 
 export function render(state, ctx, interp = 0) {
   const w = state.width;
@@ -31,9 +31,13 @@ export function render(state, ctx, interp = 0) {
   if (state.settings.ballTrail && state.ballTrail && state.ballTrail.length > 0) {
     drawBallTrail(ctx, state.ballTrail, state.ball.r, state.settings.ballColor);
   }
-  
-  // ball
-  drawBall(ctx, state.ball, state.settings.ballStyle, state.settings.ballColor, state.ballFlashTimer > 0);
+
+  // ball (rugby ball if rugby mode enabled)
+  if (state.rugbyMode?.enabled) {
+    drawRugbyBall(ctx, state.ball);
+  } else {
+    drawBall(ctx, state.ball, state.settings.ballStyle, state.settings.ballColor, state.ballFlashTimer > 0);
+  }
   
   // particles
   drawParticles(ctx, state.particles);
@@ -381,7 +385,7 @@ function drawSoccerBall(ctx, ball, color) {
   ctx.beginPath();
   ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Pentagon pattern
   ctx.fillStyle = '#000';
   const pentSize = ball.r * 0.5;
@@ -395,6 +399,59 @@ function drawSoccerBall(ctx, ball, color) {
   }
   ctx.closePath();
   ctx.fill();
+}
+
+/**
+ * Draw rugby ball with oval shape and rotation
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {Object} ball - Ball object with x, y, r, spin properties
+ */
+function drawRugbyBall(ctx, ball) {
+  ctx.save();
+
+  try {
+    // Move to ball position and rotate based on spin
+    ctx.translate(ball.x, ball.y);
+
+    // Rotation speed based on spin (spin affects visual rotation)
+    const rotationSpeed = (ball.spin || 0) * 5; // Radians per second
+    const rotation = (Date.now() / 1000) * rotationSpeed;
+    ctx.rotate(rotation);
+
+    // Draw oval (ellipse) - rugby ball shape
+    ctx.beginPath();
+    ctx.ellipse(0, 0, ball.r * 1.8, ball.r, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#8B4513'; // Brown rugby ball color
+    ctx.fill();
+
+    // Draw stitching pattern (white lines)
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 1;
+
+    // Center horizontal line
+    ctx.beginPath();
+    ctx.moveTo(-ball.r * 1.2, 0);
+    ctx.lineTo(ball.r * 1.2, 0);
+    ctx.stroke();
+
+    // Cross-stitches
+    for (let i = -3; i <= 3; i++) {
+      const x = i * (ball.r * 0.4);
+      ctx.beginPath();
+      ctx.moveTo(x, -ball.r * 0.3);
+      ctx.lineTo(x, ball.r * 0.3);
+      ctx.stroke();
+    }
+  } catch (e) {
+    // Fallback to circular ball if ellipse not supported
+    ctx.beginPath();
+    ctx.arc(0, 0, ball.r, 0, Math.PI * 2);
+    ctx.fillStyle = '#8B4513';
+    ctx.fill();
+    console.warn('[Rugby] Ellipse not supported, using circle fallback');
+  }
+
+  ctx.restore();
 }
 
 /**
