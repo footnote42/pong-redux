@@ -1,3 +1,6 @@
+<!-- CLEO:START -->
+@.cleo/templates/AGENT-INJECTION.md
+<!-- CLEO:END -->
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
@@ -168,6 +171,17 @@ No build system required. Run by opening `index.html` in a browser or serve loca
 - GitHub Pages deployment with automated workflow
 - Enhanced README with visual showcase and comprehensive features list
 - Progress: 13/16 stages complete (81%)
+
+**Rugby Ball Mode (v1.1.0)** (src/rugby.js ~300 lines, integrated throughout)
+- **Architecture**: New rugby.js module with dedicated physics engine, state integrated in game-state.js, rendering in renderer.js
+- **Spin Mechanics**: Angular velocity calculated from paddle speed and offset, decays at 0.98/frame, affects bounce variance ±15° max
+- **Momentum Impacts**: Paddle velocity multiplies ball speed (0.8x-1.2x), capped at 2.0x base speed for balance
+- **Goal Post System**: Random spawns every 10-15s in top/bottom zones (20%-80% width), 5s duration, +3 bonus points on collision
+- **Rally Scoring**: Multiplier progression (1x→2x@3hits→3x@5hits→5x@10hits), resets on ball exit, visual feedback with color coding
+- **Rendering**: Oval ball (1.4x width), rotation based on spin, goal posts as vertical bars with glow, rally/multiplier/timer UI elements
+- **Win Conditions**: Hybrid system (target score OR time limit), configurable via settings (25/50/75/100 points, 2/3/5/10 min)
+- **Settings Tab**: Rugby tab in settings panel when mode active, persists via localStorage
+- **No Breaking Changes**: Regular Pong mode unchanged, rugby isolated to opt-in game mode
 
 **Refactoring Recommendations:**
 - Consider adding more animation variations (confetti on win, menu transitions)

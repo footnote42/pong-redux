@@ -5,6 +5,59 @@ All notable changes to the Pong Redux project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-02-13 🏉 **Rugby Ball Mode**
+
+### Summary
+Major feature release introducing Rugby Ball Mode - an arcade-style game mode with oval ball physics, spin mechanics, rally combos, and dynamic goal posts. This release adds significant gameplay variety while maintaining zero breaking changes to the core Pong experience.
+
+### Added - Rugby Ball Mode
+- **New Game Mode**: Rugby Ball Mode available in both 1P and 2P variants from landing screen
+- **Oval Ball Physics**: Rugby ball rendered as oval (1.4x width ratio) with visible rotation
+- **Spin Mechanics**:
+  - Angular velocity calculated from paddle speed and impact offset
+  - Spin decays at 0.98 per frame for natural physics feel
+  - Spin affects bounce angle variance (±15° maximum)
+- **Momentum-Based Impacts**:
+  - Paddle velocity multiplies ball speed (0.8x-1.2x range)
+  - Speed capped at 2.0x base speed for balance
+  - Rewards aggressive paddle movement
+- **Rally Combo System**:
+  - Multiplier progression: 1x → 2x (3 hits) → 3x (5 hits) → 5x (10 hits)
+  - Resets on ball exit
+  - Visual feedback with color coding (white/yellow/orange/cyan)
+- **Dynamic Goal Posts**:
+  - Random spawns every 10-15 seconds
+  - Appear in top/bottom zones (20%-80% screen width)
+  - 5-second duration with visual glow effect
+  - +3 bonus points on collision
+- **Hybrid Win Conditions**:
+  - Target score OR time limit (whichever comes first)
+  - Configurable: 25/50/75/100 points, 2/3/5/10 minutes
+- **Rugby Settings Tab**: Dedicated settings panel when rugby mode active
+  - Target score selection (4 buttons)
+  - Time limit selection (4 buttons)
+  - Settings persist via localStorage
+- **UI Enhancements**:
+  - Rally counter display (top-center)
+  - Multiplier display with color coding
+  - Timer countdown (MM:SS format, top-right)
+  - Goal post visual indicators
+
+### Technical Details
+- **New Module**: `src/rugby.js` (~300 lines) - Isolated rugby physics engine
+- **Integration Points**:
+  - `src/game-state.js`: Rugby state initialization, update integration, settings functions
+  - `src/renderer.js`: Rugby ball rendering, goal posts, UI elements, rugby settings tab
+  - `src/input.js`: Rugby mode buttons, rugby settings handlers
+  - `src/constants.js`: Rugby-specific constants (RUGBY namespace)
+- **Performance**: Maintains 60fps with all rugby effects active, zero memory leaks
+- **Testing**: Comprehensive end-to-end test log (`docs/rugby-mode-test-log.md`)
+
+### Compatibility
+- **Zero Breaking Changes**: Regular Pong mode completely unchanged
+- **Backward Compatibility**: All existing settings, controls, and features preserved
+- **Optional Feature**: Rugby mode only active when explicitly selected from landing screen
+
 ## [1.0.0] - 2025-12-22 🎉 **Portfolio Release**
 
 ### Summary

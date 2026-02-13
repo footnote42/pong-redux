@@ -116,6 +116,13 @@ No installation required - runs directly in your browser!
 - 👥 **2-Player Local**: Classic couch multiplayer
   - Player 1: W/S keys
   - Player 2: Arrow keys
+- 🏉 **Rugby Ball Mode** (NEW in v1.1.0)
+  - Oval ball physics with spin mechanics
+  - Rally combo system (1x → 5x multiplier)
+  - Dynamic goal posts for bonus points
+  - Hybrid win conditions (target score OR time limit)
+  - Arcade-style skill-based gameplay
+  - Available in both 1P and 2P modes
 
 #### 🎨 **Customization System**
 - 🎨 **Paddle Styles**: Classic, Retro, Neon, Custom
