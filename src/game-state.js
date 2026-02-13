@@ -333,6 +333,53 @@ export function updateRugbyPhysics(state, dt) {
   }
 }
 
+/**
+ * Set rugby mode target score
+ * @param {Object} state - Game state
+ * @param {number} score - Target score (must be in RUGBY.TARGET_SCORES)
+ */
+export function setRugbyTargetScore(state, score) {
+  if (!RUGBY.TARGET_SCORES.includes(score)) {
+    console.warn('[Rugby] Invalid target score:', score);
+    return;
+  }
+
+  state.rugbySettings.targetScore = score;
+  persistRugbySettings(state);
+  console.log('[Rugby] Target score set to', score);
+}
+
+/**
+ * Set rugby mode time limit
+ * @param {Object} state - Game state
+ * @param {number} seconds - Time limit in seconds (must be in RUGBY.TIME_LIMITS)
+ */
+export function setRugbyTimeLimit(state, seconds) {
+  if (!RUGBY.TIME_LIMITS.includes(seconds)) {
+    console.warn('[Rugby] Invalid time limit:', seconds);
+    return;
+  }
+
+  state.rugbySettings.timeLimit = seconds;
+  persistRugbySettings(state);
+  console.log('[Rugby] Time limit set to', seconds, 'seconds');
+}
+
+/**
+ * Persist rugby settings to localStorage
+ * @param {Object} state - Game state
+ */
+function persistRugbySettings(state) {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const settings = JSON.stringify(state.rugbySettings);
+      window.localStorage.setItem('pong:rugbySettings', settings);
+    } catch (e) {
+      console.warn('Failed to save rugby settings to localStorage:', e);
+    }
+  }
+}
+
 function persistSettings(state) {
   if (typeof window !== 'undefined' && window.localStorage) {
     try {
