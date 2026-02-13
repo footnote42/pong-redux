@@ -120,6 +120,40 @@ export function render(state, ctx, interp = 0) {
     drawBtn(single, '1 Player (vs CPU)', state.landingHover === 'single', 'single');
     drawBtn(versus, '2 Players (Local)', state.landingHover === 'versus', 'versus');
 
+    // Rugby mode buttons
+    const rugbySingleBtn = {
+      x: cx - btnW / 2,
+      y: versus.y + btnH + gap + 20, // Extra gap after regular modes
+      w: btnW,
+      h: btnH,
+      text: 'Rugby Mode (1P)',
+      mode: 'rugby-single'
+    };
+
+    const rugbyVersusBtn = {
+      x: cx - btnW / 2,
+      y: rugbySingleBtn.y + btnH + gap,
+      w: btnW,
+      h: btnH,
+      text: 'Rugby Mode (2P)',
+      mode: 'rugby-versus'
+    };
+
+    // Draw rugby mode label
+    ctx.fillStyle = '#FFD700';
+    ctx.font = 'bold 20px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('NEW GAME MODE', cx, rugbySingleBtn.y - 15);
+
+    // Draw rugby buttons
+    drawBtn(rugbySingleBtn, rugbySingleBtn.text, state.landingHover === 'rugby-single', 'rugby-single');
+    drawBtn(rugbyVersusBtn, rugbyVersusBtn.text, state.landingHover === 'rugby-versus', 'rugby-versus');
+
+    // Store button positions for input handling
+    state.landingButtons = state.landingButtons || {};
+    state.landingButtons['rugby-single'] = rugbySingleBtn;
+    state.landingButtons['rugby-versus'] = rugbyVersusBtn;
+
     // High score display on landing screen
     if (state.highScore && state.highScore.score > 0) {
       ctx.fillStyle = '#aaa';
