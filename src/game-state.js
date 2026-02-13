@@ -783,11 +783,36 @@ export function update(state, dt) {
   }
   // Scoring (ball exits left/right bounds)
   if (ball.x - ball.r <= 0) {
-    state.score.right += 1;
+    // Check for goal post hit
+    let goalPostHit = false;
+    if (state.rugbyMode?.enabled) {
+      goalPostHit = rugby.checkGoalPostHit(state, ball);
+      if (goalPostHit) {
+        state.rugbyMode.goalPost.active = false; // Despawn goal post
+        console.log('[Rugby] GOAL POST HIT!');
+      }
+    }
+
+    // Calculate score with multiplier and goal post bonus
+    const points = state.rugbyMode?.enabled
+      ? rugby.calculateScore(1, state.rugbyMode.multiplier, goalPostHit)
+      : 1;
+
+    state.score.right += points;
+
+    // Reset rally if rugby mode
+    if (state.rugbyMode?.enabled) {
+      rugby.resetRally(state);
+    }
+
     resetBall(ball, state.width / 2, state.height / 2);
 
     // Check for win condition
-    if (state.score.right >= state.winScore) {
+    const winScore = state.rugbyMode?.enabled
+      ? state.rugbySettings.targetScore
+      : state.winScore;
+
+    if (state.score.right >= winScore) {
       state.gameOver = true;
       state.winner = 'right';
       soundManager.playWin(); // Sound effect for winning
@@ -799,11 +824,36 @@ export function update(state, dt) {
   }
 
   if (ball.x + ball.r >= state.width) {
-    state.score.left += 1;
+    // Check for goal post hit
+    let goalPostHit = false;
+    if (state.rugbyMode?.enabled) {
+      goalPostHit = rugby.checkGoalPostHit(state, ball);
+      if (goalPostHit) {
+        state.rugbyMode.goalPost.active = false; // Despawn goal post
+        console.log('[Rugby] GOAL POST HIT!');
+      }
+    }
+
+    // Calculate score with multiplier and goal post bonus
+    const points = state.rugbyMode?.enabled
+      ? rugby.calculateScore(1, state.rugbyMode.multiplier, goalPostHit)
+      : 1;
+
+    state.score.left += points;
+
+    // Reset rally if rugby mode
+    if (state.rugbyMode?.enabled) {
+      rugby.resetRally(state);
+    }
+
     resetBall(ball, state.width / 2, state.height / 2);
 
     // Check for win condition
-    if (state.score.left >= state.winScore) {
+    const winScore = state.rugbyMode?.enabled
+      ? state.rugbySettings.targetScore
+      : state.winScore;
+
+    if (state.score.left >= winScore) {
       state.gameOver = true;
       state.winner = 'left';
       soundManager.playWin(); // Sound effect for winning
