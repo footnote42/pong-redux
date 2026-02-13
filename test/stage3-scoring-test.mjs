@@ -8,6 +8,7 @@ console.log('Testing Stage 3: Scoring & Win Conditions...\n');
 console.log('Test 1: Serve delay after scoring');
 const state1 = createInitialState(800, 600);
 startPlaying(state1, 'versus');  // Start in versus mode to avoid CPU interference
+state1.gameState = 'PLAYING';  // Bypass transition for testing
 state1.serveTimer = 0;  // Clear serve timer so update can process scoring
 state1.ball.x = -10; // Force ball out of left boundary
 update(state1, 0.016);
@@ -20,6 +21,7 @@ console.log('✅ Serve delay works correctly\n');
 console.log('Test 2: Ball serves after timer expires');
 const state2 = createInitialState(800, 600);
 startPlaying(state2, 'versus');
+state2.gameState = 'PLAYING';  // Bypass transition for testing
 state2.serveTimer = 0.5;
 state2.ball.vx = 0;
 state2.ball.vy = 0;
@@ -32,6 +34,7 @@ console.log('✅ Ball serves after timer expires\n');
 console.log('Test 3: Win condition at 11 points');
 const state3 = createInitialState(800, 600);
 startPlaying(state3, 'versus');
+state3.gameState = 'PLAYING';  // Bypass transition for testing
 state3.serveTimer = 0;  // Clear serve timer
 state3.score.left = 10; // One point away from winning
 state3.ball.x = state3.width + 10; // Force ball out of right boundary
@@ -46,6 +49,7 @@ console.log('✅ Win condition works at 11 points\n');
 console.log('Test 4: Game stops updating when over');
 const state4 = createInitialState(800, 600);
 startPlaying(state4, 'versus');
+state4.gameState = 'PLAYING';  // Bypass transition for testing
 state4.gameOver = true;
 state4.winner = 'right';
 state4.ball.x = 400;
@@ -59,6 +63,7 @@ console.log('✅ Game stops updating when over\n');
 console.log('Test 5: Restart functionality');
 const state5 = createInitialState(800, 600);
 startPlaying(state5, 'versus');
+state5.gameState = 'PLAYING';  // Bypass transition for testing
 state5.score.left = 11;
 state5.score.right = 7;
 state5.gameOver = true;

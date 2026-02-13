@@ -64,6 +64,7 @@ console.log('Wall bounce OK');
 // swept guard (fast crossing)
 const state = createInitialState(600, 400);
 startPlaying(state, 'versus');
+state.gameState = 'PLAYING'; // Bypass transition for testing
 state.serveTimer = 0;
 state.paused = false;
 const leftP = state.paddles.left;
@@ -78,6 +79,7 @@ console.log('Swept collision guard OK');
 // Corner collision: ball overlapping right paddle near top and moving up-right
 const s2 = createInitialState(600, 400);
 startPlaying(s2, 'versus');
+s2.gameState = 'PLAYING'; // Bypass transition for testing
 s2.serveTimer = 0;
 s2.paused = false;
 const rightP = s2.paddles.right;
@@ -97,6 +99,7 @@ console.log('Corner collision handling OK');
 // Spawn inside paddle: simulate scoring serve that would land inside a paddle
 const s3 = createInitialState(600, 400);
 startPlaying(s3, 'versus');
+s3.gameState = 'PLAYING'; // Bypass transition for testing
 s3.serveTimer = 0;
 s3.paused = false;
 const leftP3 = s3.paddles.left;
