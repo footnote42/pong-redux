@@ -21,6 +21,9 @@ nul
 # Tooling / artifacts
 .playwright-mcp/
 .claude/
+.cleo/
+claudedocs/
+.serena/
 *.png
 !assets/**/*.png
 

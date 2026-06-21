@@ -73,18 +73,5 @@ export function createGame(canvas) {
     detachInputHandlers();
   }
 
-  function pause() {
-    running = false;
-    state.paused = true;
-  }
-
-  function resume() {
-    if (running) return;
-    running = true;
-    state.paused = false;
-    lastTime = performance.now();
-    rafId = requestAnimationFrame(loop);
-  }
-
-  return { start, stop, pause, resume, getState: () => state };
+  return { start, stop, getState: () => state };
 }

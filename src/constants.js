@@ -87,8 +87,6 @@ export const RUGBY = {
   GOAL_POST_POST_WIDTH: 4,         // Width of vertical posts
   GOAL_POST_CROSSBAR_WIDTH: 3,     // Width of horizontal crossbar
   GOAL_POST_DURATION: 5.0,         // Active duration in seconds
-  GOAL_POST_SPAWN_MIN: Infinity,   // DEPRECATED: Goal posts disabled
-  GOAL_POST_SPAWN_MAX: Infinity,   // DEPRECATED: Goal posts disabled
   GOAL_POST_BONUS_BASE: 10,        // Base bonus points for hitting goal post
   RALLY_THRESHOLDS: {              // Rally count → multiplier thresholds
     MULT_2X: 3,

@@ -131,7 +131,7 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
         width: RUGBY.GOAL_POST_WIDTH,
         height: RUGBY.GOAL_POST_HEIGHT,
         timer: 0,
-        spawnTimer: RUGBY.GOAL_POST_SPAWN_MIN
+        spawnTimer: Infinity
       }
     },
 
@@ -274,7 +274,6 @@ export function setEndlessMode(state, enabled) {
  * @param {string} mode - 'rugby-single' or 'rugby-versus'
  */
 export function startRugbyMode(state, mode) {
-  console.log('[DEBUG] Starting Rugby mode...');
   state.gameMode = mode;
   state.rugbyMode.enabled = true;
   state.rugbyMode.spin = 0;
@@ -282,15 +281,8 @@ export function startRugbyMode(state, mode) {
   state.rugbyMode.multiplier = 1;
   state.rugbyMode.goalPost.active = false;
 
-  // Check if goal posts are disabled to prevent NaN
-  if (RUGBY.GOAL_POST_SPAWN_MIN === Infinity) {
-    state.rugbyMode.goalPost.spawnTimer = Infinity;
-    console.log('[DEBUG] Goal posts disabled - spawnTimer set to Infinity');
-  } else {
-    state.rugbyMode.goalPost.spawnTimer = RUGBY.GOAL_POST_SPAWN_MIN +
-      Math.random() * (RUGBY.GOAL_POST_SPAWN_MAX - RUGBY.GOAL_POST_SPAWN_MIN);
-    console.log('[DEBUG] Goal post spawnTimer:', state.rugbyMode.goalPost.spawnTimer);
-  }
+  // Goal posts disabled (SPAWN_MIN/MAX removed); keep spawnTimer at Infinity
+  state.rugbyMode.goalPost.spawnTimer = Infinity;
   state.rugbySettings.elapsedTime = 0;
 
   // Initialize ball spin property
@@ -306,8 +298,6 @@ export function startRugbyMode(state, mode) {
   // Reset and start game
   restartGame(state);
   startTransition(state, state.gameState, 'PLAYING');
-
-  console.log('[Rugby] Mode started:', mode);
 }
 
 /**
@@ -316,30 +306,21 @@ export function startRugbyMode(state, mode) {
  * @param {number} dt - Delta time in seconds
  */
 export function updateRugbyPhysics(state, dt) {
-  // Diagnostic logging
-  const frameLog = Math.random() < 0.1; // Log 10% of frames to avoid spam
-  if (frameLog) console.log('[DEBUG] updateRugbyPhysics START - dt:', dt);
-
   // Update paddle velocities for momentum calculations
   rugby.updatePaddleVelocity(state.paddles.left, dt);
   rugby.updatePaddleVelocity(state.paddles.right, dt);
 
   // Update spin decay
   rugby.updateSpin(state.ball, state.rugbyMode, dt);
-  if (frameLog) console.log('[DEBUG] Spin after decay:', state.rugbyMode.spin);
 
   // Update ball visual rotation based on spin and velocity
   if (!state.ball.angle) state.ball.angle = 0;
   const speed = Math.hypot(state.ball.vx, state.ball.vy);
-  const rotationSpeed = state.rugbyMode.spin * 3.0; // radians per second from spin
-  state.ball.angle += rotationSpeed * dt + (speed / 500) * dt; // Base rotation from movement
-
-  if (frameLog) console.log('[DEBUG] Ball angle:', state.ball.angle, 'speed:', speed);
+  const rotationSpeed = state.rugbyMode.spin * 3.0;
+  state.ball.angle += rotationSpeed * dt + (speed / 500) * dt;
 
   // Update goal post system
-  if (frameLog) console.log('[DEBUG] About to update goal post, spawnTimer:', state.rugbyMode.goalPost.spawnTimer);
   rugby.updateGoalPost(state, dt);
-  if (frameLog) console.log('[DEBUG] Goal post updated, spawnTimer:', state.rugbyMode.goalPost.spawnTimer);
 
   // Update elapsed time
   state.rugbySettings.elapsedTime += dt;
@@ -353,10 +334,6 @@ export function updateRugbyPhysics(state, dt) {
       state.gameOver = true;
       state.winner = winner;
       soundManager.playWin();
-      console.log('[Rugby] Time limit reached, winner:', winner);
-    } else {
-      // Tied - continue playing (overtime)
-      console.log('[Rugby] Time limit reached, tied - continuing');
     }
   }
 }
@@ -374,7 +351,6 @@ export function setRugbyTargetScore(state, score) {
 
   state.rugbySettings.targetScore = score;
   persistRugbySettings(state);
-  console.log('[Rugby] Target score set to', score);
 }
 
 /**
@@ -390,7 +366,6 @@ export function setRugbyTimeLimit(state, seconds) {
 
   state.rugbySettings.timeLimit = seconds;
   persistRugbySettings(state);
-  console.log('[Rugby] Time limit set to', seconds, 'seconds');
 }
 
 /**
@@ -810,8 +785,7 @@ export function update(state, dt) {
     ball.x = right.x - ball.r;
     bounceOffHorizontalEdge(ball, state.height);
   } else if (isCircleRectColliding(ball, left)) {
-    // positional correction
-    const res = resolveCircleRectPenetration(ball, left);
+    resolveCircleRectPenetration(ball, left);
 
     // Rugby mode: calculate spin and apply momentum before reflection
     if (state.rugbyMode?.enabled) {
@@ -837,7 +811,7 @@ export function update(state, dt) {
     // In corner cases the ball may also collide with top/bottom - re-check to clamp position
     bounceOffHorizontalEdge(ball, state.height);
   } else if (isCircleRectColliding(ball, right)) {
-    const res = resolveCircleRectPenetration(ball, right);
+    resolveCircleRectPenetration(ball, right);
 
     // Rugby mode: calculate spin and apply momentum before reflection
     if (state.rugbyMode?.enabled) {
@@ -867,8 +841,7 @@ export function update(state, dt) {
     if (state.rugbyMode?.enabled) {
       goalPostHit = rugby.checkGoalPostHit(state, ball);
       if (goalPostHit) {
-        state.rugbyMode.goalPost.active = false; // Despawn goal post
-        console.log('[Rugby] GOAL POST HIT!');
+        state.rugbyMode.goalPost.active = false;
       }
     }
 
@@ -909,8 +882,7 @@ export function update(state, dt) {
     if (state.rugbyMode?.enabled) {
       goalPostHit = rugby.checkGoalPostHit(state, ball);
       if (goalPostHit) {
-        state.rugbyMode.goalPost.active = false; // Despawn goal post
-        console.log('[Rugby] GOAL POST HIT!');
+        state.rugbyMode.goalPost.active = false;
       }
     }
 

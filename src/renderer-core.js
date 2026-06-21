@@ -18,10 +18,6 @@ import {
     drawSettings
 } from './renderer-menu.js';
 
-export function clearCanvas(ctx) {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-}
-
 export function render(state, ctx, interp = 0) {
     const w = ctx.canvas.width;
     const h = ctx.canvas.height;

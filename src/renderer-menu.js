@@ -287,10 +287,7 @@ export function drawSettings(ctx, state, w, h) {
     }
 }
 
-// ... include all drawXXXSettings functions (Gameplay, Customization, Audio, Rugby, About) ...
-// (Omitting full implementation details here for brevity, but will include in actual file write)
 function drawGameplaySettings(state, ctx, w, h, panelX, contentY, panelW, contentH) {
-    // ... implementation copied from renderer.js ...
     let y = contentY + 20;
     ctx.textAlign = 'left';
     ctx.font = '18px monospace';

@@ -113,8 +113,6 @@ export function spawnGoalPost(state) {
   gp.y = minY + Math.random() * (maxY - minY);
   gp.active = true;
   gp.timer = RUGBY.GOAL_POST_DURATION;
-
-  console.log(`[Rugby] Goal post spawned at (${gp.x.toFixed(1)}, ${gp.y.toFixed(1)}), duration=${gp.timer}s`);
 }
 
 /**
@@ -133,15 +131,7 @@ export function updateGoalPost(state, dt) {
       // Deactivate and set random spawn timer
       gp.active = false;
 
-      // Check if goal posts are disabled (Infinity spawn timers)
-      if (RUGBY.GOAL_POST_SPAWN_MIN === Infinity) {
-        gp.spawnTimer = Infinity; // Keep disabled
-        console.log(`[Rugby] Goal post expired, feature disabled`);
-      } else {
-        gp.spawnTimer = RUGBY.GOAL_POST_SPAWN_MIN +
-          Math.random() * (RUGBY.GOAL_POST_SPAWN_MAX - RUGBY.GOAL_POST_SPAWN_MIN);
-        console.log(`[Rugby] Goal post expired, next spawn in ${gp.spawnTimer.toFixed(1)}s`);
-      }
+      gp.spawnTimer = Infinity; // goal posts disabled
     }
   } else {
     // Countdown spawn timer
@@ -196,7 +186,6 @@ export function updateRallyMultiplier(state) {
     rugby.multiplier = 1;
   }
 
-  console.log(`[Rugby] Rally count: ${rugby.rallyCount}, multiplier: ${rugby.multiplier}x`);
 }
 
 /**
@@ -207,8 +196,6 @@ export function resetRally(state) {
   const rugby = state.rugbyMode;
   rugby.rallyCount = 0;
   rugby.multiplier = 1;
-
-  console.log('[Rugby] Rally reset');
 }
 
 /**

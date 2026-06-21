@@ -1,7 +1,7 @@
 // src/renderer-game.js
 // Game entity rendering (Paddles, Ball, Particles)
 
-import { CANVAS, UI, PADDLE, BALL, RUGBY, GAME, PHYSICS } from './constants.js';
+import { UI, PADDLE, BALL, RUGBY } from './constants.js';
 
 // --- Helper Functions ---
 
