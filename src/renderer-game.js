@@ -129,48 +129,6 @@ export function drawRugbyBall(ctx, ball) {
     ctx.restore();
 }
 
-export function drawGoalPost(ctx, goalPost) {
-    if (!goalPost || !goalPost.active) return;
-
-    const x = goalPost.x;
-    const y = goalPost.y;
-    const w = goalPost.width || 40;
-    const h = goalPost.height || 60;
-    const postWidth = 4;
-    const crossbarHeight = 30;
-    const crossbarWidth = 3;
-
-    ctx.save();
-    ctx.translate(x, y);
-
-    // Draw glowing effect
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = '#ffff00';
-
-    // Draw H-shape: two vertical posts + crossbar
-    ctx.fillStyle = '#ffff00';
-
-    // Left post
-    ctx.fillRect(-w / 2, -h / 2, postWidth, h);
-
-    // Right post
-    ctx.fillRect(w / 2 - postWidth, -h / 2, postWidth, h);
-
-    // Crossbar (horizontal)
-    ctx.fillRect(-w / 2, -h / 2 + crossbarHeight, w, crossbarWidth);
-
-    // Reset shadow
-    ctx.shadowBlur = 0;
-
-    // Draw "GOAL" label
-    ctx.fillStyle = '#fff';
-    ctx.font = '12px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('GOAL', 0, h / 2 + 15);
-
-    ctx.restore();
-}
-
 
 export function drawBallTrail(ctx, trail, radius, color) {
     if (!trail) return;

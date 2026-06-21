@@ -77,7 +77,7 @@ export const AUDIO = {
 export const RUGBY = {
   SPIN_DECAY_RATE: 0.98,           // Spin multiplier per second
   SPIN_SNAP_THRESHOLD: 0.01,       // Snap to zero below this value
-  MAX_BOUNCE_VARIANCE_DEG: 30,     // Max bounce angle variance in degrees (increased from 20)
+  MAX_BOUNCE_VARIANCE_DEG: 50,     // Max bounce angle variance in degrees
   MOMENTUM_FACTOR_DIVISOR: 1000,   // Paddle velocity divisor for momentum
   MAX_BALL_SPEED_MULTIPLIER: 2.5,  // Cap ball speed at 2.5x base
   SPIN_GAIN_FACTOR: 0.75,          // Spin gain multiplier (increased from 0.5)

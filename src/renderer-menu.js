@@ -90,12 +90,20 @@ export function drawLanding(ctx, state, w, h) {
     drawSettingsGear(ctx, w, state.settingsHover === 'gear');
 }
 
+export function getPauseButtons(w, h) {
+    const bw = 200, bh = 44, cx = w / 2;
+    return {
+        resume:   { x: cx - bw / 2, y: h / 2 + 60,  w: bw, h: bh, text: 'Resume',       mode: 'resume' },
+        settings: { x: cx - bw / 2, y: h / 2 + 116, w: bw, h: bh, text: 'Settings',     mode: 'settings' },
+        quit:     { x: cx - bw / 2, y: h / 2 + 172, w: bw, h: bh, text: 'Quit to Menu', mode: 'quit' },
+    };
+}
+
 export function drawPause(ctx, w, h, state) {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     ctx.fillRect(0, 0, w, h);
 
     ctx.save();
-    // Pulsing animation
     const pulse = 1.0 + Math.sin(Date.now() / 250) * 0.05;
     ctx.translate(w / 2, h / 2);
     ctx.scale(pulse, pulse);
@@ -106,10 +114,10 @@ export function drawPause(ctx, w, h, state) {
     ctx.fillText('PAUSED', 0, 0);
     ctx.restore();
 
-    ctx.fillStyle = '#aaa';
-    ctx.font = '16px monospace';
-    ctx.fillText('Press P or ESC to Resume', w / 2, h / 2 + 50);
-    ctx.fillText('Press M for Menu', w / 2, h / 2 + 80);
+    const btns = getPauseButtons(w, h);
+    for (const key in btns) {
+        drawButton(ctx, btns[key], null);
+    }
 }
 
 export function drawVictory(ctx, state, w, h) {

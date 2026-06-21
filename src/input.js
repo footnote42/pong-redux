@@ -2,9 +2,9 @@
 // Keyboard input handling - maps keys to paddle directions and pause
 
 import { setPaddleDirection } from './paddle.js';
-import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, triggerButtonPress, startRugbyMode, setRugbyTargetScore, setRugbyTimeLimit } from './game-state.js';
+import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, triggerButtonPress, startRugbyMode, setRugbyTargetScore, setRugbyTimeLimit, showLanding } from './game-state.js';
 import { UI, BALL, GAME } from './constants.js';
-import { getLandingButtons } from './renderer-menu.js';
+import { getLandingButtons, getPauseButtons } from './renderer-menu.js';
 import { soundManager } from './sound.js';
 
 let _state = null;
@@ -95,6 +95,13 @@ function keydown(e) {
     case 'Escape':
       _state.paused = !_state.paused;
       break;
+    case 'm':
+    case 'M':
+      if (_state.paused) {
+        _state.paused = false;
+        showLanding(_state);
+      }
+      break;
     case ' ':
       if (_state.gameOver) restartGame(_state);
       break;
@@ -127,8 +134,10 @@ export function attachInputHandlers(state, canvas = null) {
     const pmove = (e) => {
       if (!_state) return;
       const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
 
       if (_state.showSettings) {
         _state.settingsHover = detectSettingsHover(x, y, _state);
@@ -159,11 +168,32 @@ export function attachInputHandlers(state, canvas = null) {
     const pdown = (e) => {
       if (!_state) return;
       const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
 
       if (_state.showSettings) {
         handleSettingsClick(x, y, _state);
+        return;
+      }
+
+      if (_state.paused && !_state.showSettings) {
+        const btns = getPauseButtons(_state.width, _state.height);
+        for (const key in btns) {
+          const btn = btns[key];
+          if (pointInRect(x, y, btn)) {
+            if (btn.mode === 'resume') {
+              _state.paused = false;
+            } else if (btn.mode === 'settings') {
+              _state.showSettings = true;
+            } else if (btn.mode === 'quit') {
+              _state.paused = false;
+              showLanding(_state);
+            }
+            return;
+          }
+        }
         return;
       }
 

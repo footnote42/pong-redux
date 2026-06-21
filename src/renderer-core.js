@@ -6,7 +6,6 @@ import {
     drawPaddle,
     drawBall,
     drawRugbyBall,
-    drawGoalPost,
     drawParticles,
     drawBallTrail,
     drawScore
@@ -40,11 +39,6 @@ export function render(state, ctx, interp = 0) {
 
     // 3. Draw Game World (if active)
     if (state.gameState === 'PLAYING' || state.gameState === 'PAUSED' || state.gameState === 'GAME_OVER') {
-        // Rugby mode: Draw goal post zones
-        if (state.rugbyMode?.enabled && state.gameState === 'PLAYING') {
-            drawGoalPost(ctx, state.rugbyMode.goalPost);
-        }
-
         // Paddles
         const left = state.paddles.left;
         const right = state.paddles.right;

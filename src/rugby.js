@@ -95,77 +95,6 @@ export function applyMomentumImpact(ball, paddle, hitOffset) {
 }
 
 /**
- * Spawns a goal post at a random position on the field
- * @param {Object} state - Game state with rugbyMode.goalPost properties
- */
-export function spawnGoalPost(state) {
-  const gp = state.rugbyMode.goalPost;
-  const padding = 100; // Keep away from edges and paddles
-
-  // Calculate spawn bounds with padding
-  const minX = padding;
-  const maxX = state.width - padding;
-  const minY = padding;
-  const maxY = state.height - padding;
-
-  // Set random X and Y position
-  gp.x = minX + Math.random() * (maxX - minX);
-  gp.y = minY + Math.random() * (maxY - minY);
-  gp.active = true;
-  gp.timer = RUGBY.GOAL_POST_DURATION;
-}
-
-/**
- * Updates goal post lifecycle (spawn/despawn timers)
- * @param {Object} state - Game state with rugbyMode.goalPost properties
- * @param {number} dt - Delta time in seconds
- */
-export function updateGoalPost(state, dt) {
-  const gp = state.rugbyMode.goalPost;
-
-  if (gp.active) {
-    // Countdown active timer
-    gp.timer -= dt;
-
-    if (gp.timer <= 0) {
-      // Deactivate and set random spawn timer
-      gp.active = false;
-
-      gp.spawnTimer = Infinity; // goal posts disabled
-    }
-  } else {
-    // Countdown spawn timer
-    gp.spawnTimer -= dt;
-
-    if (gp.spawnTimer <= 0) {
-      spawnGoalPost(state);
-    }
-  }
-}
-
-/**
- * Checks if ball hit the goal post
- * @param {Object} state - Game state with rugbyMode.goalPost properties
- * @param {Object} ball - Ball object with x, y, r properties
- * @returns {boolean} True if goal post was hit
- */
-export function checkGoalPostHit(state, ball) {
-  const gp = state.rugbyMode.goalPost;
-
-  // Goal post must be active
-  if (!gp.active) return false;
-
-  // Check if ball is within goal post bounds (rectangle collision)
-  const halfWidth = gp.width / 2;
-  const halfHeight = gp.height / 2;
-
-  const inXRange = Math.abs(ball.x - gp.x) <= halfWidth + ball.r;
-  const inYRange = Math.abs(ball.y - gp.y) <= halfHeight + ball.r;
-
-  return inXRange && inYRange;
-}
-
-/**
  * Updates rally multiplier based on rally count
  * @param {Object} state - Game state with rugbyMode properties
  */
@@ -198,28 +127,3 @@ export function resetRally(state) {
   rugby.multiplier = 1;
 }
 
-/**
- * Calculates goal post bonus points
- * @param {number} multiplier - Current rally multiplier
- * @returns {number} Bonus points
- */
-export function calculateGoalPostBonus(multiplier) {
-  return RUGBY.GOAL_POST_BONUS_BASE * multiplier;
-}
-
-/**
- * Calculates total score with multiplier and goal post bonus
- * @param {number} basePoints - Base points for the score
- * @param {number} multiplier - Current rally multiplier
- * @param {boolean} goalPostHit - Whether goal post was hit
- * @returns {number} Total score
- */
-export function calculateScore(basePoints, multiplier, goalPostHit) {
-  let total = basePoints * multiplier;
-
-  if (goalPostHit) {
-    total += calculateGoalPostBonus(multiplier);
-  }
-
-  return total;
-}

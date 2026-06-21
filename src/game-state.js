@@ -124,15 +124,6 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
       spin: 0,
       rallyCount: 0,
       multiplier: 1,
-      goalPost: {
-        active: false,
-        x: 0,  // X position on field
-        y: 0,
-        width: RUGBY.GOAL_POST_WIDTH,
-        height: RUGBY.GOAL_POST_HEIGHT,
-        timer: 0,
-        spawnTimer: Infinity
-      }
     },
 
     // Rugby settings
@@ -279,10 +270,6 @@ export function startRugbyMode(state, mode) {
   state.rugbyMode.spin = 0;
   state.rugbyMode.rallyCount = 0;
   state.rugbyMode.multiplier = 1;
-  state.rugbyMode.goalPost.active = false;
-
-  // Goal posts disabled (SPAWN_MIN/MAX removed); keep spawnTimer at Infinity
-  state.rugbyMode.goalPost.spawnTimer = Infinity;
   state.rugbySettings.elapsedTime = 0;
 
   // Initialize ball spin property
@@ -318,9 +305,6 @@ export function updateRugbyPhysics(state, dt) {
   const speed = Math.hypot(state.ball.vx, state.ball.vy);
   const rotationSpeed = state.rugbyMode.spin * 3.0;
   state.ball.angle += rotationSpeed * dt + (speed / 500) * dt;
-
-  // Update goal post system
-  rugby.updateGoalPost(state, dt);
 
   // Update elapsed time
   state.rugbySettings.elapsedTime += dt;
@@ -488,7 +472,6 @@ export function showLanding(state) {
     state.rugbyMode.spin = 0;
     state.rugbyMode.rallyCount = 0;
     state.rugbyMode.multiplier = 1;
-    state.rugbyMode.goalPost.active = false;
     if (state.ball) state.ball.spin = 0;
   }
 }
@@ -712,6 +695,14 @@ export function update(state, dt) {
     // Spawn particles at wall collision
     const wallY = ball.y < state.height / 2 ? 0 : state.height;
     spawnParticles(state, ball.x, wallY, '#ffffff', 3);
+
+    if (state.rugbyMode?.enabled) {
+      const variance = ((Math.random() - 0.5) * 2) * (15 * Math.PI / 180);
+      const speed = Math.hypot(ball.vx, ball.vy);
+      const angle = Math.atan2(ball.vy, ball.vx) + variance;
+      ball.vx = Math.cos(angle) * speed;
+      ball.vy = Math.sin(angle) * speed;
+    }
   }
 
   // Paddle collisions
@@ -836,83 +827,35 @@ export function update(state, dt) {
   }
   // Scoring (ball exits left/right bounds)
   if (ball.x - ball.r <= 0) {
-    // Check for goal post hit
-    let goalPostHit = false;
-    if (state.rugbyMode?.enabled) {
-      goalPostHit = rugby.checkGoalPostHit(state, ball);
-      if (goalPostHit) {
-        state.rugbyMode.goalPost.active = false;
-      }
-    }
-
-    // Calculate score with multiplier and goal post bonus
-    const points = state.rugbyMode?.enabled
-      ? rugby.calculateScore(1, state.rugbyMode.multiplier, goalPostHit)
-      : 1;
-
+    const points = state.rugbyMode?.enabled ? state.rugbyMode.multiplier : 1;
     state.score.right += points;
-
-    // Reset rally if rugby mode
-    if (state.rugbyMode?.enabled) {
-      rugby.resetRally(state);
-    }
-
+    if (state.rugbyMode?.enabled) rugby.resetRally(state);
     resetBall(ball, state.width / 2, state.height / 2);
-
-    // Check for win condition
-    const winScore = state.rugbyMode?.enabled
-      ? state.rugbySettings.targetScore
-      : state.winScore;
-
+    const winScore = state.rugbyMode?.enabled ? state.rugbySettings.targetScore : state.winScore;
     if (state.score.right >= winScore) {
       state.gameOver = true;
       state.winner = 'right';
       spawnConfetti(state, 150);
-      soundManager.playWin(); // Sound effect for winning
+      soundManager.playWin();
     } else {
-      soundManager.playScore(); // Sound effect for scoring
-      // Set serve delay (0.5 seconds)
+      soundManager.playScore();
       state.serveTimer = PHYSICS.SERVE_DELAY_SEC;
     }
   }
 
   if (ball.x + ball.r >= state.width) {
-    // Check for goal post hit
-    let goalPostHit = false;
-    if (state.rugbyMode?.enabled) {
-      goalPostHit = rugby.checkGoalPostHit(state, ball);
-      if (goalPostHit) {
-        state.rugbyMode.goalPost.active = false;
-      }
-    }
-
-    // Calculate score with multiplier and goal post bonus
-    const points = state.rugbyMode?.enabled
-      ? rugby.calculateScore(1, state.rugbyMode.multiplier, goalPostHit)
-      : 1;
-
+    const points = state.rugbyMode?.enabled ? state.rugbyMode.multiplier : 1;
     state.score.left += points;
-
-    // Reset rally if rugby mode
-    if (state.rugbyMode?.enabled) {
-      rugby.resetRally(state);
-    }
-
+    if (state.rugbyMode?.enabled) rugby.resetRally(state);
     resetBall(ball, state.width / 2, state.height / 2);
-
-    // Check for win condition
-    const winScore = state.rugbyMode?.enabled
-      ? state.rugbySettings.targetScore
-      : state.winScore;
-
+    const winScore = state.rugbyMode?.enabled ? state.rugbySettings.targetScore : state.winScore;
     if (state.score.left >= winScore) {
       state.gameOver = true;
       state.winner = 'left';
       spawnConfetti(state, 150);
-      soundManager.playWin(); // Sound effect for winning
+      soundManager.playWin();
     } else {
-      soundManager.playScore(); // Sound effect for scoring
-      // Set serve delay (0.5 seconds)
+      soundManager.playScore();
       state.serveTimer = PHYSICS.SERVE_DELAY_SEC;
     }
   }
