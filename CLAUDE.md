@@ -1,196 +1,110 @@
 <!-- CLEO:START -->
 @.cleo/templates/AGENT-INJECTION.md
 <!-- CLEO:END -->
-# CLAUDE.md
+# CLAUDE.md — pong-redux
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Session Start Protocol
+
+1. Read `NOW.md` — current task and next action
+2. If you need the WHY or prior decisions: `C:/Users/kenho/Obsidian/Second Brain/Projects/Pong-Redux/`
+   - `MANDATE.md` — why the project exists, what success looks like
+   - `DECISIONS.md` — architectural choices and reasoning
+3. Read the relevant source files — most sessions only need NOW.md + code
+
+Commands: `/park` (session end), `/decide` (capture a decision), `/idea` (capture an idea)
+
+---
 
 ## Project Overview
 
-Vanilla JS Pong rebuild as a learning exercise. Core architectural patterns: ES6 modules, fixed-timestep game loop, centralized state, AABB collision detection. The architecture is designed to support future online multiplayer (state serialization, input buffering).
+Vanilla JS Pong rebuild. Core patterns: ES6 modules, fixed-timestep game loop, centralized state, AABB collision detection. Architecture designed to support future online multiplayer (state serialization, input buffering).
 
 ## Running the Game
 
-No build system required. Run by opening `index.html` in a browser or serve locally:
+No build system. Open `index.html` in a browser or serve locally:
 - `npx http-server .`
 - `npx serve .`
-- VS Code Live Server extension (Go Live)
+- VS Code Live Server (Go Live)
+
+---
 
 ## Architecture
 
-**Fixed-Timestep Game Loop** (src/main.js:8-44)
-- Uses `requestAnimationFrame` with accumulator pattern
-- Fixed update rate: 60Hz (16.67ms per update)
-- Separates physics updates from rendering
-- Critical for deterministic physics and future network sync
-- Includes "spiral of death" protection (250ms cap on delta time)
+**Fixed-Timestep Game Loop** (`src/main.js:8-44`)
+- `requestAnimationFrame` with accumulator pattern
+- Fixed rate: 60Hz (16.67ms per update)
+- Physics updates separated from rendering
+- Delta capped at 250ms (spiral-of-death protection)
 
-**Centralized Game State** (src/game-state.js)
-- Single source of truth: all game entities in one serializable object
-- State includes: paddles, ball, scores, dimensions, pause flag
+**Centralized Game State** (`src/game-state.js`)
+- Single source of truth — all entities in one serializable object
+- `serialize()` function ready for future networking
 - Update logic separated from rendering
-- `serialize()` function prepares for future networking features
 
-**Collision System** (src/collision.js)
+**Collision System** (`src/collision.js`)
 - AABB circle-rectangle collision detection
-- Post-collision positional correction to prevent tunneling/sticking
+- Post-collision positional correction prevents tunneling/sticking
 - Resolves penetration along minimal axis
 
-**Input Buffering** (src/input.js)
-- Attaches/detaches event listeners to prevent memory leaks
-- Input applied in fixed update step, not render loop (avoids 1-frame lag)
-- Supports W/S (left paddle), Arrow Up/Down (right paddle), P/ESC (pause), M (settings toggle)
+**Input Buffering** (`src/input.js`)
+- Event listeners attach/detach to prevent memory leaks
+- Input applied in fixed update step, not render loop
+- Keys: W/S (left paddle), Arrow Up/Down (right paddle), P/ESC (pause), M (settings toggle)
 
 **Module Structure**
-- `main.js` - Entry point, game loop
-- `game-state.js` - State management and update logic
-- `paddle.js` - Paddle entity and movement
-- `ball.js` - Ball entity, physics, serving, bounce angle computation
-- `collision.js` - Circle-rect collision detection and resolution
-- `renderer.js` - Canvas drawing (411 lines - consider splitting)
-- `input.js` - Keyboard and mouse handlers (380 lines - consider splitting)
-- `ai.js` - CPU opponent with configurable difficulty
+- `main.js` — entry point, game loop
+- `game-state.js` — state management and update logic
+- `paddle.js` — paddle entity and movement
+- `ball.js` — ball entity, physics, serving, bounce angle
+- `collision.js` — circle-rect collision detection and resolution
+- `renderer-core.js` — canvas setup and shared drawing utilities
+- `renderer-game.js` — gameplay rendering (ball, paddles, particles, effects)
+- `renderer-menu.js` — landing screen, settings panel, game over UI
+- `input.js` — keyboard and mouse handlers
+- `ai.js` — CPU opponent with configurable difficulty
+- `sound.js` — procedural Web Audio synthesis
+- `rugby.js` — Rugby mode physics engine (opt-in, isolated)
+
+---
 
 ## Key Implementation Details
 
-**Ball Reflection from Paddles** (src/ball.js:52-60)
-- Bounce angle varies based on hit offset from paddle center
+**Ball Reflection** (`src/ball.js:52-60`)
+- Bounce angle varies by hit offset from paddle center
 - Max deflection: 60 degrees
-- Direction parameter: +1 for right, -1 for left
 - Preserves ball speed on reflection
 
-**Paddle Movement** (src/paddle.js:16-25)
-- Velocity can be directional (-1, 0, 1) or continuous (px/s)
+**Paddle Movement** (`src/paddle.js:16-25`)
+- Velocity: directional (-1, 0, 1) or continuous (px/s)
 - Clamped to canvas bounds
-- Position stored as center Y, rendering adjusts by half-height
+- Position stored as center Y; rendering adjusts by half-height
 
-**Collision Detection** (src/collision.js:8-21)
-- Finds closest point on rectangle to circle center
-- Checks if distance to closest point ≤ ball radius
-- Paddle Y stored as center, so rect bounds computed as `y ± h/2`
+**Collision Detection** (`src/collision.js:8-21`)
+- Closest point on rectangle to circle center
+- Distance to closest point ≤ ball radius = collision
+- Paddle Y is center, so rect bounds = `y ± h/2`
 
-**Scoring** (src/game-state.js:57-67)
-- Ball exiting left boundary scores point for right player
-- Ball exiting right boundary scores point for left player
+**Scoring** (`src/game-state.js:57-67`)
+- Ball exits left → right player scores
+- Ball exits right → left player scores
 - Ball resets to center with random serve direction
 
-## Technical Constraints from TRD
-
-1. **Fixed timestep is mandatory** - Variable timestep causes physics bugs and prevents future online sync
-2. **Centralized state object** - Required for serialization and debugging
-3. **AABB collision** - Chosen over circle collision for simplicity
-4. **No object allocation per frame** - Reuse objects to avoid GC spikes
-5. **Named ES6 exports** - Keep modules single-responsibility
+---
 
 ## Common Pitfalls
 
-- Ball tunneling through paddles: Ensure positional correction after collision (src/game-state.js:48,53)
-- Ball sticking to paddle: Set ball X position explicitly after reflection (src/game-state.js:48,53)
-- Input lag: Never read input inside render loop, apply in fixed update
-- Frame-rate dependent physics: Always use fixed timestep, not raw deltaTime
-- Spiral of death: Cap deltaTime when tab regains focus (src/main.js:31)
+- Ball tunneling through paddles: positional correction must run after collision (`src/game-state.js:48,53`)
+- Ball sticking to paddle: set ball X explicitly after reflection
+- Input lag: never read input inside render loop — apply in fixed update
+- Frame-rate dependent physics: always use fixed timestep, not raw deltaTime
+- Spiral of death: delta cap in `src/main.js:31`
+
+---
 
 ## Debugging Tips
 
-- Use DevTools → Performance to profile frame times and GC spikes
-- Throttle CPU in DevTools to test fixed timestep behavior
+- DevTools → Performance: profile frame times and GC spikes
+- Throttle CPU in DevTools to test fixed timestep behaviour
 - Increase ball speed temporarily to reproduce collision edge cases
-- Add console logs in `collision.js` and `ball.js` to inspect collision responses
-
-## Current Status (2025-12-22 - Stage 13 Complete)
-
-**Completed Features:**
-- ✅ Fixed-timestep game loop with accumulator pattern
-- ✅ Two-player local multiplayer (W/S and Arrow keys)
-- ✅ Single-player mode with CPU opponent (easy/medium/hard)
-- ✅ Landing screen with mode selection
-- ✅ Settings menu with gameplay and audio tabs
-- ✅ Score tracking and high score persistence
-- ✅ Win condition (configurable: 5, 7, 11, 15, 21 points)
-- ✅ Swept collision detection for corner cases
-- ✅ Ball speed customization (0.5x - 2.0x slider + presets)
-- ✅ **Paddle customization (Stage 9)** - Four styles: Classic, Retro, Neon, Custom with color pickers
-- ✅ **Ball customization (Stage 10)** - Four styles: Classic, Retro, Glow, Soccer
-- ✅ **Ball effects (Stage 10)** - Trail effect with configurable length, collision flash effect
-- ✅ **Difficulty tweaks (Stage 11)** - Ball speed presets (Slow/Normal/Fast/Insane), paddle size slider (0.5x-1.5x), endless mode toggle
-- ✅ **Sound effects system (Stage 12)** - Procedural Web Audio API sounds, paddle/wall/score/win/UI sounds, volume control
-- ✅ Settings accessible during gameplay (M key toggle)
-- ✅ **Visual polish & animations (Stage 13)** - Smooth transitions, button animations, score lerping, pause effects, particle system
-
-**Known Issues:**
-- None - all core features working correctly
-
-**Code Quality Assessment:**
-- Overall Score: 9.5/10 (Portfolio-Ready)
-- Strengths: Architecture, game loop, collision detection, visual customization, effects system, gameplay tuning, audio feedback, animation polish, comprehensive testing
-- Portfolio Highlights: Professional animations, particle effects, smooth transitions, extensive customization, procedural audio
-- Future Enhancements: Mobile controls, online multiplayer, advanced stats tracking (all optional)
-
-**Recent Additions (Stage 9, 10 & 11):**
-
-**Paddle Customization** (src/renderer.js:163-251, src/game-state.js:125-142)
-- Four rendering styles with distinct visual characteristics
-- Custom color support with color cycling (10 preset colors)
-- Settings persist via localStorage
-- No impact on collision detection or physics
-
-**Ball Customization** (src/renderer.js:252-366, src/game-state.js:145-169)
-- Four ball styles: Classic (circle), Retro (rotated square), Glow (neon effect), Soccer (pentagon pattern)
-- Trail effect: Object-pooled array of positions with alpha fade
-- Collision flash: 100ms flash on paddle/wall collisions
-- Performance-optimized: No per-frame allocations
-
-**Difficulty & Gameplay Tweaks** (src/constants.js, src/game-state.js:182-201, src/renderer.js:489-608)
-- Ball speed presets: Four clickable buttons (Slow 0.7x, Normal 1.0x, Fast 1.3x, Insane 1.8x)
-- Paddle size slider: 0.5x to 1.5x multiplier affecting both paddles
-- Endless mode toggle: Disables win condition (sets winScore to 999)
-- Settings panel height increased (80%) with optimized spacing
-- All settings persist via localStorage and update in real-time
-
-**Sound Effects System** (src/sound.js, integrated throughout)
-- Procedural synthesis using Web Audio API (no external assets needed)
-- Five distinct sound effects: paddle hit (440Hz square wave), wall bounce (330Hz square wave), score (C-E-G chord), win (C-E-G-C melody), UI click (800Hz sine wave)
-- Fully integrated with existing audio settings (soundEnabled, volume)
-- Auto-initialization on game start (after user interaction for browser autoplay policy)
-- Real-time volume control and mute toggle
-- Sound triggers: collision detection (src/game-state.js:354-421), scoring (src/game-state.js:432-458), UI interactions (src/input.js:418-577)
-
-**Visual Polish & Animation System (Stage 13)** (src/game-state.js, src/renderer.js, src/input.js)
-- **State transitions with fade effects**: Smooth fade-out/fade-in when switching between LANDING, PLAYING, GAME_OVER states (300ms duration)
-- **Button press animations**: Scale-down effect (0.95x) on click with 100ms duration for tactile feedback
-- **Score counter animation**: Lerp-based smooth counting (10 points/second) instead of instant updates
-- **Pause overlay enhancements**: Pulsing "PAUSED" text with alpha (0.7-1.0) and scale (1.0-1.05) variation at 2Hz
-- **Particle system**: Object-pooled collision particles with physics (gravity 300px/s²), alpha fade, 500ms lifetime
-  - Wall collisions: 3 white particles
-  - Paddle collisions: 4 cyan particles (#00ff88)
-- **Animation state management**: Centralized `updateAnimations()` function called every fixed timestep
-- **Performance**: Zero allocations per frame, all particles reuse array elements, smooth 60fps
-
-**Portfolio Documentation (Stage 16)**
-- High-quality screenshots (1920x1080): Landing, gameplay, settings, customization, victory
-- GitHub Pages deployment with automated workflow
-- Enhanced README with visual showcase and comprehensive features list
-- Progress: 13/16 stages complete (81%)
-
-**Rugby Ball Mode (v1.1.0)** (src/rugby.js ~300 lines, integrated throughout)
-- **Architecture**: New rugby.js module with dedicated physics engine, state integrated in game-state.js, rendering in renderer.js
-- **Spin Mechanics**: Angular velocity calculated from paddle speed and offset, decays at 0.98/frame, affects bounce variance ±15° max
-- **Momentum Impacts**: Paddle velocity multiplies ball speed (0.8x-1.2x), capped at 2.0x base speed for balance
-- **Goal Post System**: Random spawns every 10-15s in top/bottom zones (20%-80% width), 5s duration, +3 bonus points on collision
-- **Rally Scoring**: Multiplier progression (1x→2x@3hits→3x@5hits→5x@10hits), resets on ball exit, visual feedback with color coding
-- **Rendering**: Oval ball (1.4x width), rotation based on spin, goal posts as vertical bars with glow, rally/multiplier/timer UI elements
-- **Win Conditions**: Hybrid system (target score OR time limit), configurable via settings (25/50/75/100 points, 2/3/5/10 min)
-- **Settings Tab**: Rugby tab in settings panel when mode active, persists via localStorage
-- **No Breaking Changes**: Regular Pong mode unchanged, rugby isolated to opt-in game mode
-
-**Refactoring Recommendations:**
-- Consider adding more animation variations (confetti on win, menu transitions)
-- Extract remaining magic numbers to `src/constants.js`
-- Add JSDoc documentation for animation and customization functions
-
-## Future Extensions
-
-- Ball rotation animation - Stage 10 (optional)
-- Speed lines effect - Stage 10 (optional)
-- Touch/mobile controls
-- Online multiplayer (WebSocket, state sync, input buffering already architected for this)
+- `console.log` in `collision.js` and `ball.js` to inspect collision responses
+- DevTools → click inspection for button hit area issues
