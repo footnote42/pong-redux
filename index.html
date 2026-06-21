@@ -28,6 +28,10 @@
     // Start the game (landing screen will be shown if first time)
     game.start();
 
+    // Expose state for E2E tests
+    window.__game = game;
+    window.__gameState = game.getState();
+
     // simple resize handling to keep canvas logical size (no scaling for now)
     window.addEventListener('resize', () => {
       // no-op for now. could add responsive scaling later

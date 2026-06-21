@@ -9,7 +9,13 @@
     "test:collision": "node test/run_collision_tests.mjs",
     "test:stage3": "node test/stage3-scoring-test.mjs",
     "test:stage6": "node test/stage6-cpu-test.mjs",
-    "test:stage8": "node test/stage8-settings-test.mjs"
+    "test:stage8": "node test/stage8-settings-test.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
   },
   "keywords": [
     "pong",
