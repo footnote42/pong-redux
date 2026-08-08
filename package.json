@@ -28,13 +28,13 @@
     "game-physics",
     "learning-project"
   ],
-  "author": "Wayne Sutton",
+  "author": "footnote42",
   "license": "MIT",
   "engines": {
     "node": ">=16"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/waynesutton/pong-redux"
+    "url": "https://github.com/footnote42/pong-redux"
   }
 }
