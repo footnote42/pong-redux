@@ -6,6 +6,9 @@ DONE — gameplay polish shipped: M key, pause buttons, rugby physics, goal post
 ## Next
 Manual smoke test then commit. Or park and start next milestone.
 
+## Blocker
+None.
+
 ## Context
 - Obsidian: `C:/Users/kenho/Obsidian/Second Brain/Projects/Pong-Redux/`
 - Tests: 30/30 passing (single worker; parallel first-batch flakiness is pre-existing)
