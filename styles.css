@@ -11,6 +11,14 @@ html, body {
 }
 
 canvas {
+  /* Internal resolution stays 800x600; only the displayed size scales to fit
+     the viewport (16px side gutter, room below for the credit line). */
+  box-sizing: content-box;
+  width: min(800px, calc(100vw - 36px), calc((100vh - 48px) * 4 / 3));
+  width: min(800px, calc(100vw - 36px), calc((100dvh - 48px) * 4 / 3));
+  height: auto;
+  aspect-ratio: 4 / 3;
+  touch-action: manipulation;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
   image-rendering: pixelated;
   border: 2px solid #222;
