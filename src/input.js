@@ -123,6 +123,21 @@ function keyup(e) {
   setPaddleDirection(_state.paddles.right, computeDirForRight());
 }
 
+// Map a pointer event to internal canvas coordinates. The canvas is scaled by
+// CSS to fit the viewport, and its bounding rect includes the border, so
+// subtract the border and divide by the displayed content size.
+function toCanvasCoords(canvas, e) {
+  const rect = canvas.getBoundingClientRect();
+  const bx = canvas.clientLeft;
+  const by = canvas.clientTop;
+  const contentW = rect.width - bx * 2;
+  const contentH = rect.height - by * 2;
+  return {
+    x: (e.clientX - rect.left - bx) * (canvas.width / contentW),
+    y: (e.clientY - rect.top - by) * (canvas.height / contentH),
+  };
+}
+
 export function attachInputHandlers(state, canvas = null) {
   _state = state;
   _canvas = canvas;
@@ -133,11 +148,7 @@ export function attachInputHandlers(state, canvas = null) {
   if (canvas) {
     const pmove = (e) => {
       if (!_state) return;
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const x = (e.clientX - rect.left) * scaleX;
-      const y = (e.clientY - rect.top) * scaleY;
+      const { x, y } = toCanvasCoords(canvas, e);
 
       if (_state.showSettings) {
         _state.settingsHover = detectSettingsHover(x, y, _state);
@@ -167,11 +178,7 @@ export function attachInputHandlers(state, canvas = null) {
     };
     const pdown = (e) => {
       if (!_state) return;
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const x = (e.clientX - rect.left) * scaleX;
-      const y = (e.clientY - rect.top) * scaleY;
+      const { x, y } = toCanvasCoords(canvas, e);
 
       if (_state.showSettings) {
         handleSettingsClick(x, y, _state);
