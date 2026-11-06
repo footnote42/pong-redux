@@ -3,7 +3,7 @@
 
 import { setPaddleDirection } from './paddle.js';
 import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, triggerButtonPress, startRugbyMode, setRugbyTargetScore, setRugbyTimeLimit, showLanding } from './game-state.js';
-import { UI, BALL, GAME } from './constants.js';
+import { UI, BALL, GAME, CANVAS } from './constants.js';
 import { getLandingButtons, getPauseButtons } from './renderer-menu.js';
 import { soundManager } from './sound.js';
 
@@ -123,9 +123,10 @@ function keyup(e) {
   setPaddleDirection(_state.paddles.right, computeDirForRight());
 }
 
-// Map a pointer event to internal canvas coordinates. The canvas is scaled by
+// Map a pointer event to court coordinates (800x600). The canvas is scaled by
 // CSS to fit the viewport, and its bounding rect includes the border, so
-// subtract the border and divide by the displayed content size.
+// subtract the border and divide by the displayed content size. The backing
+// store (canvas.width) may be larger for high-DPI screens, so use the court size.
 function toCanvasCoords(canvas, e) {
   const rect = canvas.getBoundingClientRect();
   const bx = canvas.clientLeft;
@@ -133,8 +134,8 @@ function toCanvasCoords(canvas, e) {
   const contentW = rect.width - bx * 2;
   const contentH = rect.height - by * 2;
   return {
-    x: (e.clientX - rect.left - bx) * (canvas.width / contentW),
-    y: (e.clientY - rect.top - by) * (canvas.height / contentH),
+    x: (e.clientX - rect.left - bx) * (CANVAS.DEFAULT_WIDTH / contentW),
+    y: (e.clientY - rect.top - by) * (CANVAS.DEFAULT_HEIGHT / contentH),
   };
 }
 

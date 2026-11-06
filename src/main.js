@@ -4,14 +4,15 @@
 import { createInitialState, update as updateState, showLanding } from './game-state.js';
 import * as renderer from './renderer-core.js';
 import { attachInputHandlers, detachInputHandlers } from './input.js';
-import { PHYSICS } from './constants.js';
+import { PHYSICS, CANVAS } from './constants.js';
 import { soundManager } from './sound.js';
 
 const { MS_PER_UPDATE, SPIRAL_OF_DEATH_CAP_MS } = PHYSICS;
 
 export function createGame(canvas) {
   const ctx = canvas.getContext('2d');
-  const state = createInitialState(canvas.width, canvas.height);
+  // Court size is fixed at 800x600; the canvas backing store may be larger (see renderer-core fitToDisplay).
+  const state = createInitialState(CANVAS.DEFAULT_WIDTH, CANVAS.DEFAULT_HEIGHT);
   let lastTime = performance.now();
   let accumulator = 0;
   let running = false;
