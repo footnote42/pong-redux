@@ -59,8 +59,18 @@
       </footer>
     </section>
   </div>
+  <div id="rotate-prompt" class="rotate-prompt" role="alert" aria-live="assertive">
+    <svg class="rotate-icon" viewBox="0 0 64 64" width="96" height="96" aria-hidden="true">
+      <rect x="22" y="6" width="20" height="36" rx="4" fill="none" stroke="currentColor" stroke-width="3"/>
+      <path d="M12 50 a24 24 0 0 0 40 0" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      <path d="M52 50 l-1 -9 m1 9 l-9 -1" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <p class="rotate-title">Please turn your phone</p>
+    <p class="rotate-sub">Pong plays sideways.</p>
+  </div>
   <script type="module">
     import { createGame } from './src/main.js';
+    import { attachRotatePrompt } from './src/rotate.js';
 
     const canvas = document.getElementById('gameCanvas');
     if (!canvas) {
@@ -75,6 +85,7 @@
     }
 
     const game = createGame(canvas);
+    attachRotatePrompt(game.getState());
 
     // Start the game; src/screens.js shows the HTML landing screen over the canvas
     game.start();

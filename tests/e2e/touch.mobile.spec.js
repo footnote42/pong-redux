@@ -58,8 +58,7 @@ test('left drag moves the left paddle by the drag distance', async ({ page }) =>
   await touch(page, 'pointermove', 1, w * 0.1, 190);
   await touch(page, 'pointerup', 1, w * 0.1, 190);
 
-  await page.waitForFunction((y) => Math.abs(window.__gameState.paddles.left.y - y) > 1, startY);
-  expect(await paddleY(page, 'left')).toBeCloseTo(startY + 40 * k, 1);
+  await expect.poll(() => paddleY(page, 'left')).toBeCloseTo(startY + 40 * k, 1);
   expect(await paddleY(page, 'right')).toBe(startRight);
 });
 
@@ -77,8 +76,7 @@ test('right drag moves the right paddle, and does not jump to the thumb', async 
   await touch(page, 'pointermove', 1, w * 0.9, 350);
   await touch(page, 'pointerup', 1, w * 0.9, 350);
 
-  await page.waitForFunction((y) => Math.abs(window.__gameState.paddles.right.y - y) > 1, startY);
-  expect(await paddleY(page, 'right')).toBeCloseTo(startY - 30 * k, 1);
+  await expect.poll(() => paddleY(page, 'right')).toBeCloseTo(startY - 30 * k, 1);
   expect(await paddleY(page, 'left')).toBe(startLeft);
 });
 
@@ -96,12 +94,8 @@ test('two simultaneous drags move both paddles in 2 Players', async ({ page }) =
   await touch(page, 'pointerup', 1, w * 0.1, 120);
   await touch(page, 'pointerup', 2, w * 0.9, 290);
 
-  await page.waitForFunction(([l, r]) => {
-    const p = window.__gameState.paddles;
-    return Math.abs(p.left.y - l) > 1 && Math.abs(p.right.y - r) > 1;
-  }, [startL, startR]);
-  expect(await paddleY(page, 'left')).toBeCloseTo(startL - 30 * k, 1);
-  expect(await paddleY(page, 'right')).toBeCloseTo(startR + 40 * k, 1);
+  await expect.poll(() => paddleY(page, 'left')).toBeCloseTo(startL - 30 * k, 1);
+  await expect.poll(() => paddleY(page, 'right')).toBeCloseTo(startR + 40 * k, 1);
 });
 
 test('in vs CPU the CPU half ignores touch and the player half moves', async ({ page }) => {
@@ -122,8 +116,7 @@ test('in vs CPU the CPU half ignores touch and the player half moves', async ({ 
   await touch(page, 'pointerdown', 2, w * 0.1, 150);
   await touch(page, 'pointermove', 2, w * 0.1, 120);
   await touch(page, 'pointerup', 2, w * 0.1, 120);
-  await page.waitForFunction((y) => Math.abs(window.__gameState.paddles.left.y - y) > 1, startL);
-  expect(await paddleY(page, 'left')).toBeCloseTo(startL - 30 * k, 1);
+  await expect.poll(() => paddleY(page, 'left')).toBeCloseTo(startL - 30 * k, 1);
 });
 
 test('in Rugby (1P) only the player half moves a paddle', async ({ page }) => {
