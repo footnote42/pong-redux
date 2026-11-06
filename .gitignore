@@ -36,3 +36,4 @@ playwright-report/
 
 # Environment
 .env
+.scratch/

@@ -65,7 +65,7 @@ export function initCPU(state, difficulty = 'medium') {
  * @param {number} dt - Delta time in seconds
  */
 export function updateCPU(state, dt) {
-  if (!state.cpu || !state.cpu.enabled || state.gameOver || state.paused) {
+  if (!state.cpu || !state.cpu.enabled || state.gameState !== 'PLAYING') {
     return;
   }
 
