@@ -1,6 +1,6 @@
 // Touch zones and Drag control: zone assignment and drag maths.
 import assert from 'node:assert/strict';
-import { zoneForX, humanZones, createTouchController, applyDrags } from '../src/touch.js';
+import { zoneForX, humanZones, createTouchController, applyDrags, isControlTarget } from '../src/touch.js';
 import { createInitialState, startPlaying, startRugbyMode, pauseGame, resumeGame } from '../src/game-state.js';
 
 console.log('Testing touch zones and drag control...');
@@ -91,5 +91,13 @@ for (const mode of ['single', 'rugby-single']) {
   applyDrags(s, c);
   assert.equal(s.paddles.left.y, 300);
 }
+
+// A touch on a control (the pause button, an overlay button) is a tap, not a drag
+const el = (matches) => ({ closest: (sel) => (matches.some((m) => sel.includes(m)) ? {} : null) });
+assert.equal(isControlTarget(el(['button'])), true, 'buttons get their tap');
+assert.equal(isControlTarget(el(['a'])), true, 'links get their tap');
+assert.equal(isControlTarget(el([])), false, 'the court is not a control');
+assert.equal(isControlTarget(null), false);
+assert.equal(isControlTarget({}), false, 'targets without closest() are not controls');
 
 console.log('touch tests passed');

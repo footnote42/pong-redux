@@ -1,7 +1,7 @@
 // src/renderer-core.js
 // Main Renderer Orchestration
 
-import { CANVAS, UI, GAME } from './constants.js';
+import { CANVAS } from './constants.js';
 import {
     drawPaddle,
     drawBall,
@@ -11,11 +11,8 @@ import {
     drawScore
 } from './renderer-game.js';
 import {
-    drawLanding,
-    drawPause,
-    drawVictory,
-    drawSettings
-} from './renderer-menu.js';
+    drawConfetti
+} from './renderer-confetti.js';
 
 // Size the canvas backing store to its displayed CSS size x devicePixelRatio,
 // and map the 800x600 court onto it. Runs every frame so resize, orientation
@@ -85,16 +82,13 @@ export function render(state, ctx, interp = 0) {
         drawScore(ctx, state);
     }
 
-    // 4. Draw Overlays / UI
-    if (state.gameState === 'LANDING') {
-        drawLanding(ctx, state, w, h);
-    } else if (state.gameState === 'PAUSED') {
-        drawPause(ctx, w, h, state);
-    } else if (state.gameState === 'GAME_OVER' || state.gameState === 'VICTORY') {
-        drawVictory(ctx, state, w, h);
+    // 4. Overlays: landing, pause and victory are HTML screens (src/screens.js);
+    // only the victory confetti is drawn here, behind the victory screen
+    if (state.gameState === 'GAME_OVER') {
+        drawConfetti(ctx, state);
     }
 
-    // 5. Draw Transitions (overlay everything except settings)
+    // 5. Draw Transitions (the settings panel is HTML, over the canvas)
     if (state.transitions.active) {
         let alpha = 0;
         if (state.transitions.type === 'fadeOut') {
@@ -105,11 +99,6 @@ export function render(state, ctx, interp = 0) {
         if (isNaN(alpha)) alpha = 0;
         ctx.fillStyle = `rgba(0, 0, 0, ${Math.max(0, Math.min(1, alpha))})`;
         ctx.fillRect(0, 0, w, h);
-    }
-
-    // 6. Draw Settings Menu (always on top if open)
-    if (state.showSettings) {
-        drawSettings(ctx, state, w, h);
     }
 }
 

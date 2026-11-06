@@ -7,6 +7,7 @@ import { attachInputHandlers, detachInputHandlers } from './input.js';
 import { PHYSICS, CANVAS } from './constants.js';
 import { soundManager } from './sound.js';
 import { applyTouchDrag } from './touch.js';
+import { mountScreens } from './screens.js';
 
 const { MS_PER_UPDATE, SPIRAL_OF_DEATH_CAP_MS } = PHYSICS;
 
@@ -18,6 +19,7 @@ export function createGame(canvas) {
   let accumulator = 0;
   let running = false;
   let rafId = null;
+  let screens = null; // HTML overlay screens (ADR 0001)
 
   function update(dt) {
     // dt in seconds
@@ -28,6 +30,7 @@ export function createGame(canvas) {
   function render(interp) {
     // delegated to renderer module
     renderer.render(state, ctx, interp);
+    if (screens) screens.sync();
   }
 
   function loop(now) {
@@ -61,6 +64,7 @@ export function createGame(canvas) {
 
     // attach input handlers (pass canvas for pointer events)
     attachInputHandlers(state, canvas);
+    screens = mountScreens(canvas.ownerDocument, state);
 
     // Landing screen is shown by default (gameState starts as 'LANDING')
     // No need to manually call showLanding here
@@ -74,6 +78,8 @@ export function createGame(canvas) {
     rafId = null;
     // detach input handlers
     detachInputHandlers();
+    if (screens) screens.unmount();
+    screens = null;
   }
 
   return { start, stop, getState: () => state };

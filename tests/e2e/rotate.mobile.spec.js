@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { BUTTONS, waitForGameState } from './helpers.js';
+import { gameModeButton, landing, waitForGameState, pauseScreen, overlayButton } from './helpers.js';
 
 // Rotate prompt: phone projects (android, iphone), which start in landscape.
 
@@ -7,6 +7,8 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.clear();
     localStorage.setItem('pong:seenInstructions', '1');
+    // Real fullscreen in headless Chromium blocks setViewportSize (install.smoke.spec.js covers the request)
+    Element.prototype.requestFullscreen = () => Promise.resolve();
   });
   await page.goto('/');
   await page.waitForFunction(() => !!window.__gameState);
@@ -22,9 +24,7 @@ async function rotate(page, to) {
 }
 
 async function startVersus(page) {
-  const box = await page.locator('#gameCanvas').boundingBox();
-  const k = (box.width - 4) / 800;
-  await page.touchscreen.tap(box.x + 2 + BUTTONS.versus.x * k, box.y + 2 + BUTTONS.versus.y * k);
+  await gameModeButton(page, 'versus').tap();
   await waitForGameState(page, 'PLAYING');
 }
 
@@ -35,6 +35,21 @@ test('landscape hides the prompt, upright shows it', async ({ page }) => {
   await page.screenshot({ path: `.scratch/rotate-prompt-${test.info().project.name}.png` });
   await rotate(page, 'landscape');
   await expect(prompt(page)).toBeHidden();
+});
+
+test('upright, the prompt sits above the HTML landing screen', async ({ page }) => {
+  await expect(landing(page)).toBeVisible();
+  await rotate(page, 'portrait');
+  await expect(prompt(page)).toBeVisible();
+  const { width, height } = page.viewportSize();
+  for (const [x, y] of [[width / 2, height / 2], [width / 4, height / 3], [width - 30, 30]]) {
+    const onTop = await page.evaluate(([x, y]) => !!document.elementFromPoint(x, y)?.closest('#rotate-prompt'), [x, y]);
+    expect(onTop).toBe(true);
+  }
+  await rotate(page, 'landscape');
+  await expect(prompt(page)).toBeHidden();
+  await expect(landing(page)).toBeVisible();
+  expect(await gameState(page)).toBe('LANDING');
 });
 
 test('rotating mid-game pauses, and turning back does not resume', async ({ page }) => {
@@ -48,8 +63,9 @@ test('rotating mid-game pauses, and turning back does not resume', async ({ page
   await page.waitForTimeout(200);
   expect(await gameState(page)).toBe('PAUSED');
 
-  // The player chooses Resume
-  await page.keyboard.press('p');
+  // The player chooses Resume on the HTML pause screen
+  await expect(pauseScreen(page)).toBeVisible();
+  await overlayButton(pauseScreen(page), 'Resume').tap();
   await waitForGameState(page, 'PLAYING');
 });
 

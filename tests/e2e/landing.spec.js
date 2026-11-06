@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { clickCanvasAt, waitForGameState, BUTTONS } from './helpers.js';
+import { gameModeButton, landing, waitForGameState } from './helpers.js';
+
+// Desktop layout and keyboard (desktop project only). Layout-agnostic landing
+// checks live in landing.smoke.spec.js; the Touch layout in landing.mobile.spec.js.
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -10,55 +13,74 @@ test.beforeEach(async ({ page }) => {
   await page.waitForFunction(() => !!window.__gameState);
 });
 
-test('loads on LANDING screen', async ({ page }) => {
-  const state = await page.evaluate(() => window.__gameState.gameState);
-  expect(state).toBe('LANDING');
+test('uses the Desktop layout inside the canvas frame', async ({ page }) => {
+  expect(await page.evaluate(() => document.documentElement.dataset.layout)).toBe('desktop');
+  const canvas = await page.locator('#gameCanvas').boundingBox();
+  const screen = await landing(page).boundingBox();
+  expect(screen.x).toBeGreaterThanOrEqual(canvas.x);
+  expect(screen.y).toBeGreaterThanOrEqual(canvas.y);
+  expect(screen.x + screen.width).toBeLessThanOrEqual(canvas.x + canvas.width);
+  expect(screen.y + screen.height).toBeLessThanOrEqual(canvas.y + canvas.height);
+  await expect(landing(page).locator('.key-hint')).toBeVisible();
 });
 
-test('single player button starts game in single mode', async ({ page }) => {
-  await clickCanvasAt(page, BUTTONS.single.x, BUTTONS.single.y);
-  await waitForGameState(page, 'PLAYING');
-  const mode = await page.evaluate(() => window.__gameState.gameMode);
-  expect(mode).toBe('single');
-});
-
-test('versus button starts game in versus mode', async ({ page }) => {
-  await clickCanvasAt(page, BUTTONS.versus.x, BUTTONS.versus.y);
-  await waitForGameState(page, 'PLAYING');
-  const mode = await page.evaluate(() => window.__gameState.gameMode);
-  expect(mode).toBe('versus');
-});
-
-test('rugby single button starts rugby mode', async ({ page }) => {
-  await clickCanvasAt(page, BUTTONS.rugbySingle.x, BUTTONS.rugbySingle.y);
-  await waitForGameState(page, 'PLAYING');
-  const enabled = await page.evaluate(() => window.__gameState.rugbyMode.enabled);
-  expect(enabled).toBe(true);
-});
-
-test('rugby versus button starts rugby mode', async ({ page }) => {
-  await clickCanvasAt(page, BUTTONS.rugbyVersus.x, BUTTONS.rugbyVersus.y);
-  await waitForGameState(page, 'PLAYING');
-  const enabled = await page.evaluate(() => window.__gameState.rugbyMode.enabled);
-  expect(enabled).toBe(true);
-});
-
-test('settings gear opens settings panel', async ({ page }) => {
-  await clickCanvasAt(page, BUTTONS.settings.x, BUTTONS.settings.y);
-  const showSettings = await page.evaluate(() => window.__gameState.showSettings);
-  expect(showSettings).toBe(true);
-});
-
-test('keyboard 1 starts single player', async ({ page }) => {
+test('landing screen comes back after quitting to the menu', async ({ page }) => {
   await page.keyboard.press('1');
   await waitForGameState(page, 'PLAYING');
-  const mode = await page.evaluate(() => window.__gameState.gameMode);
-  expect(mode).toBe('single');
+  await page.keyboard.press('p');
+  await page.keyboard.press('m');
+  await waitForGameState(page, 'LANDING');
+  await expect(landing(page)).toBeVisible();
 });
 
-test('keyboard 2 starts versus', async ({ page }) => {
-  await page.keyboard.press('2');
-  await waitForGameState(page, 'PLAYING');
-  const mode = await page.evaluate(() => window.__gameState.gameMode);
-  expect(mode).toBe('versus');
+test('Escape on the landing screen leaves it in place', async ({ page }) => {
+  await page.keyboard.press('Escape');
+  expect(await page.evaluate(() => window.__gameState.gameState)).toBe('LANDING');
+  await expect(landing(page)).toBeVisible();
+});
+
+test.describe('keyboard', () => {
+  test('1 starts vs CPU', async ({ page }) => {
+    await page.keyboard.press('1');
+    await waitForGameState(page, 'PLAYING');
+    expect(await page.evaluate(() => window.__gameState.gameMode)).toBe('single');
+  });
+
+  test('2 starts 2 Players', async ({ page }) => {
+    await page.keyboard.press('2');
+    await waitForGameState(page, 'PLAYING');
+    expect(await page.evaluate(() => window.__gameState.gameMode)).toBe('versus');
+  });
+
+  test('Enter with nothing focused starts 2 Players', async ({ page }) => {
+    await page.keyboard.press('Enter');
+    await waitForGameState(page, 'PLAYING');
+    expect(await page.evaluate(() => window.__gameState.gameMode)).toBe('versus');
+  });
+
+  test('Tab opens settings', async ({ page }) => {
+    await page.keyboard.press('Tab');
+    expect(await page.evaluate(() => window.__gameState.showSettings)).toBe(true);
+    await expect(landing(page)).toBeHidden();
+  });
+
+  test('arrow keys reach Rugby (2P) and Enter starts it', async ({ page }) => {
+    await page.keyboard.press('ArrowDown'); // focuses vs CPU
+    await expect(gameModeButton(page, 'single')).toBeFocused();
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowRight');
+    await expect(gameModeButton(page, 'rugby-versus')).toBeFocused();
+    await page.keyboard.press('Enter');
+    await waitForGameState(page, 'PLAYING');
+    expect(await page.evaluate(() => window.__gameState.gameMode)).toBe('rugby-versus');
+  });
+
+  test('Space on a focused Game mode starts it', async ({ page }) => {
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('ArrowDown');
+    await expect(gameModeButton(page, 'rugby-single')).toBeFocused();
+    await page.keyboard.press(' ');
+    await waitForGameState(page, 'PLAYING');
+    expect(await page.evaluate(() => window.__gameState.gameMode)).toBe('rugby-single');
+  });
 });
