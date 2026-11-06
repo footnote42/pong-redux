@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { BUTTONS, waitForGameState } from './helpers.js';
+import { gameModeButton, landing, waitForGameState } from './helpers.js';
 
 // Drag control tests: run on the phone projects (android, iphone).
 
@@ -12,15 +12,9 @@ test.beforeEach(async ({ page }) => {
   await page.waitForFunction(() => !!window.__gameState);
 });
 
-// Tap a landing button with a real touch tap (court coords -> screen).
-async function tapCanvasAt(page, courtX, courtY) {
-  const box = await page.locator('#gameCanvas').boundingBox();
-  const k = (box.width - 4) / 800; // 2px border each side
-  await page.touchscreen.tap(box.x + 2 + courtX * k, box.y + 2 + courtY * k);
-}
-
-async function startMode(page, button, mode) {
-  await tapCanvasAt(page, button.x, button.y);
+// Start a Game mode with a real touch tap on the HTML landing screen.
+async function startMode(page, mode) {
+  await gameModeButton(page, mode).tap();
   await waitForGameState(page, 'PLAYING');
   expect(await page.evaluate(() => window.__gameState.gameMode)).toBe(mode);
 }
@@ -52,7 +46,7 @@ async function viewportWidth(page) {
 }
 
 test('left drag moves the left paddle by the drag distance', async ({ page }) => {
-  await startMode(page, BUTTONS.versus, 'versus');
+  await startMode(page, 'versus');
   const k = await courtPerPx(page);
   const w = await viewportWidth(page);
   const startY = await paddleY(page, 'left');
@@ -69,7 +63,7 @@ test('left drag moves the left paddle by the drag distance', async ({ page }) =>
 });
 
 test('right drag moves the right paddle, and does not jump to the thumb', async ({ page }) => {
-  await startMode(page, BUTTONS.versus, 'versus');
+  await startMode(page, 'versus');
   const k = await courtPerPx(page);
   const w = await viewportWidth(page);
   const startY = await paddleY(page, 'right');
@@ -87,7 +81,7 @@ test('right drag moves the right paddle, and does not jump to the thumb', async 
 });
 
 test('two simultaneous drags move both paddles in 2 Players', async ({ page }) => {
-  await startMode(page, BUTTONS.versus, 'versus');
+  await startMode(page, 'versus');
   const k = await courtPerPx(page);
   const w = await viewportWidth(page);
   const startL = await paddleY(page, 'left');
@@ -105,7 +99,7 @@ test('two simultaneous drags move both paddles in 2 Players', async ({ page }) =
 });
 
 test('in vs CPU the CPU half ignores touch and the player half moves', async ({ page }) => {
-  await startMode(page, BUTTONS.single, 'single');
+  await startMode(page, 'single');
   const k = await courtPerPx(page);
   const w = await viewportWidth(page);
   const startL = await paddleY(page, 'left');
@@ -126,7 +120,7 @@ test('in vs CPU the CPU half ignores touch and the player half moves', async ({ 
 });
 
 test('in Rugby (1P) only the player half moves a paddle', async ({ page }) => {
-  await startMode(page, BUTTONS.rugbySingle, 'rugby-single');
+  await startMode(page, 'rugby-single');
   const w = await viewportWidth(page);
   await page.evaluate(() => { window.__gameState.serveTimer = 5; });
   const startR = await paddleY(page, 'right');
@@ -138,7 +132,7 @@ test('in Rugby (1P) only the player half moves a paddle', async ({ page }) => {
 });
 
 test('paddle stays inside the court', async ({ page }) => {
-  await startMode(page, BUTTONS.versus, 'versus');
+  await startMode(page, 'versus');
   const w = await viewportWidth(page);
   await touch(page, 'pointerdown', 1, w * 0.1, 50);
   await touch(page, 'pointermove', 1, w * 0.1, 5000);
@@ -152,7 +146,7 @@ test('paddle stays inside the court', async ({ page }) => {
 });
 
 test('touching during play does not scroll, zoom or select', async ({ page }) => {
-  await startMode(page, BUTTONS.versus, 'versus');
+  await startMode(page, 'versus');
   const w = await viewportWidth(page);
 
   // Default is prevented on the touch events that would scroll or zoom.
@@ -185,6 +179,6 @@ test('touching during play does not scroll, zoom or select', async ({ page }) =>
 });
 
 test('menus still respond to taps', async ({ page }) => {
-  await tapCanvasAt(page, BUTTONS.settings.x, BUTTONS.settings.y);
+  await landing(page).getByRole('button', { name: 'Settings' }).tap();
   await page.waitForFunction(() => window.__gameState.showSettings === true);
 });
