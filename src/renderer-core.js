@@ -11,7 +11,6 @@ import {
     drawScore
 } from './renderer-game.js';
 import {
-    drawLanding,
     drawPause,
     drawVictory,
     drawSettings
@@ -65,10 +64,8 @@ export function render(state, ctx, interp = 0) {
         drawScore(ctx, state);
     }
 
-    // 4. Draw Overlays / UI
-    if (state.gameState === 'LANDING') {
-        drawLanding(ctx, state, w, h);
-    } else if (state.gameState === 'PAUSED') {
+    // 4. Draw Overlays / UI (the landing screen is HTML: src/screen-landing.js)
+    if (state.gameState === 'PAUSED') {
         drawPause(ctx, w, h, state);
     } else if (state.gameState === 'GAME_OVER' || state.gameState === 'VICTORY') {
         drawVictory(ctx, state, w, h);

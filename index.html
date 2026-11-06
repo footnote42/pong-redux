@@ -7,8 +7,58 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
-  <a class="credit-link" href="https://waynetellis.com/workshop/projects">Built by Wayne Ellis · waynetellis.com</a>
+  <div class="stage">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <!-- Overlay screens (ADR 0001): HTML over the canvas, shown by src/screens.js -->
+    <section class="screen landing" data-screen="landing" aria-labelledby="landing-title" hidden>
+      <header class="landing-head">
+        <h1 class="landing-title" id="landing-title">PONG REDUX</h1>
+        <button type="button" class="icon-button" data-action="settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="4"/>
+            <g fill="currentColor">
+              <rect x="10" y="1" width="4" height="5" rx="1"/>
+              <rect x="10" y="1" width="4" height="5" rx="1" transform="rotate(45 12 12)"/>
+              <rect x="10" y="1" width="4" height="5" rx="1" transform="rotate(90 12 12)"/>
+              <rect x="10" y="1" width="4" height="5" rx="1" transform="rotate(135 12 12)"/>
+              <rect x="10" y="1" width="4" height="5" rx="1" transform="rotate(180 12 12)"/>
+              <rect x="10" y="1" width="4" height="5" rx="1" transform="rotate(225 12 12)"/>
+              <rect x="10" y="1" width="4" height="5" rx="1" transform="rotate(270 12 12)"/>
+              <rect x="10" y="1" width="4" height="5" rx="1" transform="rotate(315 12 12)"/>
+            </g>
+          </svg>
+        </button>
+      </header>
+
+      <div class="modes">
+        <button type="button" class="mode" data-mode="single" aria-label="vs CPU" aria-describedby="mode-single-desc">
+          <span class="mode-name" aria-hidden="true">vs CPU</span>
+          <span class="mode-desc" id="mode-single-desc">You against the computer.</span>
+          <kbd class="mode-key" aria-hidden="true">1</kbd>
+        </button>
+        <button type="button" class="mode" data-mode="versus" aria-label="2 Players" aria-describedby="mode-versus-desc">
+          <span class="mode-name" aria-hidden="true">2 Players</span>
+          <span class="mode-desc" id="mode-versus-desc">Two players, one device.</span>
+          <kbd class="mode-key" aria-hidden="true">2</kbd>
+        </button>
+        <button type="button" class="mode mode-rugby" data-mode="rugby-single" aria-label="Rugby (1P)" aria-describedby="mode-rugby-single-desc">
+          <span class="mode-name" aria-hidden="true">Rugby (1P)</span>
+          <span class="mode-desc" id="mode-rugby-single-desc">Spin, momentum and score multipliers for long rallies, against the CPU. Race to a target score or beat the clock.</span>
+        </button>
+        <button type="button" class="mode mode-rugby" data-mode="rugby-versus" aria-label="Rugby (2P)" aria-describedby="mode-rugby-versus-desc">
+          <span class="mode-name" aria-hidden="true">Rugby (2P)</span>
+          <span class="mode-desc" id="mode-rugby-versus-desc">The same, head to head.</span>
+        </button>
+      </div>
+
+      <footer class="landing-foot">
+        <p class="high-score" hidden></p>
+        <p class="key-hint">Press <kbd>1</kbd> or <kbd>2</kbd>, or arrows and <kbd>Enter</kbd> · <kbd>Tab</kbd> for settings</p>
+        <a class="credit-link standalone-only" href="https://waynetellis.com/workshop/projects">Built by Wayne Ellis · waynetellis.com</a>
+      </footer>
+    </section>
+  </div>
   <script type="module">
     import { createGame } from './src/main.js';
 
@@ -26,7 +76,7 @@
 
     const game = createGame(canvas);
 
-    // Start the game (landing screen will be shown if first time)
+    // Start the game; src/screens.js shows the HTML landing screen over the canvas
     game.start();
 
     // Expose state for E2E tests

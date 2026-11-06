@@ -193,7 +193,8 @@ All game entities (paddles, ball, scores) live in one object (`game-state.js`). 
 - `paddle.js` - Paddle entity and movement
 - `ball.js` - Ball physics, serving, bounce angle computation
 - `collision.js` - AABB detection and positional correction
-- `renderer.js` - Canvas drawing (separate from logic)
+- `renderer-core.js`, `renderer-game.js`, `renderer-menu.js` - Canvas drawing of gameplay (separate from logic)
+- `screens.js`, `screen-landing.js`, `environment.js` - HTML menus over the canvas (see below)
 - `input.js` - Keyboard event buffering
 
 **Rule**: No object allocation inside the game loop. Reuse objects to prevent GC spikes.
@@ -207,6 +208,14 @@ The collision system has:
 - **Interactive debug harness** with configurable parameters (max bounce angle, center deadzone, swept guard toggles)
 
 This lets us refactor physics confidently without breaking gameplay feel.
+
+### 5. Menus Are HTML Over the Canvas
+The canvas draws gameplay only; menus are HTML laid over it ([ADR 0001](docs/adr/0001-html-menus-over-canvas-two-layouts.md)). The landing screen is the first one moved; the pause, victory and settings screens are still drawn on the canvas for now.
+
+- **One set of screens, two layouts.** `environment.js` marks `<html data-layout="touch|desktop">` from the input type (`pointer: coarse` / `hover: none`), never the width. The Touch layout fills the screen, thumb-first; the Desktop layout sits inside the canvas frame and scales with it.
+- **Embedded or Standalone.** `environment.js` also marks `<html data-context="embedded|standalone">`. Anything with the class `standalone-only` (the link back to waynetellis.com) is hidden when Pong runs inside the portfolio's iframe ([ADR 0002](docs/adr/0002-embed-contract-with-portfolio.md)).
+- **Screens.** Each screen is an element with `data-screen="<name>"` in `index.html` and a mount function registered in `screens.js`. `activeScreen(state)` is the one place that decides which screen shows; the game loop calls `sync()` each frame.
+- **Landing screen controls.** Tap or click a Game mode or the settings gear. Keyboard: `1` vs CPU, `2` or `Enter` 2 Players, arrow keys to move between Game modes and `Enter`/`Space` to start the focused one, `Tab` for settings.
 
 ---
 
@@ -360,8 +369,11 @@ pong-redux/
 │   ├── paddle.js           # Paddle entity factory
 │   ├── ball.js             # Ball physics & serving
 │   ├── collision.js        # AABB collision + correction
-│   ├── renderer.js         # Canvas drawing
-│   └── input.js            # Keyboard event buffering
+│   ├── renderer-*.js       # Canvas drawing (gameplay, canvas menus)
+│   ├── screens.js          # HTML overlay screens: which one shows, and when
+│   ├── screen-landing.js   # Landing screen: Game modes and settings gear
+│   ├── environment.js      # Touch/Desktop layout, Embedded/Standalone
+│   └── input.js            # Keyboard and canvas pointer input
 ├── test/
 │   ├── run_collision_tests.mjs  # Headless Node.js tests
 │   ├── collision.unit.html      # Browser test suite

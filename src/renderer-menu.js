@@ -50,46 +50,6 @@ function drawSlider(ctx, x, y, width, value, min, max, name, hover) {
 
 // --- Main Menu Functions ---
 
-export function drawLanding(ctx, state, w, h) {
-    // Title
-    ctx.fillStyle = '#fff';
-    ctx.textAlign = 'center';
-    ctx.font = '48px monospace';
-    ctx.fillText('PONG REDUX', w / 2, h * 0.15); // Updated position
-
-    // Draw Buttons
-    const buttons = getLandingButtons(w, h); // Use helper to get layout
-
-    // Single Player
-    drawButton(ctx, buttons.single, state.landingHover);
-
-    // Two Player
-    drawButton(ctx, buttons.versus, state.landingHover);
-
-    // Rugby Buttons
-    drawButton(ctx, buttons['rugby-single'], state.landingHover);
-    drawButton(ctx, buttons['rugby-versus'], state.landingHover);
-
-    // High score display
-    if (state.highScore && state.highScore.score > 0) {
-        ctx.fillStyle = '#aaa';
-        ctx.font = '16px monospace';
-        ctx.fillText(`High Score: ${state.highScore.score} (${state.highScore.holder || '---'})`, w / 2, h * 0.80);
-    }
-
-    ctx.fillStyle = '#aaa';
-    ctx.font = '16px monospace';
-    ctx.fillText('Press 1 or 2, or click a button to start', w / 2, h * 0.90);
-
-    // Small settings hint
-    ctx.fillStyle = '#666';
-    ctx.font = '12px monospace';
-    ctx.fillText('Open Settings: Tab or click gear', w / 2, h * 0.95);
-
-    // Settings Gear
-    drawSettingsGear(ctx, w, state.settingsHover === 'gear');
-}
-
 export function getPauseButtons(w, h) {
     const bw = 200, bh = 44, cx = w / 2;
     return {
@@ -144,67 +104,6 @@ export function drawVictory(ctx, state, w, h) {
             ctx.fillRect(p.x, p.y, p.size, p.size);
         }
     }
-}
-
-// Internal helper for buttons layout (Must match input.js)
-export function getLandingButtons(w, h) {
-    const btnW = UI.BUTTON_WIDTH;
-    const btnH = UI.BUTTON_HEIGHT;
-    const gap = 40;
-    const cx = w / 2;
-
-    const y = h * 0.30 - btnH / 2;
-    const single = { x: cx - btnW - gap / 2, y, w: btnW, h: btnH, text: 'vs CPU (1P)', mode: 'single' };
-    const versus = { x: cx + gap / 2, y, w: btnW, h: btnH, text: '2 Players', mode: 'versus' };
-
-    const rugby_single = {
-        x: cx - btnW / 2,
-        y: versus.y + btnH + 20,
-        w: btnW,
-        h: btnH,
-        text: 'Rugby Mode (1P)',
-        mode: 'rugby-single'
-    };
-
-    const rugby_versus = {
-        x: cx - btnW / 2,
-        y: rugby_single.y + btnH + 20,
-        w: btnW,
-        h: btnH,
-        text: 'Rugby Mode (2P)',
-        mode: 'rugby-versus'
-    };
-
-    const settings = { x: w - 64, y: 8, w: 48, h: 48, mode: 'settings' };
-
-    return { single, versus, 'rugby-single': rugby_single, 'rugby-versus': rugby_versus, settings };
-}
-
-
-function drawSettingsGear(ctx, w, isHovered) {
-    const x = w - 40;
-    const y = 32;
-
-    ctx.save();
-    ctx.translate(x, y);
-
-    ctx.fillStyle = isHovered ? '#fff' : '#666';
-    ctx.beginPath();
-    // Draw gear simplified (circle with teeth)
-    for (let i = 0; i < 8; i++) {
-        ctx.rotate(Math.PI / 4);
-        ctx.fillRect(-4, -14, 8, 6);
-    }
-    ctx.beginPath();
-    ctx.arc(0, 0, 10, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = '#0b0b0b'; // Hole
-    ctx.beginPath();
-    ctx.arc(0, 0, 4, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.restore();
 }
 
 // --- Settings Menu ---

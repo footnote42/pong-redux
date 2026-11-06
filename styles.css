@@ -12,7 +12,7 @@ html, body {
 
 canvas {
   /* Internal resolution stays 800x600; only the displayed size scales to fit
-     the viewport (16px side gutter, room below for the credit line). */
+     the viewport (16px side gutter, room below). Keep in step with --stage-w. */
   box-sizing: content-box;
   width: min(800px, calc(100vw - 36px), calc((100vh - 48px) * 4 / 3));
   width: min(800px, calc(100vw - 36px), calc((100dvh - 48px) * 4 / 3));
@@ -24,16 +24,306 @@ canvas {
   border: 2px solid #222;
 }
 
+/* --- Overlay screens (ADR 0001) -------------------------------------------
+   HTML over the canvas. <html data-layout="touch|desktop"> is set from the
+   input type by src/environment.js, never from the width. The Desktop layout
+   sits inside the canvas frame and scales with it; the Touch layout fills the
+   whole screen, thumb-first. */
+
+:root {
+  /* Displayed canvas width, same formula as the canvas rule above */
+  --stage-w: min(800px, calc(100vw - 36px), calc((100vh - 48px) * 4 / 3));
+  --stage-w: min(800px, calc(100vw - 36px), calc((100dvh - 48px) * 4 / 3));
+  /* One internal canvas pixel, so Desktop layout sizes match the 800x600 court */
+  --u: calc(var(--stage-w) / 800);
+  --ink: #f2f2f2;
+  --ink-dim: #9a9a9a;
+  --ink-faint: #666;
+  --line: #3a3a3a;
+  --panel: #151515;
+  --panel-hi: #222;
+  --rugby: #e8b04a;
+  --font: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+.stage {
+  position: relative;
+  display: flex;
+}
+
+.screen {
+  position: absolute;
+  inset: 2px; /* inside the canvas border */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #0b0b0b;
+  color: var(--ink);
+  font-family: var(--font);
+  -webkit-tap-highlight-color: transparent;
+  animation: screen-in 160ms ease-out;
+}
+
+.screen[hidden] {
+  display: none;
+}
+
+@keyframes screen-in {
+  from { opacity: 0; }
+}
+
+.screen button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.screen :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.screen kbd {
+  font: inherit;
+  padding: 0 0.35em;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink-dim);
+}
+
+html[data-context="embedded"] .standalone-only {
+  display: none;
+}
+
+/* --- Landing screen ---------------------------------------------------- */
+
+.landing {
+  padding: calc(28 * var(--u)) calc(40 * var(--u)) calc(16 * var(--u));
+  gap: calc(22 * var(--u));
+}
+
+.landing-head {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.landing-title {
+  margin: 0;
+  font-size: calc(48 * var(--u));
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.icon-button {
+  position: absolute;
+  right: calc(-24 * var(--u));
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: max(36px, calc(48 * var(--u)));
+  height: max(36px, calc(48 * var(--u)));
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-faint);
+  transition: color 120ms ease-out, background-color 120ms ease-out;
+}
+
+.icon-button svg {
+  width: 55%;
+  height: 55%;
+}
+
+.modes {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: calc(16 * var(--u));
+}
+
+.mode {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: calc(8 * var(--u));
+  min-height: 0;
+  padding: calc(16 * var(--u)) calc(22 * var(--u));
+  text-align: left;
+  border: 2px solid var(--line);
+  border-radius: calc(6 * var(--u));
+  background: var(--panel);
+  transition: border-color 120ms ease-out, background-color 120ms ease-out, transform 120ms ease-out;
+}
+
+.mode:active {
+  transform: scale(0.98);
+}
+
+.mode-name {
+  font-size: calc(22 * var(--u));
+  font-weight: 700;
+}
+
+.mode-rugby .mode-name {
+  color: var(--rugby);
+}
+
+/* Reserve the longest description's lines so names line up across the row */
+.mode-rugby .mode-desc {
+  min-height: calc(3 * 1.45em);
+  min-height: 3lh;
+}
+
+.mode-desc {
+  font-size: calc(14 * var(--u));
+  line-height: 1.45;
+  color: var(--ink-dim);
+}
+
+.screen .mode-key {
+  position: absolute;
+  top: calc(12 * var(--u));
+  right: calc(12 * var(--u));
+  font-size: calc(13 * var(--u));
+}
+
+@media (hover: hover) {
+  .mode:hover {
+    border-color: var(--ink);
+    background: var(--panel-hi);
+  }
+  .icon-button:hover {
+    color: var(--ink);
+    background: var(--panel-hi);
+  }
+}
+
+.landing-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(6 * var(--u));
+  font-size: calc(13 * var(--u));
+  color: var(--ink-faint);
+}
+
+.landing-foot p {
+  margin: 0;
+}
+
+.high-score {
+  color: var(--ink-dim);
+}
+
 .credit-link {
-  margin-top: 10px;
-  font-family: monospace;
-  font-size: 12px;
-  color: #666;
+  color: var(--ink-faint);
   text-decoration: none;
 }
 
 .credit-link:hover,
-.credit-link:focus {
-  color: #aaa;
+.credit-link:focus-visible {
+  color: var(--ink-dim);
   text-decoration: underline;
+}
+
+/* --- Touch layout: whole screen, thumb-first --------------------------- */
+
+html[data-layout="touch"] .screen {
+  position: fixed;
+  inset: 0;
+  padding:
+    max(10px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(8px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+}
+
+html[data-layout="touch"] .landing {
+  gap: 10px;
+}
+
+html[data-layout="touch"] .landing-title {
+  font-size: clamp(20px, 7vh, 36px);
+  font-size: clamp(20px, 7dvh, 36px);
+}
+
+html[data-layout="touch"] .icon-button {
+  right: 0;
+  width: 48px;
+  height: 48px;
+  color: var(--ink-dim);
+}
+
+html[data-layout="touch"] .icon-button:active {
+  color: var(--ink);
+  background: var(--panel-hi);
+}
+
+html[data-layout="touch"] .modes {
+  gap: 10px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 460px; /* tablets: keep cards card-sized, centred */
+  margin: auto;
+}
+
+html[data-layout="touch"] .mode {
+  min-height: 64px;
+  gap: 4px;
+  padding: 10px 16px;
+  border-radius: 10px;
+}
+
+html[data-layout="touch"] .mode:active {
+  border-color: var(--ink);
+  background: var(--panel-hi);
+}
+
+html[data-layout="touch"] .mode-name {
+  font-size: clamp(18px, 4.5vh, 24px);
+}
+
+html[data-layout="touch"] .mode-desc {
+  font-size: clamp(13px, 3.4vh, 16px);
+  line-height: 1.35;
+}
+
+html[data-layout="touch"] .mode-rugby .mode-desc {
+  min-height: calc(3 * 1.35em);
+  min-height: 3lh;
+}
+
+html[data-layout="touch"] .mode-key,
+html[data-layout="touch"] .key-hint {
+  display: none;
+}
+
+html[data-layout="touch"] .landing-foot {
+  flex-direction: row;
+  justify-content: center;
+  gap: 16px;
+  font-size: 12px;
+}
+
+html[data-layout="touch"] .credit-link {
+  /* small text, full-height tap target */
+  padding: 6px 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen { animation: none; }
+  .mode, .icon-button { transition: none; }
+  .mode:active { transform: none; }
 }

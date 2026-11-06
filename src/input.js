@@ -2,9 +2,9 @@
 // Keyboard input handling - maps keys to paddle directions and pause
 
 import { setPaddleDirection } from './paddle.js';
-import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, triggerButtonPress, startRugbyMode, setRugbyTargetScore, setRugbyTimeLimit, showLanding } from './game-state.js';
+import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, setRugbyTargetScore, setRugbyTimeLimit, showLanding } from './game-state.js';
 import { UI, BALL, GAME } from './constants.js';
-import { getLandingButtons, getPauseButtons } from './renderer-menu.js';
+import { getPauseButtons } from './renderer-menu.js';
 import { soundManager } from './sound.js';
 
 let _state = null;
@@ -42,6 +42,9 @@ function keydown(e) {
     return;
   }
 
+  // A focused control on an HTML overlay screen handles its own Enter and Space
+  if ((k === 'Enter' || k === ' ') && e.target?.closest?.('[data-screen]')) return;
+
   // Settings overlay keyboard controls
   if (_state.showSettings) {
     if (k === 'Escape' || k === 'Tab') {
@@ -66,6 +69,7 @@ function keydown(e) {
       return;
     }
     if (k === 'Tab') {
+      e.preventDefault(); // Tab is the settings key here, not focus traversal
       _state.showSettings = !_state.showSettings;
       _state.settingsHover = null;
       return;
@@ -152,29 +156,8 @@ export function attachInputHandlers(state, canvas = null) {
 
       if (_state.showSettings) {
         _state.settingsHover = detectSettingsHover(x, y, _state);
-        return;
       }
-
-      // Landing hover detection (buttons + settings gear)
-      if (_state.gameState === 'LANDING') {
-        const btns = getLandingButtons(_state.width, _state.height);
-        let found = false;
-
-        for (const key in btns) {
-          const btn = btns[key];
-          if (pointInRect(x, y, btn)) {
-            _state.landingHover = btn.mode !== 'settings' ? btn.mode : null;
-            _state.settingsHover = btn.mode === 'settings' ? 'settings' : null;
-            found = true;
-            break;
-          }
-        }
-
-        if (!found) {
-          _state.landingHover = null;
-          _state.settingsHover = null;
-        }
-      }
+      // The landing screen is HTML (src/screen-landing.js), not canvas
     };
     const pdown = (e) => {
       if (!_state) return;
@@ -202,32 +185,6 @@ export function attachInputHandlers(state, canvas = null) {
           }
         }
         return;
-      }
-
-      if (_state.gameState === 'LANDING') {
-        const btns = getLandingButtons(_state.width, _state.height);
-
-        for (const key in btns) {
-          const btn = btns[key];
-          if (pointInRect(x, y, btn)) {
-            triggerButtonPress(_state, btn.mode);
-
-            if (btn.mode === 'settings') {
-              _state.showSettings = true;
-              _state.settingsHover = null;
-            } else if (btn.mode.startsWith('rugby')) {
-              soundManager.playUIClick();
-              try {
-                startRugbyMode(_state, btn.mode);
-              } catch (e) {
-                console.error('Failed to start Rugby mode:', e);
-              }
-            } else {
-              startPlaying(_state, btn.mode);
-            }
-            return;
-          }
-        }
       }
     };
     canvas.addEventListener('pointermove', pmove);
