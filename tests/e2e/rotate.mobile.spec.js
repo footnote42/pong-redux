@@ -1,0 +1,67 @@
+import { test, expect } from '@playwright/test';
+import { BUTTONS, waitForGameState } from './helpers.js';
+
+// Rotate prompt: phone projects (android, iphone), which start in landscape.
+
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.clear();
+    localStorage.setItem('pong:seenInstructions', '1');
+  });
+  await page.goto('/');
+  await page.waitForFunction(() => !!window.__gameState);
+});
+
+const prompt = (page) => page.locator('#rotate-prompt');
+const gameState = (page) => page.evaluate(() => window.__gameState.gameState);
+
+async function rotate(page, to) {
+  const { width, height } = page.viewportSize();
+  const [w, h] = to === 'portrait' ? [Math.min(width, height), Math.max(width, height)] : [Math.max(width, height), Math.min(width, height)];
+  await page.setViewportSize({ width: w, height: h });
+}
+
+async function startVersus(page) {
+  const box = await page.locator('#gameCanvas').boundingBox();
+  const k = (box.width - 4) / 800;
+  await page.touchscreen.tap(box.x + 2 + BUTTONS.versus.x * k, box.y + 2 + BUTTONS.versus.y * k);
+  await waitForGameState(page, 'PLAYING');
+}
+
+test('landscape hides the prompt, upright shows it', async ({ page }) => {
+  await expect(prompt(page)).toBeHidden();
+  await rotate(page, 'portrait');
+  await expect(prompt(page)).toBeVisible();
+  await page.screenshot({ path: `.scratch/rotate-prompt-${test.info().project.name}.png` });
+  await rotate(page, 'landscape');
+  await expect(prompt(page)).toBeHidden();
+});
+
+test('rotating mid-game pauses, and turning back does not resume', async ({ page }) => {
+  await startVersus(page);
+  await rotate(page, 'portrait');
+  await expect(prompt(page)).toBeVisible();
+  await waitForGameState(page, 'PAUSED');
+
+  await rotate(page, 'landscape');
+  await expect(prompt(page)).toBeHidden();
+  await page.waitForTimeout(200);
+  expect(await gameState(page)).toBe('PAUSED');
+
+  // The player chooses Resume
+  await page.keyboard.press('p');
+  await waitForGameState(page, 'PLAYING');
+});
+
+test('paddles do not move under the prompt', async ({ page }) => {
+  await startVersus(page);
+  await rotate(page, 'portrait');
+  await waitForGameState(page, 'PAUSED');
+  const before = await page.evaluate(() => window.__gameState.paddles.left.y);
+  await page.evaluate(() => {
+    document.body.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, pointerType: 'touch', clientX: 10, clientY: 100, bubbles: true }));
+    document.body.dispatchEvent(new PointerEvent('pointermove', { pointerId: 1, pointerType: 'touch', clientX: 10, clientY: 300, bubbles: true }));
+  });
+  await page.waitForTimeout(150);
+  expect(await page.evaluate(() => window.__gameState.paddles.left.y)).toBe(before);
+});
