@@ -66,7 +66,6 @@ const state = createInitialState(600, 400);
 startPlaying(state, 'versus');
 state.gameState = 'PLAYING'; // Bypass transition for testing
 state.serveTimer = 0;
-state.paused = false;
 const leftP = state.paddles.left;
 state.ball.x = leftP.x + leftP.w + 200;
 state.ball.y = leftP.y;
@@ -81,7 +80,6 @@ const s2 = createInitialState(600, 400);
 startPlaying(s2, 'versus');
 s2.gameState = 'PLAYING'; // Bypass transition for testing
 s2.serveTimer = 0;
-s2.paused = false;
 const rightP = s2.paddles.right;
 // move paddle up so its top is near the top wall, then place ball overlapping both
 rightP.y = rightP.h / 2 + 2; // top ≈ 2px
@@ -101,7 +99,6 @@ const s3 = createInitialState(600, 400);
 startPlaying(s3, 'versus');
 s3.gameState = 'PLAYING'; // Bypass transition for testing
 s3.serveTimer = 0;
-s3.paused = false;
 const leftP3 = s3.paddles.left;
 // artificially trigger scoring by moving ball out of bounds on the left
 s3.ball.x = -10;

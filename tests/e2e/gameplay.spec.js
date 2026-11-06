@@ -14,21 +14,18 @@ test.beforeEach(async ({ page }) => {
 
 test('P key pauses game', async ({ page }) => {
   await page.keyboard.press('p');
-  const paused = await page.evaluate(() => window.__gameState.paused);
-  expect(paused).toBe(true);
+  await waitForGameState(page, 'PAUSED');
 });
 
 test('P key toggles pause off', async ({ page }) => {
   await page.keyboard.press('p');
   await page.keyboard.press('p');
-  const paused = await page.evaluate(() => window.__gameState.paused);
-  expect(paused).toBe(false);
+  await waitForGameState(page, 'PLAYING');
 });
 
 test('ESC key pauses game', async ({ page }) => {
   await page.keyboard.press('Escape');
-  const paused = await page.evaluate(() => window.__gameState.paused);
-  expect(paused).toBe(true);
+  await waitForGameState(page, 'PAUSED');
 });
 
 test('M key returns to landing when paused', async ({ page }) => {
@@ -76,7 +73,7 @@ test('game over triggers when score reaches win score', async ({ page }) => {
     window.__gameState.ball.x = window.__gameState.width + 20;
   });
   await page.waitForFunction(
-    () => window.__gameState.gameOver === true,
+    () => window.__gameState.gameState === 'GAME_OVER',
     { timeout: 2000 }
   );
   const winner = await page.evaluate(() => window.__gameState.winner);
@@ -85,10 +82,9 @@ test('game over triggers when score reaches win score', async ({ page }) => {
 
 test('SPACE restarts game after game over', async ({ page }) => {
   await page.evaluate(() => {
-    window.__gameState.gameOver = true;
+    window.__gameState.gameState = 'GAME_OVER';
     window.__gameState.winner = 'left';
   });
   await page.keyboard.press('Space');
-  const gameOver = await page.evaluate(() => window.__gameState.gameOver);
-  expect(gameOver).toBe(false);
+  await waitForGameState(page, 'PLAYING');
 });

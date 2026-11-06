@@ -71,8 +71,6 @@ const s6 = createInitialState(800, 600);
 startPlaying(s6, 'single');
 
 // Ensure game is not paused or over
-s6.paused = false;
-s6.gameOver = false;
 s6.serveTimer = 0;  // No serve delay
 
 // Set ball moving away from CPU (left)

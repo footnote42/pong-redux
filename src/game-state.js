@@ -72,13 +72,12 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
     ballTrail: [], // Array of {x, y} positions for trail effect
     ballFlashTimer: 0, // Timer for collision flash effect (seconds)
     running: false,
-    paused: false,
-    gameOver: false,
-    winner: null, // 'left' or 'right'
+    winner: null, // 'left' or 'right'; set only while gameState is 'GAME_OVER'
     serveTimer: 0, // countdown timer for serve delay (seconds)
     winScore: (persistedSettings && persistedSettings.winScore) || defaultSettings.winScore,
     showInstructions: !hasSeen,
     // Stage 5: landing and game mode - default to LANDING screen
+    // Single source of truth for pause and game over (no separate flags):
     gameState: 'LANDING', // 'LANDING' | 'PLAYING' | 'PAUSED' | 'GAME_OVER'
     gameMode: null, // 'single' or 'versus'
     landingHover: null,
@@ -315,8 +314,7 @@ export function updateRugbyPhysics(state, dt) {
       state.score.right > state.score.left ? 'right' : null;
 
     if (winner) {
-      state.gameOver = true;
-      state.winner = winner;
+      endGame(state, winner);
       soundManager.playWin();
     }
   }
@@ -459,6 +457,38 @@ export function startTransition(state, fromState, toState) {
   state.transitions.timer = state.transitions.duration;
   state.transitions.fromState = fromState;
   state.transitions.toState = toState;
+}
+
+/** True while the game is paused. */
+export function isPaused(state) {
+  return state.gameState === 'PAUSED';
+}
+
+/** True once a game has finished (victory screen showing). */
+export function isGameOver(state) {
+  return state.gameState === 'GAME_OVER';
+}
+
+/** Pause an active game. No-op unless gameState is 'PLAYING'. */
+export function pauseGame(state) {
+  if (state.gameState === 'PLAYING') state.gameState = 'PAUSED';
+}
+
+/** Resume a paused game. No-op unless gameState is 'PAUSED'. */
+export function resumeGame(state) {
+  if (state.gameState === 'PAUSED') state.gameState = 'PLAYING';
+}
+
+/** Pause if playing, resume if paused. */
+export function togglePause(state) {
+  if (state.gameState === 'PLAYING') pauseGame(state);
+  else if (state.gameState === 'PAUSED') resumeGame(state);
+}
+
+/** Finish the game: gameState becomes 'GAME_OVER' and the winner ('left' | 'right') is recorded. */
+export function endGame(state, winner) {
+  state.gameState = 'GAME_OVER';
+  state.winner = winner;
 }
 
 export function showLanding(state) {
@@ -634,13 +664,12 @@ export function update(state, dt) {
   updateAnimations(state, dt);
 
   // Update rugby physics if enabled (before regular game logic)
-  if (state.rugbyMode?.enabled && state.gameState === 'PLAYING' && !state.paused && !state.gameOver) {
+  if (state.rugbyMode?.enabled && state.gameState === 'PLAYING') {
     updateRugbyPhysics(state, dt);
   }
 
   // Only update game when we're actively playing
   if (state.gameState !== 'PLAYING') return;
-  if (state.paused || state.gameOver) return;
 
   // Handle serve delay timer
   if (state.serveTimer > 0) {
@@ -833,8 +862,7 @@ export function update(state, dt) {
     resetBall(ball, state.width / 2, state.height / 2);
     const winScore = state.rugbyMode?.enabled ? state.rugbySettings.targetScore : state.winScore;
     if (state.score.right >= winScore) {
-      state.gameOver = true;
-      state.winner = 'right';
+      endGame(state, 'right');
       spawnConfetti(state, 150);
       soundManager.playWin();
     } else {
@@ -850,8 +878,7 @@ export function update(state, dt) {
     resetBall(ball, state.width / 2, state.height / 2);
     const winScore = state.rugbyMode?.enabled ? state.rugbySettings.targetScore : state.winScore;
     if (state.score.left >= winScore) {
-      state.gameOver = true;
-      state.winner = 'left';
+      endGame(state, 'left');
       spawnConfetti(state, 150);
       soundManager.playWin();
     } else {
@@ -873,9 +900,10 @@ export function restartGame(state) {
   // Reset ball to center
   resetBall(state.ball, state.width / 2, state.height / 2);
 
-  // Clear game over state
-  state.gameOver = false;
+  // Clear game over state. Leave gameState alone when coming from LANDING:
+  // startPlaying's fade transition switches it to PLAYING.
   state.winner = null;
+  if (state.gameState === 'GAME_OVER' || state.gameState === 'PAUSED') state.gameState = 'PLAYING';
   state.confetti = [];
 
   // Serve the ball after a brief delay
