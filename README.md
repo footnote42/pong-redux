@@ -265,6 +265,26 @@ node test/run_collision_tests.mjs
 
 ---
 
+## End-to-End Tests
+
+`npm install`, `npx playwright install chromium webkit`, then `npx playwright test` (set `PORT=8109` to serve on another port).
+
+Three projects run: `desktop` (Desktop Chrome), `android` (Pixel 7, landscape, Chromium) and `iphone` (iPhone 14, landscape, WebKit). Run one on its own:
+
+```
+npx playwright test --project=android
+npx playwright test --project=iphone
+npx playwright test --project=desktop
+```
+
+Spec files in `tests/e2e/` pick their projects by name:
+
+| Name | Runs on |
+|------|---------|
+| `*.spec.js` | desktop only |
+| `*.mobile.spec.js` | android and iphone only |
+| `*.smoke.spec.js` | all three |
+
 ## Technical Highlights
 
 ### Ball Reflection Algorithm

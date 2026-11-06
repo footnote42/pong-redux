@@ -20,6 +20,13 @@ export async function chooseGameMode(page, mode) {
   await gameModeButton(page, mode).click();
 }
 
+// Click at court coordinates on the canvas (still used for the canvas pause
+// buttons), accounting for the 2px CSS border
+export async function clickCanvasAt(page, canvasX, canvasY) {
+  const box = await page.locator('#gameCanvas').boundingBox();
+  await page.mouse.click(box.x + canvasX + 2, box.y + canvasY + 2);
+}
+
 export async function waitForGameState(page, target, timeout = 3000) {
   await page.waitForFunction(
     (s) => window.__gameState?.gameState === s,

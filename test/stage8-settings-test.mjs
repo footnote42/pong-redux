@@ -64,7 +64,6 @@ test('setBallSpeed applies to active ball velocity', () => {
   const state = createInitialState(800, 600);
   startPlaying(state, 'versus');
   state.serveTimer = 0;
-  state.paused = false;
 
   // Serve ball manually
   state.ball.vx = 200;

@@ -16,7 +16,7 @@ console.log('Test 2: Update halts when paused');
 const s2 = createInitialState(800, 600);
 s2.ball.x = 400;
 s2.ball.vx = 100;
-s2.paused = true;
+s2.gameState = 'PAUSED';
 const beforeX = s2.ball.x;
 update(s2, 0.016);
 console.assert(s2.ball.x === beforeX, 'Ball should not move when paused');

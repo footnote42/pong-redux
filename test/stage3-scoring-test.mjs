@@ -40,7 +40,7 @@ state3.score.left = 10; // One point away from winning
 state3.ball.x = state3.width + 10; // Force ball out of right boundary
 update(state3, 0.016);
 console.assert(state3.score.left === 11, 'Left player should have 11 points');
-console.assert(state3.gameOver === true, 'Game should be over');
+console.assert(state3.gameState === 'GAME_OVER', 'Game should be over');
 console.assert(state3.winner === 'left', 'Left player should be winner');
 console.assert(state3.serveTimer === 0, 'Serve timer should not be set when game is over');
 console.log('✅ Win condition works at 11 points\n');
@@ -50,7 +50,7 @@ console.log('Test 4: Game stops updating when over');
 const state4 = createInitialState(800, 600);
 startPlaying(state4, 'versus');
 state4.gameState = 'PLAYING';  // Bypass transition for testing
-state4.gameOver = true;
+state4.gameState = 'GAME_OVER';
 state4.winner = 'right';
 state4.ball.x = 400;
 state4.ball.vx = 200;
@@ -66,14 +66,14 @@ startPlaying(state5, 'versus');
 state5.gameState = 'PLAYING';  // Bypass transition for testing
 state5.score.left = 11;
 state5.score.right = 7;
-state5.gameOver = true;
+state5.gameState = 'GAME_OVER';
 state5.winner = 'left';
 state5.paddles.left.y = 100;
 state5.paddles.right.y = 500;
 restartGame(state5);
 console.assert(state5.score.left === 0, 'Left score should be reset');
 console.assert(state5.score.right === 0, 'Right score should be reset');
-console.assert(state5.gameOver === false, 'gameOver flag should be cleared');
+console.assert(state5.gameState === 'PLAYING', 'game over should be cleared');
 console.assert(state5.winner === null, 'winner should be cleared');
 console.assert(state5.serveTimer === 0.5, 'Serve timer should be set');
 console.assert(state5.paddles.left.y === state5.height / 2, 'Left paddle should be centered');

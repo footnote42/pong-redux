@@ -2,10 +2,11 @@
 // Keyboard input handling - maps keys to paddle directions and pause
 
 import { setPaddleDirection } from './paddle.js';
-import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, setRugbyTargetScore, setRugbyTimeLimit, showLanding } from './game-state.js';
-import { UI, BALL, GAME } from './constants.js';
+import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, setRugbyTargetScore, setRugbyTimeLimit, showLanding, togglePause, resumeGame, pauseGame, isPaused, isGameOver } from './game-state.js';
+import { UI, BALL, GAME, PADDLE, CANVAS } from './constants.js';
 import { getPauseButtons } from './renderer-menu.js';
 import { soundManager } from './sound.js';
+import { attachTouchHandlers, detachTouchHandlers } from './touch.js';
 
 let _state = null;
 let listeners = [];
@@ -97,17 +98,15 @@ function keydown(e) {
     case 'p':
     case 'P':
     case 'Escape':
-      _state.paused = !_state.paused;
+      if (isGameOver(_state)) showLanding(_state);
+      else togglePause(_state);
       break;
     case 'm':
     case 'M':
-      if (_state.paused) {
-        _state.paused = false;
-        showLanding(_state);
-      }
+      if (isPaused(_state)) showLanding(_state);
       break;
     case ' ':
-      if (_state.gameOver) restartGame(_state);
+      if (isGameOver(_state)) restartGame(_state);
       break;
     default:
       break;
@@ -127,9 +126,10 @@ function keyup(e) {
   setPaddleDirection(_state.paddles.right, computeDirForRight());
 }
 
-// Map a pointer event to internal canvas coordinates. The canvas is scaled by
+// Map a pointer event to court coordinates (800x600). The canvas is scaled by
 // CSS to fit the viewport, and its bounding rect includes the border, so
-// subtract the border and divide by the displayed content size.
+// subtract the border and divide by the displayed content size. The backing
+// store (canvas.width) may be larger for high-DPI screens, so use the court size.
 function toCanvasCoords(canvas, e) {
   const rect = canvas.getBoundingClientRect();
   const bx = canvas.clientLeft;
@@ -137,8 +137,8 @@ function toCanvasCoords(canvas, e) {
   const contentW = rect.width - bx * 2;
   const contentH = rect.height - by * 2;
   return {
-    x: (e.clientX - rect.left - bx) * (canvas.width / contentW),
-    y: (e.clientY - rect.top - by) * (canvas.height / contentH),
+    x: (e.clientX - rect.left - bx) * (CANVAS.DEFAULT_WIDTH / contentW),
+    y: (e.clientY - rect.top - by) * (CANVAS.DEFAULT_HEIGHT / contentH),
   };
 }
 
@@ -148,6 +148,7 @@ export function attachInputHandlers(state, canvas = null) {
   window.addEventListener('keydown', keydown);
   window.addEventListener('keyup', keyup);
   listeners = [keydown, keyup];
+  if (canvas) attachTouchHandlers(state, canvas, toCanvasCoords);
 
   if (canvas) {
     const pmove = (e) => {
@@ -168,17 +169,16 @@ export function attachInputHandlers(state, canvas = null) {
         return;
       }
 
-      if (_state.paused && !_state.showSettings) {
+      if (isPaused(_state) && !_state.showSettings) {
         const btns = getPauseButtons(_state.width, _state.height);
         for (const key in btns) {
           const btn = btns[key];
           if (pointInRect(x, y, btn)) {
             if (btn.mode === 'resume') {
-              _state.paused = false;
+              resumeGame(_state);
             } else if (btn.mode === 'settings') {
               _state.showSettings = true;
             } else if (btn.mode === 'quit') {
-              _state.paused = false;
               showLanding(_state);
             }
             return;
@@ -198,6 +198,7 @@ export function detachInputHandlers() {
   window.removeEventListener('keydown', listeners[0]);
   window.removeEventListener('keyup', listeners[1]);
   listeners = [];
+  detachTouchHandlers();
   if (_canvas && _pointerListeners.length) {
     _canvas.removeEventListener('pointermove', _pointerListeners[0]);
     _canvas.removeEventListener('pointerdown', _pointerListeners[1]);

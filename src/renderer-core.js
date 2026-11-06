@@ -16,9 +16,29 @@ import {
     drawSettings
 } from './renderer-menu.js';
 
+// Size the canvas backing store to its displayed CSS size x devicePixelRatio,
+// and map the 800x600 court onto it. Runs every frame so resize, orientation
+// and DPR changes are picked up without extra listeners.
+export function fitToDisplay(ctx) {
+    const canvas = ctx.canvas;
+    const cssW = canvas.clientWidth;
+    const cssH = canvas.clientHeight;
+    if (!cssW || !cssH) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const bw = Math.round(cssW * dpr);
+    const bh = Math.round(cssH * dpr);
+    if (canvas.width !== bw || canvas.height !== bh) {
+        canvas.width = bw;
+        canvas.height = bh;
+    }
+    ctx.setTransform(bw / CANVAS.DEFAULT_WIDTH, 0, 0, bh / CANVAS.DEFAULT_HEIGHT, 0, 0);
+}
+
 export function render(state, ctx, interp = 0) {
-    const w = ctx.canvas.width;
-    const h = ctx.canvas.height;
+    fitToDisplay(ctx);
+    const w = state.width;
+    const h = state.height;
 
     // 1. Clear Canvas
     ctx.fillStyle = '#0b0b0b';

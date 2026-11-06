@@ -54,7 +54,7 @@ No build system. Open `index.html` in a browser or serve locally:
 - Layout comes from `<html data-layout="touch|desktop">`, set by input type, never width. Style the Touch layout with `html[data-layout="touch"]` selectors; Desktop layout sizes use `--u` (one internal canvas pixel).
 - `<html data-context="embedded|standalone">`: class `standalone-only` hides when Embedded. Pong never navigates the parent page (ADR 0002); no `target="_top"` links.
 - A focused overlay button handles its own Enter/Space; `input.js` skips its global Enter (2 Players) shortcut then.
-- E2E: reach landing controls by role and name (`tests/e2e/helpers.js`: `chooseGameMode`, `gameModeButton`), never canvas coordinates.
+- E2E: reach landing controls by role and name (`tests/e2e/helpers.js`: `chooseGameMode`, `gameModeButton`), never canvas coordinates. Landing specs: `landing.smoke.spec.js` (all projects), `landing.spec.js` (Desktop layout, keyboard), `landing.mobile.spec.js` (Touch layout on android/iphone).
 
 **Module Structure**
 - `main.js` — entry point, game loop

@@ -38,4 +38,12 @@ assert.equal(activeScreen(starting), null, 'no overlay screen during play');
 showLanding(starting);
 for (let i = 0; i < 60; i++) update(starting, 1 / 60);
 assert.equal(activeScreen(starting), 'landing', 'returning to the menu shows the landing screen again');
+
+// The single gameState model: no HTML screen while paused or after the game
+// (pause and victory are still drawn on the canvas)
+const later = createInitialState(800, 600);
+later.gameState = 'PAUSED';
+assert.equal(activeScreen(later), null, 'no HTML screen while PAUSED');
+later.gameState = 'GAME_OVER';
+assert.equal(activeScreen(later), null, 'no HTML screen at GAME_OVER');
 console.log('screens: all tests passed');
