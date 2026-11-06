@@ -5,19 +5,20 @@
 
 import { applyEnvironment } from './environment.js';
 import { mountLanding } from './screen-landing.js';
+import { mountSettings } from './screen-settings.js';
 import { mountPause, mountHud } from './screen-pause.js';
 import { mountVictory } from './screen-victory.js';
 
-const SCREENS = { landing: mountLanding, pause: mountPause, victory: mountVictory, hud: mountHud };
+const SCREENS = { landing: mountLanding, hud: mountHud, pause: mountPause, victory: mountVictory, settings: mountSettings };
 
 /**
  * The overlay screen the game state asks for, or null when the canvas alone
  * should show. This is the one place that maps state to a screen.
  * @param {Object} state - Game state
- * @returns {'landing'|'hud'|'pause'|'victory'|null}
+ * @returns {'landing'|'hud'|'pause'|'victory'|'settings'|null}
  */
 export function activeScreen(state) {
-  if (state.showSettings) return null; // settings still draw on the canvas
+  if (state.showSettings) return 'settings'; // over the landing screen, pause or play
   const leaving = state.transitions.active && state.transitions.toState !== 'LANDING';
   if (state.gameState === 'LANDING' && !leaving) return 'landing';
   // Quit to Menu and Main Menu fade out while the old gameState lingers
@@ -33,7 +34,7 @@ export function activeScreen(state) {
  * Bind every overlay screen in the page to the game state.
  *
  * Each screen is an element marked data-screen="<name>" (see index.html) and a
- * mount function in SCREENS: mount(el, state) returns { show?, hide?, unmount? }.
+ * mount function in SCREENS: mount(el, state) returns { show?, hide?, update?, unmount? }.
  * Call sync() once per frame; it shows the screen activeScreen() asks for and
  * hides the rest, touching the DOM only when that changes.
  *
@@ -75,7 +76,10 @@ export function mountScreens(doc, state) {
 
   function sync() {
     const next = activeScreen(state);
-    if (next === current) return;
+    if (next === current) {
+      screens[current]?.ctrl.update?.(); // per-frame upkeep, e.g. settings changed by a shortcut
+      return;
+    }
     hide(current);
     current = next;
     show(current);

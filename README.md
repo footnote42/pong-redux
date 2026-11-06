@@ -210,12 +210,13 @@ The collision system has:
 This lets us refactor physics confidently without breaking gameplay feel.
 
 ### 5. Menus Are HTML Over the Canvas
-The canvas draws gameplay only; menus are HTML laid over it ([ADR 0001](docs/adr/0001-html-menus-over-canvas-two-layouts.md)). The landing screen is the first one moved; the pause, victory and settings screens are still drawn on the canvas for now.
+The canvas draws gameplay only; menus are HTML laid over it ([ADR 0001](docs/adr/0001-html-menus-over-canvas-two-layouts.md)). The landing and settings screens are HTML so far; the pause and victory screens are still drawn on the canvas for now.
 
 - **One set of screens, two layouts.** `environment.js` marks `<html data-layout="touch|desktop">` from the input type (`pointer: coarse` / `hover: none`), never the width. The Touch layout fills the screen, thumb-first; the Desktop layout sits inside the canvas frame and scales with it.
 - **Embedded or Standalone.** `environment.js` also marks `<html data-context="embedded|standalone">`. Anything with the class `standalone-only` (the link back to waynetellis.com) is hidden when Pong runs inside the portfolio's iframe ([ADR 0002](docs/adr/0002-embed-contract-with-portfolio.md)).
 - **Screens.** Each screen is an element with `data-screen="<name>"` in `index.html` and a mount function registered in `screens.js`. `activeScreen(state)` is the one place that decides which screen shows; the game loop calls `sync()` each frame.
 - **Landing screen controls.** Tap or click a Game mode or the settings gear. Keyboard: `1` vs CPU, `2` or `Enter` 2 Players, arrow keys to move between Game modes and `Enter`/`Space` to start the focused one, `Tab` for settings.
+- **Settings panel controls.** Native buttons, radios, switches and sliders in tabs (Gameplay, Custom, Rugby in Rugby mode, Audio, About); thumb-sized (44px) in the Touch layout, scrolling inside a landscape phone. It opens from the landing gear, the pause overlay's Settings button and `Tab`, over the landing screen, the pause or play. It closes with `Esc`, `Tab` (when focus is outside the panel; inside, `Tab` moves between controls), the close button, or a tap outside the panel. `1`/`2`/`3` set the difficulty while it is open. Changes go through the `game-state.js` setters via `settings-model.js`, so saved values are unchanged.
 
 ---
 
@@ -389,9 +390,11 @@ pong-redux/
 │   ├── paddle.js           # Paddle entity factory
 │   ├── ball.js             # Ball physics & serving
 │   ├── collision.js        # AABB collision + correction
-│   ├── renderer-*.js       # Canvas drawing (gameplay, canvas menus)
+│   ├── renderer-*.js       # Canvas drawing (gameplay, pause, game over)
 │   ├── screens.js          # HTML overlay screens: which one shows, and when
 │   ├── screen-landing.js   # Landing screen: Game modes and settings gear
+│   ├── screen-settings.js  # Settings panel: tabs of native controls
+│   ├── settings-model.js   # Settings -> game-state setters (tabs, ranges, formats)
 │   ├── environment.js      # Touch/Desktop layout, Embedded/Standalone
 │   └── input.js            # Keyboard and canvas pointer input
 ├── test/

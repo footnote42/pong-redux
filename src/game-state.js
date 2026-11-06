@@ -85,7 +85,6 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
     settings: persistedSettings || defaultSettings,
     highScore: persistedHigh || { score: 0, holder: null },
     showSettings: false,
-    settingsHover: null,
     settingsTab: 'gameplay', // 'gameplay', 'audio', 'about'
 
     // Stage 13: Animation state for visual polish

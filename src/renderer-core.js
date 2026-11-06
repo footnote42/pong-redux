@@ -1,7 +1,7 @@
 // src/renderer-core.js
 // Main Renderer Orchestration
 
-import { CANVAS, UI, GAME } from './constants.js';
+import { CANVAS } from './constants.js';
 import {
     drawPaddle,
     drawBall,
@@ -11,8 +11,7 @@ import {
     drawScore
 } from './renderer-game.js';
 import {
-    drawConfetti,
-    drawSettings
+    drawConfetti
 } from './renderer-menu.js';
 
 // Size the canvas backing store to its displayed CSS size x devicePixelRatio,
@@ -89,7 +88,7 @@ export function render(state, ctx, interp = 0) {
         drawConfetti(ctx, state);
     }
 
-    // 5. Draw Transitions (overlay everything except settings)
+    // 5. Draw Transitions (the settings panel is HTML, over the canvas)
     if (state.transitions.active) {
         let alpha = 0;
         if (state.transitions.type === 'fadeOut') {
@@ -100,11 +99,6 @@ export function render(state, ctx, interp = 0) {
         if (isNaN(alpha)) alpha = 0;
         ctx.fillStyle = `rgba(0, 0, 0, ${Math.max(0, Math.min(1, alpha))})`;
         ctx.fillRect(0, 0, w, h);
-    }
-
-    // 6. Draw Settings Menu (always on top if open)
-    if (state.showSettings) {
-        drawSettings(ctx, state, w, h);
     }
 }
 

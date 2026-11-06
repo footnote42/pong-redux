@@ -18,8 +18,7 @@ export function mountPause(el, state) {
     switch (button.dataset.action) {
       case 'resume': resumeGame(state); break;
       case 'settings':
-        state.showSettings = true; // settings still draw on the canvas
-        state.settingsHover = null;
+        state.showSettings = true; // the settings screen shows over this one
         break;
       case 'quit': showLanding(state); break;
       default: break;

@@ -27,7 +27,7 @@ assert.equal(isEmbedded(blocked), true, 'unreadable top window counts as Embedde
 const fresh = createInitialState(800, 600);
 assert.equal(activeScreen(fresh), 'landing', 'a new game shows the landing screen');
 fresh.showSettings = true;
-assert.equal(activeScreen(fresh), null, 'settings (still on the canvas) hides the landing screen');
+assert.equal(activeScreen(fresh), 'settings', 'settings replaces the landing screen');
 
 const starting = createInitialState(800, 600);
 startPlaying(starting, 'single');
@@ -45,12 +45,14 @@ const later = createInitialState(800, 600);
 later.gameState = 'PLAYING';
 assert.equal(activeScreen(later), 'hud', 'play shows the HUD (pause button)');
 later.showSettings = true;
-assert.equal(activeScreen(later), null, 'settings hide the HUD');
+assert.equal(activeScreen(later), 'settings', 'settings sit over the HUD');
 later.showSettings = false;
 later.gameState = 'PAUSED';
 assert.equal(activeScreen(later), 'pause', 'PAUSED shows the pause screen');
 later.showSettings = true;
-assert.equal(activeScreen(later), null, 'settings opened from pause hide the pause screen');
+assert.equal(activeScreen(later), 'settings', 'settings opened from pause sit over the pause screen');
+later.showSettings = false;
+assert.equal(activeScreen(later), 'pause', 'closing settings shows the pause screen again');
 later.showSettings = false;
 showLanding(later);
 assert.equal(later.gameState, 'PAUSED', 'quitting fades out while still PAUSED');

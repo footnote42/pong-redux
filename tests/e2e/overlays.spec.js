@@ -178,31 +178,3 @@ test('pause is ignored on the victory screen', async ({ page }) => {
   expect(await gameState(page)).toBe('GAME_OVER');
 });
 
-test('changing paddle size in settings does not throw', async ({ page }) => {
-  await page.keyboard.press('Tab');
-  expect(await page.evaluate(() => window.__gameState.showSettings)).toBe(true);
-  // The gameplay-tab paddle-size slider hit area (input.js) sits below the visible
-  // 600px canvas (and outside the settings panel), so no real click reaches it. Make the
-  // logical state taller and drive the pointer event straight at the canvas.
-  await page.evaluate(() => {
-    window.__gameState.height = 1400;
-    const c = document.getElementById('gameCanvas');
-    const r = c.getBoundingClientRect();
-    const sx = (r.width - c.clientLeft * 2) / c.width;
-    const sy = (r.height - c.clientTop * 2) / c.height;
-    const panelX = c.width * 0.15; // UI.SETTINGS_PANEL.WIDTH_RATIO
-    const x = panelX + 40 + 225;   // 75% along a 300px slider
-    const y = 1400 * 0.1 + 672 + 10; // panelY + slider row offset in input.js hit-testing
-    c.dispatchEvent(new PointerEvent('pointerdown', {
-      clientX: r.left + c.clientLeft + x * sx,
-      clientY: r.top + c.clientTop + y * sy,
-      bubbles: true,
-    }));
-  });
-  const s = await page.evaluate(() => ({
-    size: window.__gameState.settings.paddleSize,
-    h: window.__gameState.paddles.left.h,
-  }));
-  expect(s.size).toBeCloseTo(1.25, 5);
-  expect(s.h).toBeCloseTo(100, 5);
-});

@@ -95,6 +95,162 @@
       </div>
       <p class="key-hint"><kbd>Space</kbd> to play again · <kbd>Esc</kbd> for the menu</p>
     </section>
+
+    <section class="screen settings" data-screen="settings" role="dialog" aria-modal="true" aria-labelledby="settings-title" hidden>
+      <div class="settings-panel">
+        <header class="settings-head">
+          <h2 class="settings-title" id="settings-title">SETTINGS</h2>
+          <div class="settings-tabs" role="tablist" aria-label="Settings sections">
+            <button type="button" role="tab" class="settings-tab" id="settings-tab-gameplay" data-tab="gameplay" aria-controls="settings-pane-gameplay">Gameplay</button>
+            <button type="button" role="tab" class="settings-tab" id="settings-tab-custom" data-tab="custom" aria-controls="settings-pane-custom">Custom</button>
+            <button type="button" role="tab" class="settings-tab" id="settings-tab-rugby" data-tab="rugby" aria-controls="settings-pane-rugby">Rugby</button>
+            <button type="button" role="tab" class="settings-tab" id="settings-tab-audio" data-tab="audio" aria-controls="settings-pane-audio">Audio</button>
+            <button type="button" role="tab" class="settings-tab" id="settings-tab-about" data-tab="about" aria-controls="settings-pane-about">About</button>
+          </div>
+          <button type="button" class="settings-close" data-action="close" aria-label="Close settings">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <path d="M5 5l14 14M19 5L5 19" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </header>
+
+        <div class="settings-body">
+          <div class="settings-pane" role="tabpanel" id="settings-pane-gameplay" data-pane="gameplay" aria-labelledby="settings-tab-gameplay">
+            <div class="field" role="radiogroup" aria-labelledby="f-difficulty">
+              <span class="field-label" id="f-difficulty">Difficulty</span>
+              <div class="segments">
+                <label class="seg"><input type="radio" name="difficulty" data-setting="difficulty" value="easy"><span>Easy</span></label>
+                <label class="seg"><input type="radio" name="difficulty" data-setting="difficulty" value="medium"><span>Medium</span></label>
+                <label class="seg"><input type="radio" name="difficulty" data-setting="difficulty" value="hard"><span>Hard</span></label>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-head" for="f-ballSpeed"><span class="field-label">Ball speed</span><output data-output="ballSpeed" for="f-ballSpeed"></output></label>
+              <input type="range" id="f-ballSpeed" data-setting="ballSpeed">
+              <div class="segments" role="radiogroup" aria-label="Ball speed presets">
+                <label class="seg"><input type="radio" name="ballSpeedPreset" data-setting="ballSpeed" value="0.7"><span>Slow</span></label>
+                <label class="seg"><input type="radio" name="ballSpeedPreset" data-setting="ballSpeed" value="1"><span>Normal</span></label>
+                <label class="seg"><input type="radio" name="ballSpeedPreset" data-setting="ballSpeed" value="1.3"><span>Fast</span></label>
+                <label class="seg"><input type="radio" name="ballSpeedPreset" data-setting="ballSpeed" value="1.8"><span>Insane</span></label>
+              </div>
+            </div>
+
+            <div class="field" role="radiogroup" aria-labelledby="f-winScore">
+              <span class="field-label" id="f-winScore">Win score</span>
+              <div class="segments">
+                <label class="seg"><input type="radio" name="winScore" data-setting="winScore" value="5"><span>5</span></label>
+                <label class="seg"><input type="radio" name="winScore" data-setting="winScore" value="7"><span>7</span></label>
+                <label class="seg"><input type="radio" name="winScore" data-setting="winScore" value="11"><span>11</span></label>
+                <label class="seg"><input type="radio" name="winScore" data-setting="winScore" value="15"><span>15</span></label>
+                <label class="seg"><input type="radio" name="winScore" data-setting="winScore" value="21"><span>21</span></label>
+              </div>
+            </div>
+
+            <label class="field field-row">
+              <span class="field-label">Endless mode</span>
+              <span class="switch"><input type="checkbox" role="switch" data-setting="endlessMode"><span class="track"></span></span>
+            </label>
+
+            <div class="field">
+              <label class="field-head" for="f-paddleSize"><span class="field-label">Paddle size</span><output data-output="paddleSize" for="f-paddleSize"></output></label>
+              <input type="range" id="f-paddleSize" data-setting="paddleSize">
+            </div>
+          </div>
+
+          <div class="settings-pane" role="tabpanel" id="settings-pane-custom" data-pane="custom" aria-labelledby="settings-tab-custom" hidden>
+            <div class="field" role="radiogroup" aria-labelledby="f-paddleStyle">
+              <span class="field-label" id="f-paddleStyle">Paddle style</span>
+              <div class="segments">
+                <label class="seg"><input type="radio" name="paddleStyle" data-setting="paddleStyle" value="classic"><span>Classic</span></label>
+                <label class="seg"><input type="radio" name="paddleStyle" data-setting="paddleStyle" value="retro"><span>Retro</span></label>
+                <label class="seg"><input type="radio" name="paddleStyle" data-setting="paddleStyle" value="neon"><span>Neon</span></label>
+                <label class="seg"><input type="radio" name="paddleStyle" data-setting="paddleStyle" value="custom"><span>Custom</span></label>
+              </div>
+            </div>
+
+            <div class="field" role="radiogroup" aria-labelledby="f-leftPaddleColor" data-when="paddleStyle=custom">
+              <span class="field-label" id="f-leftPaddleColor">Left paddle colour</span>
+              <div class="segments swatches" data-colors="leftPaddleColor"></div>
+            </div>
+
+            <div class="field" role="radiogroup" aria-labelledby="f-rightPaddleColor" data-when="paddleStyle=custom">
+              <span class="field-label" id="f-rightPaddleColor">Right paddle colour</span>
+              <div class="segments swatches" data-colors="rightPaddleColor"></div>
+            </div>
+
+            <div class="field" role="radiogroup" aria-labelledby="f-ballStyle">
+              <span class="field-label" id="f-ballStyle">Ball style</span>
+              <div class="segments">
+                <label class="seg"><input type="radio" name="ballStyle" data-setting="ballStyle" value="classic"><span>Classic</span></label>
+                <label class="seg"><input type="radio" name="ballStyle" data-setting="ballStyle" value="retro"><span>Retro</span></label>
+                <label class="seg"><input type="radio" name="ballStyle" data-setting="ballStyle" value="glow"><span>Glow</span></label>
+                <label class="seg"><input type="radio" name="ballStyle" data-setting="ballStyle" value="soccer"><span>Soccer</span></label>
+              </div>
+            </div>
+
+            <label class="field field-row">
+              <span class="field-label">Ball trail</span>
+              <span class="switch"><input type="checkbox" role="switch" data-setting="ballTrail"><span class="track"></span></span>
+            </label>
+
+            <div class="field" data-when="ballTrail">
+              <label class="field-head" for="f-trailLength"><span class="field-label">Trail length</span><output data-output="trailLength" for="f-trailLength"></output></label>
+              <input type="range" id="f-trailLength" data-setting="trailLength">
+            </div>
+
+            <label class="field field-row">
+              <span class="field-label">Ball flash on hit</span>
+              <span class="switch"><input type="checkbox" role="switch" data-setting="ballFlash"><span class="track"></span></span>
+            </label>
+          </div>
+
+          <div class="settings-pane" role="tabpanel" id="settings-pane-rugby" data-pane="rugby" aria-labelledby="settings-tab-rugby" hidden>
+            <div class="field" role="radiogroup" aria-labelledby="f-rugbyTargetScore">
+              <span class="field-label" id="f-rugbyTargetScore">Target score</span>
+              <div class="segments">
+                <label class="seg"><input type="radio" name="rugbyTargetScore" data-setting="rugbyTargetScore" value="25"><span>25</span></label>
+                <label class="seg"><input type="radio" name="rugbyTargetScore" data-setting="rugbyTargetScore" value="50"><span>50</span></label>
+                <label class="seg"><input type="radio" name="rugbyTargetScore" data-setting="rugbyTargetScore" value="75"><span>75</span></label>
+                <label class="seg"><input type="radio" name="rugbyTargetScore" data-setting="rugbyTargetScore" value="100"><span>100</span></label>
+              </div>
+            </div>
+
+            <div class="field" role="radiogroup" aria-labelledby="f-rugbyTimeLimit">
+              <span class="field-label" id="f-rugbyTimeLimit">Time limit</span>
+              <div class="segments">
+                <label class="seg"><input type="radio" name="rugbyTimeLimit" data-setting="rugbyTimeLimit" value="120"><span>2 min</span></label>
+                <label class="seg"><input type="radio" name="rugbyTimeLimit" data-setting="rugbyTimeLimit" value="180"><span>3 min</span></label>
+                <label class="seg"><input type="radio" name="rugbyTimeLimit" data-setting="rugbyTimeLimit" value="300"><span>5 min</span></label>
+                <label class="seg"><input type="radio" name="rugbyTimeLimit" data-setting="rugbyTimeLimit" value="600"><span>10 min</span></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-pane" role="tabpanel" id="settings-pane-audio" data-pane="audio" aria-labelledby="settings-tab-audio" hidden>
+            <label class="field field-row">
+              <span class="field-label">Sound effects</span>
+              <span class="switch"><input type="checkbox" role="switch" data-setting="soundEnabled"><span class="track"></span></span>
+            </label>
+
+            <div class="field">
+              <label class="field-head" for="f-volume"><span class="field-label">Volume</span><output data-output="volume" for="f-volume"></output></label>
+              <input type="range" id="f-volume" data-setting="volume" data-enabled-when="soundEnabled">
+              <p class="field-note" data-when="!soundEnabled">Turn sound effects on to adjust the volume.</p>
+            </div>
+          </div>
+
+          <div class="settings-pane settings-about" role="tabpanel" id="settings-pane-about" data-pane="about" aria-labelledby="settings-tab-about" hidden>
+            <p class="about-name">Pong Redux</p>
+            <p>Version 0.8.0</p>
+            <p>Built with vanilla JavaScript: a fixed-timestep game loop (60Hz) and ES6 modules.</p>
+            <p class="about-small">Created as a learning project, demonstrating clean game architecture.</p>
+          </div>
+        </div>
+
+        <p class="settings-foot"><kbd>Esc</kbd> or <kbd>Tab</kbd> to close</p>
+      </div>
+    </section>
   </div>
   <div id="rotate-prompt" class="rotate-prompt" role="alert" aria-live="assertive">
     <svg class="rotate-icon" viewBox="0 0 64 64" width="96" height="96" aria-hidden="true">
