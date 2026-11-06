@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { gameModeButton, landing, waitForGameState } from './helpers.js';
+import { gameModeButton, landing, waitForGameState, pauseScreen, overlayButton } from './helpers.js';
 
 // Rotate prompt: phone projects (android, iphone), which start in landscape.
 
@@ -61,8 +61,9 @@ test('rotating mid-game pauses, and turning back does not resume', async ({ page
   await page.waitForTimeout(200);
   expect(await gameState(page)).toBe('PAUSED');
 
-  // The player chooses Resume
-  await page.keyboard.press('p');
+  // The player chooses Resume on the HTML pause screen
+  await expect(pauseScreen(page)).toBeVisible();
+  await overlayButton(pauseScreen(page), 'Resume').tap();
   await waitForGameState(page, 'PLAYING');
 });
 

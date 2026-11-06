@@ -60,6 +60,15 @@ export function createTouchController() {
   };
 }
 
+/**
+ * True if a touch landed on a control (a button or link), which must get its
+ * tap instead of becoming a drag. preventDefault on touchstart would swallow
+ * the tap's click.
+ */
+export function isControlTarget(target) {
+  return !!target?.closest?.('button, a, [data-screen]:not(.hud)');
+}
+
 /** True while paddles are being driven (not a menu, pause, settings or game over). */
 export function isPlaying(state) {
   return state.gameState === 'PLAYING' && !state.showSettings;
@@ -107,7 +116,7 @@ export function attachTouchHandlers(state, canvas, toCourt) {
   const isTouch = (e) => e.pointerType === 'touch';
 
   const down = (e) => {
-    if (!isTouch(e) || !isPlaying(state)) return;
+    if (!isTouch(e) || !isPlaying(state) || isControlTarget(e.target)) return;
     const zone = zoneForX(e.clientX, window.innerWidth);
     const { y } = toCourt(canvas, e);
     if (controller.begin(e.pointerId, zone, y, humanZones(state.gameMode))) {
@@ -125,7 +134,7 @@ export function attachTouchHandlers(state, canvas, toCourt) {
   };
   // While playing, stop the browser scrolling, zooming or selecting.
   const block = (e) => {
-    if (isPlaying(state)) e.preventDefault();
+    if (isPlaying(state) && !isControlTarget(e.target)) e.preventDefault();
   };
   const noMenu = (e) => e.preventDefault();
 
