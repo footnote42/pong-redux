@@ -6,6 +6,7 @@ import * as renderer from './renderer-core.js';
 import { attachInputHandlers, detachInputHandlers } from './input.js';
 import { PHYSICS, CANVAS } from './constants.js';
 import { soundManager } from './sound.js';
+import { applyTouchDrag } from './touch.js';
 
 const { MS_PER_UPDATE, SPIRAL_OF_DEATH_CAP_MS } = PHYSICS;
 
@@ -20,6 +21,7 @@ export function createGame(canvas) {
 
   function update(dt) {
     // dt in seconds
+    applyTouchDrag(state); // Drag control: touch moves paddles in the fixed step
     updateState(state, dt);
   }
 

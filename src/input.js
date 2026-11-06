@@ -6,6 +6,7 @@ import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, se
 import { UI, BALL, GAME, CANVAS } from './constants.js';
 import { getLandingButtons, getPauseButtons } from './renderer-menu.js';
 import { soundManager } from './sound.js';
+import { attachTouchHandlers, detachTouchHandlers } from './touch.js';
 
 let _state = null;
 let listeners = [];
@@ -145,6 +146,7 @@ export function attachInputHandlers(state, canvas = null) {
   window.addEventListener('keydown', keydown);
   window.addEventListener('keyup', keyup);
   listeners = [keydown, keyup];
+  if (canvas) attachTouchHandlers(state, canvas, toCanvasCoords);
 
   if (canvas) {
     const pmove = (e) => {
@@ -242,6 +244,7 @@ export function detachInputHandlers() {
   window.removeEventListener('keydown', listeners[0]);
   window.removeEventListener('keyup', listeners[1]);
   listeners = [];
+  detachTouchHandlers();
   if (_canvas && _pointerListeners.length) {
     _canvas.removeEventListener('pointermove', _pointerListeners[0]);
     _canvas.removeEventListener('pointerdown', _pointerListeners[1]);
