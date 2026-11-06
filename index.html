@@ -165,16 +165,17 @@
                 <label class="seg"><input type="radio" name="paddleStyle" data-setting="paddleStyle" value="classic"><span>Classic</span></label>
                 <label class="seg"><input type="radio" name="paddleStyle" data-setting="paddleStyle" value="retro"><span>Retro</span></label>
                 <label class="seg"><input type="radio" name="paddleStyle" data-setting="paddleStyle" value="neon"><span>Neon</span></label>
+                <label class="seg"><input type="radio" name="paddleStyle" data-setting="paddleStyle" value="disco"><span>Disco</span></label>
                 <label class="seg"><input type="radio" name="paddleStyle" data-setting="paddleStyle" value="custom"><span>Custom</span></label>
               </div>
             </div>
 
-            <div class="field" role="radiogroup" aria-labelledby="f-leftPaddleColor" data-when="paddleStyle=custom">
+            <div class="field" role="radiogroup" aria-labelledby="f-leftPaddleColor" data-when="!paddleStyle=disco">
               <span class="field-label" id="f-leftPaddleColor">Left paddle colour</span>
               <div class="segments swatches" data-colors="leftPaddleColor"></div>
             </div>
 
-            <div class="field" role="radiogroup" aria-labelledby="f-rightPaddleColor" data-when="paddleStyle=custom">
+            <div class="field" role="radiogroup" aria-labelledby="f-rightPaddleColor" data-when="!paddleStyle=disco">
               <span class="field-label" id="f-rightPaddleColor">Right paddle colour</span>
               <div class="segments swatches" data-colors="rightPaddleColor"></div>
             </div>

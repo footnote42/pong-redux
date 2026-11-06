@@ -195,10 +195,12 @@ test.describe('tabs', () => {
     await expect(settingsGroup(page, 'Time limit')).toBeVisible();
   });
 
-  test('custom paddle colours show only for the Custom paddle style; trail length only with a trail', async ({ page }) => {
+  test('paddle colours show for every paddle style but Disco; trail length only with a trail', async ({ page }) => {
     await openSettingsFromGear(page);
     await settingsTab(page, 'Custom').click();
     const panel = settingsPanel(page);
+    await expect(settingsGroup(page, 'Left paddle colour')).toBeVisible();
+    await settingsGroup(page, 'Paddle style').getByRole('radio', { name: 'Disco' }).check();
     await expect(settingsGroup(page, 'Left paddle colour')).toBeHidden();
     await settingsGroup(page, 'Paddle style').getByRole('radio', { name: 'Custom' }).check();
     await expect(settingsGroup(page, 'Left paddle colour')).toBeVisible();
@@ -310,6 +312,21 @@ test.describe('every setting changes and persists across a reload', () => {
       await expect(OPTION(`${side} paddle colour`, 'Red')(page)).toBeChecked();
     });
   }
+
+  test('paddle colours are offered for Neon and hidden for Disco', async ({ page }) => {
+    await openSettingsFromGear(page);
+    await settingsTab(page, 'Custom').click();
+    await OPTION('Paddle style', 'Neon')(page).check();
+    await expect(OPTION('Left paddle colour', 'Magenta')(page)).toBeVisible();
+    await OPTION('Left paddle colour', 'Magenta')(page).check();
+    expect((await saved(page)).leftPaddleColor).toBe('#ff00ff');
+    await OPTION('Paddle style', 'Disco')(page).check();
+    await expect(settingsGroup(page, 'Left paddle colour')).toBeHidden();
+    await expect(settingsGroup(page, 'Right paddle colour')).toBeHidden();
+    expect((await saved(page)).paddleStyle).toBe('disco');
+    await reopenOn(page, 'Custom');
+    await expect(OPTION('Paddle style', 'Disco')(page)).toBeChecked();
+  });
 
   test('rugby target score and time limit', async ({ page }) => {
     await chooseGameMode(page, 'rugby-single');

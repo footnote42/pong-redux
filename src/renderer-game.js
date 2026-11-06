@@ -25,19 +25,18 @@ export function drawPaddle(ctx, paddle, style, color, side) {
                 }
             }
         }
-    } else if (style === 'neon') {
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = color || '#0f0';
-        ctx.fillStyle = color || '#0f0';
+    } else if (style === 'neon' || style === 'disco') {
+        // Neon tube: a glow in the paddle colour round a thin white core
+        const glow = color || '#0f0';
+        ctx.shadowColor = glow;
+        ctx.fillStyle = glow;
+        ctx.shadowBlur = style === 'disco' ? 30 : 20;
         ctx.fillRect(x, y, w, h);
+        ctx.fillRect(x, y, w, h); // second pass deepens the glow
 
-        // Inner white core
         ctx.shadowBlur = 0;
         ctx.fillStyle = '#fff';
-        ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
-
-        // Reset shadow
-        ctx.shadowBlur = 0;
+        ctx.fillRect(x + w / 3, y + 3, w / 3, h - 6);
     } else if (style === 'custom') {
         // Gradient fill
         const grad = ctx.createLinearGradient(x, y, x + w, y + h);

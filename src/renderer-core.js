@@ -13,6 +13,7 @@ import {
 import {
     drawConfetti
 } from './renderer-confetti.js';
+import { discoColor } from './disco.js';
 
 // Size the canvas backing store to its displayed CSS size x devicePixelRatio,
 // and map the 800x600 court onto it. Runs every frame so resize, orientation
@@ -37,6 +38,12 @@ export function render(state, ctx, interp = 0) {
     fitToDisplay(ctx);
     const w = state.width;
     const h = state.height;
+    const disco = state.settings.paddleStyle === 'disco';
+    const now = disco ? performance.now() : 0;
+    const paddleColor = (side) => disco
+        ? discoColor(now, side)
+        : state.settings[`${side}PaddleColor`];
+    const ballColor = disco ? discoColor(now + 1000, 'left') : state.settings.ballColor;
 
     // 1. Clear Canvas
     ctx.fillStyle = '#0b0b0b';
@@ -44,7 +51,7 @@ export function render(state, ctx, interp = 0) {
 
     // 2. Draw Center Line (only in game modes)
     if (state.gameState === 'PLAYING' || state.gameState === 'PAUSED' || state.gameState === 'GAME_OVER') {
-        ctx.strokeStyle = '#444';
+        ctx.strokeStyle = disco ? ballColor : '#444';
         ctx.lineWidth = 2;
         ctx.setLineDash([10, 10]);
         ctx.beginPath();
@@ -60,19 +67,19 @@ export function render(state, ctx, interp = 0) {
         const left = state.paddles.left;
         const right = state.paddles.right;
 
-        drawPaddle(ctx, left, state.settings.paddleStyle, state.settings.leftPaddleColor, 'left');
-        drawPaddle(ctx, right, state.settings.paddleStyle, state.settings.rightPaddleColor, 'right');
+        drawPaddle(ctx, left, state.settings.paddleStyle, paddleColor('left'), 'left');
+        drawPaddle(ctx, right, state.settings.paddleStyle, paddleColor('right'), 'right');
 
         // Ball Trail
         if (state.settings.ballTrail) {
-            drawBallTrail(ctx, state.ballTrail, state.ball.r, state.settings.ballColor);
+            drawBallTrail(ctx, state.ballTrail, state.ball.r, ballColor);
         }
 
         // Ball
         if (state.rugbyMode?.enabled) {
             drawRugbyBall(ctx, state.ball);
         } else {
-            drawBall(ctx, state.ball, state.settings.ballStyle, state.settings.ballColor, state.ballFlashTimer > 0);
+            drawBall(ctx, state.ball, state.settings.ballStyle, ballColor, state.ballFlashTimer > 0);
         }
 
         // Particles
