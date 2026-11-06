@@ -2,9 +2,8 @@
 // Keyboard input handling - maps keys to paddle directions and pause
 
 import { setPaddleDirection } from './paddle.js';
-import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, setRugbyTargetScore, setRugbyTimeLimit, showLanding, togglePause, resumeGame, isPaused, isGameOver } from './game-state.js';
+import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, setRugbyTargetScore, setRugbyTimeLimit, showLanding, togglePause, isPaused, isGameOver } from './game-state.js';
 import { UI, BALL, GAME, PADDLE, CANVAS } from './constants.js';
-import { getPauseButtons, getVictoryButtons } from './renderer-menu.js';
 import { soundManager } from './sound.js';
 import { attachTouchHandlers, detachTouchHandlers } from './touch.js';
 
@@ -158,7 +157,7 @@ export function attachInputHandlers(state, canvas = null) {
       if (_state.showSettings) {
         _state.settingsHover = detectSettingsHover(x, y, _state);
       }
-      // The landing screen is HTML (src/screen-landing.js), not canvas
+      // The landing, pause and victory screens are HTML, not canvas
     };
     const pdown = (e) => {
       if (!_state) return;
@@ -169,30 +168,7 @@ export function attachInputHandlers(state, canvas = null) {
         return;
       }
 
-      if (isPaused(_state) && !_state.showSettings) {
-        const btns = getPauseButtons(_state.width, _state.height);
-        for (const key in btns) {
-          const btn = btns[key];
-          if (pointInRect(x, y, btn)) {
-            if (btn.mode === 'resume') {
-              resumeGame(_state);
-            } else if (btn.mode === 'settings') {
-              _state.showSettings = true;
-            } else if (btn.mode === 'quit') {
-              showLanding(_state);
-            }
-            return;
-          }
-        }
-        return;
-      }
-
-      if (isGameOver(_state)) {
-        const btns = getVictoryButtons(_state.width, _state.height);
-        if (pointInRect(x, y, btns.again)) restartGame(_state);
-        else if (pointInRect(x, y, btns.menu)) showLanding(_state);
-        return;
-      }
+      // Pause and victory are HTML screens (src/screen-pause.js, src/screen-victory.js)
     };
     canvas.addEventListener('pointermove', pmove);
     canvas.addEventListener('pointerdown', pdown);

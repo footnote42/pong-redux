@@ -11,8 +11,7 @@ import {
     drawScore
 } from './renderer-game.js';
 import {
-    drawPause,
-    drawVictory,
+    drawConfetti,
     drawSettings
 } from './renderer-menu.js';
 
@@ -84,11 +83,10 @@ export function render(state, ctx, interp = 0) {
         drawScore(ctx, state);
     }
 
-    // 4. Draw Overlays / UI (the landing screen is HTML: src/screen-landing.js)
-    if (state.gameState === 'PAUSED') {
-        drawPause(ctx, w, h, state);
-    } else if (state.gameState === 'GAME_OVER' || state.gameState === 'VICTORY') {
-        drawVictory(ctx, state, w, h);
+    // 4. Overlays: landing, pause and victory are HTML screens (src/screens.js);
+    // only the victory confetti is drawn here, behind the victory screen
+    if (state.gameState === 'GAME_OVER' || state.gameState === 'VICTORY') {
+        drawConfetti(ctx, state);
     }
 
     // 5. Draw Transitions (overlay everything except settings)

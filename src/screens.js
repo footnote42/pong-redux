@@ -5,19 +5,27 @@
 
 import { applyEnvironment } from './environment.js';
 import { mountLanding } from './screen-landing.js';
+import { mountPause, mountHud } from './screen-pause.js';
+import { mountVictory } from './screen-victory.js';
 
-const SCREENS = { landing: mountLanding };
+const SCREENS = { landing: mountLanding, pause: mountPause, victory: mountVictory, hud: mountHud };
 
 /**
  * The overlay screen the game state asks for, or null when the canvas alone
  * should show. This is the one place that maps state to a screen.
  * @param {Object} state - Game state
- * @returns {'landing'|null}
+ * @returns {'landing'|'hud'|'pause'|'victory'|null}
  */
 export function activeScreen(state) {
   if (state.showSettings) return null; // settings still draw on the canvas
   const leaving = state.transitions.active && state.transitions.toState !== 'LANDING';
   if (state.gameState === 'LANDING' && !leaving) return 'landing';
+  // Quit to Menu and Main Menu fade out while the old gameState lingers
+  const toMenu = state.transitions.active && state.transitions.toState === 'LANDING';
+  if (toMenu) return null;
+  if (state.gameState === 'PLAYING') return 'hud'; // the pause button
+  if (state.gameState === 'PAUSED') return 'pause';
+  if (state.gameState === 'GAME_OVER') return 'victory';
   return null;
 }
 
@@ -61,8 +69,8 @@ export function mountScreens(doc, state) {
   function show(name) {
     const screen = screens[name];
     if (!screen) return;
-    screen.ctrl.show?.();
     screen.el.hidden = false;
+    screen.ctrl.show?.(); // after unhiding, so it can take keyboard focus
   }
 
   function sync() {

@@ -66,6 +66,35 @@
         <a class="credit-link standalone-only" href="https://waynetellis.com/workshop/projects">Built by Wayne Ellis · waynetellis.com</a>
       </footer>
     </section>
+
+    <!-- HUD: the pause button, top-right (top-left belongs to the portfolio's back link, ADR 0002) -->
+    <section class="screen hud" data-screen="hud" aria-label="Game controls" hidden>
+      <button type="button" class="pause-button" data-action="pause" aria-label="Pause">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+          <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+          <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+        </svg>
+      </button>
+    </section>
+
+    <section class="screen overlay pause" data-screen="pause" aria-labelledby="pause-title" hidden>
+      <h2 class="overlay-title" id="pause-title">PAUSED</h2>
+      <div class="overlay-actions">
+        <button type="button" class="overlay-button" data-action="resume">Resume</button>
+        <button type="button" class="overlay-button" data-action="settings">Settings</button>
+        <button type="button" class="overlay-button" data-action="quit">Quit to Menu</button>
+      </div>
+      <p class="key-hint"><kbd>P</kbd> or <kbd>Esc</kbd> to resume · <kbd>M</kbd> for the menu</p>
+    </section>
+
+    <section class="screen overlay victory" data-screen="victory" aria-labelledby="victory-title" hidden>
+      <h2 class="overlay-title" id="victory-title" aria-live="polite"></h2>
+      <div class="overlay-actions">
+        <button type="button" class="overlay-button" data-action="again">Play Again</button>
+        <button type="button" class="overlay-button" data-action="menu">Main Menu</button>
+      </div>
+      <p class="key-hint"><kbd>Space</kbd> to play again · <kbd>Esc</kbd> for the menu</p>
+    </section>
   </div>
   <div id="rotate-prompt" class="rotate-prompt" role="alert" aria-live="assertive">
     <svg class="rotate-icon" viewBox="0 0 64 64" width="96" height="96" aria-hidden="true">
