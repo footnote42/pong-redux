@@ -26,7 +26,7 @@ assert.equal(isEmbedded(blocked), true, 'unreadable top window counts as Embedde
 const fresh = createInitialState(800, 600);
 assert.equal(activeScreen(fresh), 'landing', 'a new game shows the landing screen');
 fresh.showSettings = true;
-assert.equal(activeScreen(fresh), null, 'settings (still on the canvas) hides the landing screen');
+assert.equal(activeScreen(fresh), 'settings', 'settings replaces the landing screen');
 
 const starting = createInitialState(800, 600);
 startPlaying(starting, 'single');
@@ -40,7 +40,7 @@ for (let i = 0; i < 60; i++) update(starting, 1 / 60);
 assert.equal(activeScreen(starting), 'landing', 'returning to the menu shows the landing screen again');
 
 // The single gameState model: no HTML screen while paused or after the game
-// (pause and victory are still drawn on the canvas)
+// (pause and victory are still drawn on the canvas; settings sits over them)
 const later = createInitialState(800, 600);
 later.gameState = 'PAUSED';
 assert.equal(activeScreen(later), null, 'no HTML screen while PAUSED');

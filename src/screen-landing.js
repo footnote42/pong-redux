@@ -24,7 +24,6 @@ export function startGameMode(state, mode) {
 
 function openSettings(state) {
   state.showSettings = true;
-  state.settingsHover = null;
 }
 
 /**
