@@ -5,12 +5,13 @@
   "main": "src/main.js",
   "type": "module",
   "scripts": {
-    "test": "npm run test:collision && npm run test:stage3 && npm run test:stage6 && npm run test:stage8 && npm run test:pause",
+    "test": "npm run test:collision && npm run test:stage3 && npm run test:stage6 && npm run test:stage8 && npm run test:pause && npm run test:touch",
     "test:pause": "node test/pause-gameover-test.mjs",
     "test:collision": "node test/run_collision_tests.mjs",
     "test:stage3": "node test/stage3-scoring-test.mjs",
     "test:stage6": "node test/stage6-cpu-test.mjs",
     "test:stage8": "node test/stage8-settings-test.mjs",
+    "test:touch": "node test/touch-test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug"
