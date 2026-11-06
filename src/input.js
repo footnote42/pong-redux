@@ -2,9 +2,9 @@
 // Keyboard input handling - maps keys to paddle directions and pause
 
 import { setPaddleDirection } from './paddle.js';
-import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, setRugbyTargetScore, setRugbyTimeLimit, showLanding, togglePause, resumeGame, pauseGame, isPaused, isGameOver } from './game-state.js';
+import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, setRugbyTargetScore, setRugbyTimeLimit, showLanding, togglePause, resumeGame, isPaused, isGameOver } from './game-state.js';
 import { UI, BALL, GAME, PADDLE, CANVAS } from './constants.js';
-import { getPauseButtons } from './renderer-menu.js';
+import { getPauseButtons, getVictoryButtons } from './renderer-menu.js';
 import { soundManager } from './sound.js';
 import { attachTouchHandlers, detachTouchHandlers } from './touch.js';
 
@@ -184,6 +184,13 @@ export function attachInputHandlers(state, canvas = null) {
             return;
           }
         }
+        return;
+      }
+
+      if (isGameOver(_state)) {
+        const btns = getVictoryButtons(_state.width, _state.height);
+        if (pointInRect(x, y, btns.again)) restartGame(_state);
+        else if (pointInRect(x, y, btns.menu)) showLanding(_state);
         return;
       }
     };

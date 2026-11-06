@@ -80,6 +80,15 @@ export function drawPause(ctx, w, h, state) {
     }
 }
 
+// Victory screen buttons, so a touch-only player can leave game over.
+export function getVictoryButtons(w, h) {
+    const bw = 200, bh = 44, cx = w / 2;
+    return {
+        again: { x: cx - bw / 2, y: h / 2 + 10, w: bw, h: bh, text: 'Play Again', mode: 'again' },
+        menu:  { x: cx - bw / 2, y: h / 2 + 66, w: bw, h: bh, text: 'Main Menu',  mode: 'menu' },
+    };
+}
+
 export function drawVictory(ctx, state, w, h) {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
     ctx.fillRect(0, 0, w, h);
@@ -93,12 +102,16 @@ export function drawVictory(ctx, state, w, h) {
     ctx.fillStyle = color || '#fff';
     ctx.textAlign = 'center';
     ctx.font = '64px monospace';
-    ctx.fillText(`${name} Wins!`, w / 2, h / 2 - 40);
+    ctx.fillText(`${name} Wins!`, w / 2, h / 2 - 60);
 
-    ctx.fillStyle = '#fff';
-    ctx.font = '24px monospace';
-    ctx.fillText('Press SPACE to Restart', w / 2, h / 2 + 40);
-    ctx.fillText('Press ESC for Main Menu', w / 2, h / 2 + 80);
+    const btns = getVictoryButtons(w, h);
+    for (const key in btns) {
+        drawButton(ctx, btns[key], null);
+    }
+
+    ctx.fillStyle = '#aaa';
+    ctx.font = '16px monospace';
+    ctx.fillText('SPACE: Play Again    ESC: Main Menu', w / 2, h / 2 + 150);
 
     // Draw Confetti (Polish)
     if (state.confetti) {
