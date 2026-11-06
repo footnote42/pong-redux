@@ -49,7 +49,7 @@ No build system. Open `index.html` in a browser or serve locally:
 - Keys: W/S (left paddle), Arrow Up/Down (right paddle), P/ESC (pause), M (quit to menu when paused), Tab (settings)
 
 **Menus: HTML over the canvas** (ADR 0001, `docs/adr/`)
-- The canvas draws gameplay only. The landing and settings screens are HTML (`index.html`, `data-screen="landing"` / `"settings"`); pause and victory are still canvas until #15 moves them.
+- The canvas draws gameplay only. The landing and settings screens are HTML (`index.html`, `data-screen="landing"` / `"settings"`); pause, victory and settings are HTML too (`data-screen="pause"`, `"victory"`, `"hud"`).
 - Pattern for a new screen: markup with `data-screen="<name>"` and class `screen` inside `.stage`; a `mount(el, state)` returning `{ show?, hide?, update?, unmount? }`; register it in `SCREENS` in `screens.js`; add its branch to `activeScreen(state)` (pure, unit-tested in `test/screens-test.mjs`). `main.js` calls `screens.sync()` every frame.
 - Layout comes from `<html data-layout="touch|desktop">`, set by input type, never width. Style the Touch layout with `html[data-layout="touch"]` selectors; Desktop layout sizes use `--u` (one internal canvas pixel).
 - `<html data-context="embedded|standalone">`: class `standalone-only` hides when Embedded. Pong never navigates the parent page (ADR 0002); no `target="_top"` links.
@@ -64,11 +64,16 @@ No build system. Open `index.html` in a browser or serve locally:
 - `collision.js` — circle-rect collision detection and resolution
 - `renderer-core.js` — canvas setup and shared drawing utilities
 - `renderer-game.js` — gameplay rendering (ball, paddles, particles, effects)
-- `renderer-menu.js` — canvas pause and game over UI
+- `renderer-confetti.js` — victory confetti, the only menu drawing left on the canvas
 - `screens.js` — HTML overlay screens: `activeScreen(state)` picks one, `mountScreens()` shows/hides them
 - `screen-landing.js` — HTML landing screen (Game modes, settings gear, arrow-key focus)
+- `screen-pause.js` — HTML pause screen and the HUD pause button
+- `screen-victory.js` — HTML victory screen (Play Again, Main Menu)
 - `screen-settings.js` — HTML settings panel (tabs, radios, switches, sliders); `settings-model.js` maps each control to its `game-state.js` setter
 - `environment.js` — Touch/Desktop layout by input type; Embedded/Standalone detection
+- `fullscreen.js` — asks a Touch-layout browser tab for fullscreen when a game starts
+- `touch.js` — Touch zones and Drag control for the paddles
+- `rotate.js` — Rotate prompt; auto-pauses a game when the phone is held upright
 - `input.js` — keyboard and canvas pointer handlers
 - `ai.js` — CPU opponent with configurable difficulty
 - `sound.js` — procedural Web Audio synthesis

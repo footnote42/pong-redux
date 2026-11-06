@@ -193,8 +193,9 @@ All game entities (paddles, ball, scores) live in one object (`game-state.js`). 
 - `paddle.js` - Paddle entity and movement
 - `ball.js` - Ball physics, serving, bounce angle computation
 - `collision.js` - AABB detection and positional correction
-- `renderer-core.js`, `renderer-game.js`, `renderer-menu.js` - Canvas drawing of gameplay (separate from logic)
-- `screens.js`, `screen-landing.js`, `environment.js` - HTML menus over the canvas (see below)
+- `renderer-core.js`, `renderer-game.js`, `renderer-confetti.js` - Canvas drawing of gameplay and victory confetti (separate from logic)
+- `screens.js`, `screen-*.js`, `settings-model.js`, `environment.js` - HTML menus over the canvas (see below)
+- `fullscreen.js`, `touch.js`, `rotate.js` - Touch layout: fullscreen request, drag control, rotate prompt
 - `input.js` - Keyboard event buffering
 
 **Rule**: No object allocation inside the game loop. Reuse objects to prevent GC spikes.
@@ -210,7 +211,7 @@ The collision system has:
 This lets us refactor physics confidently without breaking gameplay feel.
 
 ### 5. Menus Are HTML Over the Canvas
-The canvas draws gameplay only; menus are HTML laid over it ([ADR 0001](docs/adr/0001-html-menus-over-canvas-two-layouts.md)). The landing and settings screens are HTML so far; the pause and victory screens are still drawn on the canvas for now.
+The canvas draws gameplay only; menus are HTML laid over it ([ADR 0001](docs/adr/0001-html-menus-over-canvas-two-layouts.md)). The landing, pause, victory and settings screens are all HTML.
 
 - **One set of screens, two layouts.** `environment.js` marks `<html data-layout="touch|desktop">` from the input type (`pointer: coarse` / `hover: none`), never the width. The Touch layout fills the screen, thumb-first; the Desktop layout sits inside the canvas frame and scales with it.
 - **Embedded or Standalone.** `environment.js` also marks `<html data-context="embedded|standalone">`. Anything with the class `standalone-only` (the link back to waynetellis.com) is hidden when Pong runs inside the portfolio's iframe ([ADR 0002](docs/adr/0002-embed-contract-with-portfolio.md)).
@@ -390,12 +391,17 @@ pong-redux/
 │   ├── paddle.js           # Paddle entity factory
 │   ├── ball.js             # Ball physics & serving
 │   ├── collision.js        # AABB collision + correction
-│   ├── renderer-*.js       # Canvas drawing (gameplay, pause, game over)
+│   ├── renderer-*.js       # Canvas drawing (gameplay, victory confetti)
 │   ├── screens.js          # HTML overlay screens: which one shows, and when
 │   ├── screen-landing.js   # Landing screen: Game modes and settings gear
+│   ├── screen-pause.js     # Pause screen and HUD pause button
+│   ├── screen-victory.js   # Victory screen: Play Again, Main Menu
 │   ├── screen-settings.js  # Settings panel: tabs of native controls
 │   ├── settings-model.js   # Settings -> game-state setters (tabs, ranges, formats)
 │   ├── environment.js      # Touch/Desktop layout, Embedded/Standalone
+│   ├── fullscreen.js       # Fullscreen request on game start (Touch)
+│   ├── touch.js            # Touch zones and Drag control
+│   ├── rotate.js           # Rotate prompt auto-pause
 │   └── input.js            # Keyboard and canvas pointer input
 ├── test/
 │   ├── run_collision_tests.mjs  # Headless Node.js tests
