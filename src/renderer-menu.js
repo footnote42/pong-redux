@@ -124,13 +124,16 @@ export function drawVictory(ctx, state, w, h) {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
     ctx.fillRect(0, 0, w, h);
 
-    const winner = state.winner;
-    const color = winner === 'Player 1' ? state.settings.leftPaddleColor : state.settings.rightPaddleColor;
+    // state.winner is 'left' | 'right'; show a player-facing name
+    const isLeft = state.winner === 'left';
+    const vsCpu = state.gameMode === 'single' || state.gameMode === 'rugby-single';
+    const name = isLeft ? 'Player 1' : (vsCpu ? 'CPU' : 'Player 2');
+    const color = isLeft ? state.settings.leftPaddleColor : state.settings.rightPaddleColor;
 
     ctx.fillStyle = color || '#fff';
     ctx.textAlign = 'center';
     ctx.font = '64px monospace';
-    ctx.fillText(`${winner} Wins!`, w / 2, h / 2 - 40);
+    ctx.fillText(`${name} Wins!`, w / 2, h / 2 - 40);
 
     ctx.fillStyle = '#fff';
     ctx.font = '24px monospace';

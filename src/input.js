@@ -2,8 +2,8 @@
 // Keyboard input handling - maps keys to paddle directions and pause
 
 import { setPaddleDirection } from './paddle.js';
-import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, triggerButtonPress, startRugbyMode, setRugbyTargetScore, setRugbyTimeLimit, showLanding } from './game-state.js';
-import { UI, BALL, GAME, CANVAS } from './constants.js';
+import { restartGame, startPlaying, setDifficulty, setBallSpeed, setWinScore, setSoundEnabled, setVolume, setPaddleStyle, setLeftPaddleColor, setRightPaddleColor, setEndlessMode, setPaddleSize, setBallStyle, setBallTrail, setBallFlash, setTrailLength, triggerButtonPress, startRugbyMode, setRugbyTargetScore, setRugbyTimeLimit, showLanding, togglePause, resumeGame, pauseGame, isPaused, isGameOver } from './game-state.js';
+import { UI, BALL, GAME, PADDLE, CANVAS } from './constants.js';
 import { getLandingButtons, getPauseButtons } from './renderer-menu.js';
 import { soundManager } from './sound.js';
 
@@ -93,17 +93,15 @@ function keydown(e) {
     case 'p':
     case 'P':
     case 'Escape':
-      _state.paused = !_state.paused;
+      if (isGameOver(_state)) showLanding(_state);
+      else togglePause(_state);
       break;
     case 'm':
     case 'M':
-      if (_state.paused) {
-        _state.paused = false;
-        showLanding(_state);
-      }
+      if (isPaused(_state)) showLanding(_state);
       break;
     case ' ':
-      if (_state.gameOver) restartGame(_state);
+      if (isGameOver(_state)) restartGame(_state);
       break;
     default:
       break;
@@ -186,17 +184,16 @@ export function attachInputHandlers(state, canvas = null) {
         return;
       }
 
-      if (_state.paused && !_state.showSettings) {
+      if (isPaused(_state) && !_state.showSettings) {
         const btns = getPauseButtons(_state.width, _state.height);
         for (const key in btns) {
           const btn = btns[key];
           if (pointInRect(x, y, btn)) {
             if (btn.mode === 'resume') {
-              _state.paused = false;
+              resumeGame(_state);
             } else if (btn.mode === 'settings') {
               _state.showSettings = true;
             } else if (btn.mode === 'quit') {
-              _state.paused = false;
               showLanding(_state);
             }
             return;

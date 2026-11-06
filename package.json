@@ -5,7 +5,8 @@
   "main": "src/main.js",
   "type": "module",
   "scripts": {
-    "test": "npm run test:collision && npm run test:stage3 && npm run test:stage6 && npm run test:stage8",
+    "test": "npm run test:collision && npm run test:stage3 && npm run test:stage6 && npm run test:stage8 && npm run test:pause",
+    "test:pause": "node test/pause-gameover-test.mjs",
     "test:collision": "node test/run_collision_tests.mjs",
     "test:stage3": "node test/stage3-scoring-test.mjs",
     "test:stage6": "node test/stage6-cpu-test.mjs",
