@@ -7,6 +7,8 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.clear();
     localStorage.setItem('pong:seenInstructions', '1');
+    // Real fullscreen in headless Chromium blocks setViewportSize (install.smoke.spec.js covers the request)
+    Element.prototype.requestFullscreen = () => Promise.resolve();
   });
   await page.goto('/');
   await page.waitForFunction(() => !!window.__gameState);
