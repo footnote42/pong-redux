@@ -6,12 +6,6 @@ export const CANVAS = {
   DEFAULT_HEIGHT: 600
 };
 
-export const UI = {
-  BUTTON_WIDTH: 260,
-  BUTTON_HEIGHT: 60,
-  BUTTON_GAP: 40
-};
-
 export const PHYSICS = {
   UPDATE_RATE_HZ: 60,
   MS_PER_UPDATE: 1000 / 60,  // 16.67ms

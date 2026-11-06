@@ -2,7 +2,7 @@
 // The landing screen: choose a Game mode or open settings. Markup lives in
 // index.html under data-screen="landing"; mounted by screens.js.
 
-import { startPlaying, startRugbyMode, triggerButtonPress } from './game-state.js';
+import { startPlaying, startRugbyMode } from './game-state.js';
 import { soundManager } from './sound.js';
 import { requestGameFullscreen } from './fullscreen.js';
 
@@ -12,10 +12,10 @@ const GRID_COLUMNS = 2; // Game modes sit in a 2x2 grid in both layouts
  * Start a Game mode chosen on the landing screen.
  * @param {Object} state - Game state
  * @param {'single'|'versus'|'rugby-single'|'rugby-versus'} mode
+ * @param {Document} doc - the landing screen's document
  */
-export function startGameMode(state, mode) {
-  requestGameFullscreen(document); // inside the tap, or the browser refuses
-  triggerButtonPress(state, mode);
+export function startGameMode(state, mode, doc) {
+  requestGameFullscreen(doc); // inside the tap, or the browser refuses
   if (mode.startsWith('rugby')) {
     soundManager.playUIClick();
     startRugbyMode(state, mode);
@@ -41,7 +41,7 @@ export function mountLanding(el, state) {
     const button = e.target.closest('button[data-mode], button[data-action]');
     if (!button || !el.contains(button)) return;
     if (button.dataset.action === 'settings') openSettings(state);
-    else startGameMode(state, button.dataset.mode);
+    else startGameMode(state, button.dataset.mode, doc);
   }
 
   // Arrow keys move focus around the Game mode grid (Tab is the settings key)

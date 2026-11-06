@@ -38,7 +38,7 @@ export function activeScreen(state) {
  * Call sync() once per frame; it shows the screen activeScreen() asks for and
  * hides the rest, touching the DOM only when that changes.
  *
- * To add a screen (pause, victory, settings): add its markup with
+ * To add a screen: add its markup with
  * data-screen, a mount function, an entry in SCREENS, and a branch in
  * activeScreen().
  *

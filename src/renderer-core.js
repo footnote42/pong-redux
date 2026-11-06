@@ -12,7 +12,7 @@ import {
 } from './renderer-game.js';
 import {
     drawConfetti
-} from './renderer-menu.js';
+} from './renderer-confetti.js';
 
 // Size the canvas backing store to its displayed CSS size x devicePixelRatio,
 // and map the 800x600 court onto it. Runs every frame so resize, orientation
@@ -84,7 +84,7 @@ export function render(state, ctx, interp = 0) {
 
     // 4. Overlays: landing, pause and victory are HTML screens (src/screens.js);
     // only the victory confetti is drawn here, behind the victory screen
-    if (state.gameState === 'GAME_OVER' || state.gameState === 'VICTORY') {
+    if (state.gameState === 'GAME_OVER') {
         drawConfetti(ctx, state);
     }
 

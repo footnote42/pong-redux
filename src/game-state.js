@@ -80,12 +80,11 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
     // Single source of truth for pause and game over (no separate flags):
     gameState: 'LANDING', // 'LANDING' | 'PLAYING' | 'PAUSED' | 'GAME_OVER'
     gameMode: null, // 'single' or 'versus'
-    landingHover: null,
     // Stage 5 extras: settings and high score
     settings: persistedSettings || defaultSettings,
     highScore: persistedHigh || { score: 0, holder: null },
     showSettings: false,
-    settingsTab: 'gameplay', // 'gameplay', 'audio', 'about'
+    settingsTab: 'gameplay', // 'gameplay', 'custom', 'rugby', 'audio', 'about'
 
     // Stage 13: Animation state for visual polish
     transitions: {
@@ -95,12 +94,6 @@ export function createInitialState(width = CANVAS.DEFAULT_WIDTH, height = CANVAS
       timer: 0,
       fromState: null,
       toState: null
-    },
-    buttonPressAnim: {
-      active: false,
-      buttonName: null,
-      timer: 0,
-      duration: 0.1 // seconds
     },
     scoreDisplay: {
       left: 0,
@@ -434,17 +427,6 @@ export function spawnConfetti(state, count = 100) {
 }
 
 /**
- * Triggers a button press animation
- * @param {Object} state - Game state
- * @param {string} buttonName - Name of the button being pressed
- */
-export function triggerButtonPress(state, buttonName) {
-  state.buttonPressAnim.active = true;
-  state.buttonPressAnim.buttonName = buttonName;
-  state.buttonPressAnim.timer = state.buttonPressAnim.duration;
-}
-
-/**
  * Starts a fade transition between game states
  * @param {Object} state - Game state
  * @param {string} fromState - Current game state
@@ -493,7 +475,6 @@ export function endGame(state, winner) {
 export function showLanding(state) {
   startTransition(state, state.gameState, 'LANDING');
   state.showInstructions = false; // don't show instruction overlay on top of landing
-  state.landingHover = null;
 
   // Reset rugby state when returning to landing
   if (state.rugbyMode) {
@@ -509,7 +490,6 @@ export function startPlaying(state, mode = 'versus') {
   state.gameMode = mode; // 'single' or 'versus'
   startTransition(state, state.gameState, 'PLAYING');
   state.showInstructions = false;
-  state.landingHover = null;
   // Persist that user has seen landing so it won't show automatically again
   if (typeof window !== 'undefined' && window.localStorage) {
     window.localStorage.setItem('pong:seenLanding', '1');
@@ -569,15 +549,6 @@ function updateAnimations(state, dt) {
         state.transitions.active = false;
         state.transitions.type = null;
       }
-    }
-  }
-
-  // Update button press animation
-  if (state.buttonPressAnim.active) {
-    state.buttonPressAnim.timer -= dt;
-    if (state.buttonPressAnim.timer <= 0) {
-      state.buttonPressAnim.active = false;
-      state.buttonPressAnim.buttonName = null;
     }
   }
 
