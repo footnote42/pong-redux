@@ -28,6 +28,20 @@ export function isEmbedded(win) {
   }
 }
 
+/**
+ * Installed means launched from a phone's home screen: the browser reports a
+ * fullscreen or standalone display mode (Android) or navigator.standalone
+ * (iOS Safari). An installed Pong is still Standalone, not Embedded.
+ * @param {Window} win
+ * @returns {boolean}
+ */
+export function isInstalled(win) {
+  const matches = (q) => !!win.matchMedia?.(q).matches;
+  return matches('(display-mode: fullscreen)')
+    || matches('(display-mode: standalone)')
+    || win.navigator?.standalone === true;
+}
+
 const LAYOUT_QUERIES = ['(pointer: coarse)', '(pointer: fine)', '(hover: none)'];
 
 /**
@@ -46,6 +60,7 @@ export function applyEnvironment(doc) {
 
   setLayout();
   root.dataset.context = isEmbedded(win) ? 'embedded' : 'standalone';
+  if (isInstalled(win)) root.dataset.installed = 'true';
 
   const lists = LAYOUT_QUERIES.map((q) => win.matchMedia(q));
   lists.forEach((mql) => mql.addEventListener('change', setLayout));
