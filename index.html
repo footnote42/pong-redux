@@ -3,6 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#111111" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-title" content="Pong Redux" />
   <title>Pong Rebuild</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -57,6 +65,35 @@
         <p class="key-hint">Press <kbd>1</kbd> or <kbd>2</kbd>, or arrows and <kbd>Enter</kbd> · <kbd>Tab</kbd> for settings</p>
         <a class="credit-link standalone-only" href="https://waynetellis.com/workshop/projects">Built by Wayne Ellis · waynetellis.com</a>
       </footer>
+    </section>
+
+    <!-- HUD: the pause button, top-right (top-left belongs to the portfolio's back link, ADR 0002) -->
+    <section class="screen hud" data-screen="hud" aria-label="Game controls" hidden>
+      <button type="button" class="pause-button" data-action="pause" aria-label="Pause">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+          <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+          <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+        </svg>
+      </button>
+    </section>
+
+    <section class="screen overlay pause" data-screen="pause" aria-labelledby="pause-title" hidden>
+      <h2 class="overlay-title" id="pause-title">PAUSED</h2>
+      <div class="overlay-actions">
+        <button type="button" class="overlay-button" data-action="resume">Resume</button>
+        <button type="button" class="overlay-button" data-action="settings">Settings</button>
+        <button type="button" class="overlay-button" data-action="quit">Quit to Menu</button>
+      </div>
+      <p class="key-hint"><kbd>P</kbd> or <kbd>Esc</kbd> to resume · <kbd>M</kbd> for the menu</p>
+    </section>
+
+    <section class="screen overlay victory" data-screen="victory" aria-labelledby="victory-title" hidden>
+      <h2 class="overlay-title" id="victory-title" aria-live="polite"></h2>
+      <div class="overlay-actions">
+        <button type="button" class="overlay-button" data-action="again">Play Again</button>
+        <button type="button" class="overlay-button" data-action="menu">Main Menu</button>
+      </div>
+      <p class="key-hint"><kbd>Space</kbd> to play again · <kbd>Esc</kbd> for the menu</p>
     </section>
 
     <section class="screen settings" data-screen="settings" role="dialog" aria-modal="true" aria-labelledby="settings-title" hidden>

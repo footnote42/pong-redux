@@ -100,6 +100,6 @@ assert.ok(PADDLE_COLORS.length >= 10 && PADDLE_COLORS.every(c => /^#[0-9a-f]{6}$
   s.gameState = 'PLAYING';
   assert.equal(activeScreen(s), 'settings');
   s.showSettings = false;
-  assert.equal(activeScreen(s), null);
+  assert.equal(activeScreen(s), 'hud', 'closing settings during play brings the HUD back');
 }
 console.log('settings-model: all tests passed');

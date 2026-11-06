@@ -5,7 +5,7 @@
   "main": "src/main.js",
   "type": "module",
   "scripts": {
-    "test": "npm run test:collision && npm run test:stage3 && npm run test:stage6 && npm run test:stage8 && npm run test:pause && npm run test:touch && npm run test:rotate && npm run test:screens && npm run test:settings",
+    "test": "npm run test:collision && npm run test:stage3 && npm run test:stage6 && npm run test:stage8 && npm run test:pause && npm run test:touch && npm run test:rotate && npm run test:screens && npm run test:settings && npm run test:install",
     "test:pause": "node test/pause-gameover-test.mjs",
     "test:collision": "node test/run_collision_tests.mjs",
     "test:stage3": "node test/stage3-scoring-test.mjs",
@@ -15,6 +15,7 @@
     "test:rotate": "node test/rotate-test.mjs",
     "test:screens": "node test/screens-test.mjs",
     "test:settings": "node test/settings-model-test.mjs",
+    "test:install": "node test/install-test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug"

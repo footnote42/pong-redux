@@ -1,21 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { waitForGameState, clickCanvasAt } from './helpers.js';
+import { waitForGameState, pauseButton, pauseScreen, victoryScreen, overlayButton } from './helpers.js';
 
-// Count bright pixels in a canvas-local rectangle (text on the dark overlays).
-async function brightPixels(page, x, y, w, h) {
-  return page.evaluate(([x, y, w, h]) => {
-    const c = document.getElementById('gameCanvas');
-    const d = ctxData(c, x, y, w, h);
-    let n = 0;
-    for (let i = 0; i < d.length; i += 4) {
-      if (d[i] > 150 || d[i + 1] > 150 || d[i + 2] > 150) n++;
-    }
-    return n;
-    function ctxData(c, x, y, w, h) {
-      return c.getContext('2d').getImageData(x, y, w, h).data;
-    }
-  }, [x, y, w, h]);
-}
+// Pause and victory are HTML screens (ADR 0001): drive them by role and name.
+// Desktop layout; the phone projects are in pause.mobile.spec.js and
+// victory.mobile.spec.js.
 
 let errors;
 
@@ -30,7 +18,6 @@ test.beforeEach(async ({ page }) => {
   await page.waitForFunction(() => !!window.__gameState);
   await page.keyboard.press('2');
   await waitForGameState(page, 'PLAYING');
-  // let the fade-in finish so overlays are not tinted by the transition
   await page.waitForFunction(() => !window.__gameState.transitions.active);
 });
 
@@ -38,74 +25,156 @@ test.afterEach(() => {
   expect(errors).toEqual([]);
 });
 
-// Canvas is 800x600. Pause title sits at h/2 = 300; buttons start at h/2 + 60.
-const PAUSE_TITLE = [250, 255, 300, 50];
-const VICTORY_TITLE = [100, 215, 600, 50];
+const gameState = (page) => page.evaluate(() => window.__gameState.gameState);
+
+async function finishGame(page, winner = 'left') {
+  await page.evaluate((winner) => {
+    window.__gameState.gameState = 'GAME_OVER';
+    window.__gameState.winner = winner;
+  }, winner);
+  await expect(victoryScreen(page)).toBeVisible();
+}
+
+test('the pause button shows during play, top-right and clear of the top-left corner', async ({ page }) => {
+  await expect(pauseButton(page)).toBeVisible();
+  const box = await pauseButton(page).boundingBox();
+  const canvas = await page.locator('#gameCanvas').boundingBox();
+  expect(box.x + box.width / 2).toBeGreaterThan(canvas.x + canvas.width * 0.75);
+  expect(box.y + box.height / 2).toBeLessThan(canvas.y + canvas.height * 0.25);
+  await page.waitForTimeout(300); // let the screen fade in
+  await page.screenshot({ path: '.scratch/hud-desktop.png' });
+});
+
+test('clicking the pause button pauses and shows the pause screen', async ({ page }) => {
+  await pauseButton(page).click();
+  await waitForGameState(page, 'PAUSED');
+  await expect(pauseScreen(page)).toBeVisible();
+  await expect(pauseButton(page)).toBeHidden();
+});
 
 for (const key of ['p', 'Escape']) {
-  test(`${key} shows the pause overlay with its buttons`, async ({ page }) => {
-    const before = await brightPixels(page, ...PAUSE_TITLE);
+  test(`${key} shows the pause screen with its buttons`, async ({ page }) => {
     await page.keyboard.press(key);
     await waitForGameState(page, 'PAUSED');
-    await page.waitForTimeout(100);
-    const after = await brightPixels(page, ...PAUSE_TITLE);
-    expect(after).toBeGreaterThan(before + 150);
-    // Resume / Settings / Quit buttons are drawn (outlines are bright)
-    expect(await brightPixels(page, 270, 355, 260, 180)).toBeGreaterThan(150);
+    const screen = pauseScreen(page);
+    await expect(screen).toBeVisible();
+    await expect(screen.getByRole('heading', { name: 'PAUSED' })).toBeVisible();
+    for (const name of ['Resume', 'Settings', 'Quit to Menu']) {
+      await expect(overlayButton(screen, name)).toBeVisible();
+    }
+    await page.waitForTimeout(300); // let the screen fade in
+    await page.screenshot({ path: '.scratch/pause-desktop.png' });
   });
 }
 
-test('Resume button on the pause overlay resumes play', async ({ page }) => {
+test('P and Esc resume from the pause screen', async ({ page }) => {
+  for (const key of ['p', 'Escape']) {
+    await page.keyboard.press(key);
+    await waitForGameState(page, 'PAUSED');
+    await page.keyboard.press(key);
+    await waitForGameState(page, 'PLAYING');
+    await expect(pauseScreen(page)).toBeHidden();
+  }
+});
+
+test('Resume button on the pause screen resumes play', async ({ page }) => {
   await page.keyboard.press('p');
   await waitForGameState(page, 'PAUSED');
-  await clickCanvasAt(page, 400, 360 + 30); // Resume: y = h/2 + 60, h = 60
+  await overlayButton(pauseScreen(page), 'Resume').click();
+  await waitForGameState(page, 'PLAYING');
+  await expect(pauseScreen(page)).toBeHidden();
+  await expect(pauseButton(page)).toBeVisible();
+});
+
+test('Space resumes from the pause screen (Resume has focus)', async ({ page }) => {
+  await page.keyboard.press('p');
+  await waitForGameState(page, 'PAUSED');
+  await expect(overlayButton(pauseScreen(page), 'Resume')).toBeFocused();
+  await page.keyboard.press(' ');
   await waitForGameState(page, 'PLAYING');
 });
 
-test('Settings button on the pause overlay opens settings and stays paused', async ({ page }) => {
+test('Settings button on the pause screen opens settings and stays paused', async ({ page }) => {
   await page.keyboard.press('p');
   await waitForGameState(page, 'PAUSED');
-  await clickCanvasAt(page, 400, 416 + 30); // Settings: y = h/2 + 116
+  await overlayButton(pauseScreen(page), 'Settings').click();
   const s = await page.evaluate(() => ({ show: window.__gameState.showSettings, gs: window.__gameState.gameState }));
   expect(s).toEqual({ show: true, gs: 'PAUSED' });
+  await expect(pauseScreen(page)).toBeHidden();
+  // closing settings brings the pause screen back
+  await page.keyboard.press('Escape');
+  await expect(pauseScreen(page)).toBeVisible();
+  expect(await gameState(page)).toBe('PAUSED');
 });
 
 test('Quit to Menu button returns to landing', async ({ page }) => {
   await page.keyboard.press('p');
   await waitForGameState(page, 'PAUSED');
-  await clickCanvasAt(page, 400, 472 + 30); // Quit: y = h/2 + 172
+  await overlayButton(pauseScreen(page), 'Quit to Menu').click();
+  await waitForGameState(page, 'LANDING');
+  await expect(pauseScreen(page)).toBeHidden();
+});
+
+test('M on the pause screen returns to landing', async ({ page }) => {
+  await page.keyboard.press('p');
+  await waitForGameState(page, 'PAUSED');
+  await page.keyboard.press('m');
   await waitForGameState(page, 'LANDING');
 });
 
-test('a finished game shows the victory screen', async ({ page }) => {
+test('a finished game shows the victory screen with the winner', async ({ page }) => {
   await page.waitForFunction(() => window.__gameState.serveTimer <= 0, { timeout: 3000 });
   await page.evaluate(() => {
     window.__gameState.winScore = 1;
     window.__gameState.ball.x = window.__gameState.width + 20;
   });
   await waitForGameState(page, 'GAME_OVER');
-  await page.waitForTimeout(100);
   expect(await page.evaluate(() => window.__gameState.winner)).toBe('left');
-  expect(await brightPixels(page, ...VICTORY_TITLE)).toBeGreaterThan(300);
-  // restart prompt line
-  expect(await brightPixels(page, 100, 320, 600, 30)).toBeGreaterThan(150);
+  const screen = victoryScreen(page);
+  await expect(screen).toBeVisible();
+  await expect(screen.getByRole('heading', { name: 'Player 1 Wins!' })).toBeVisible();
+  await expect(overlayButton(screen, 'Play Again')).toBeVisible();
+  await expect(overlayButton(screen, 'Main Menu')).toBeVisible();
+  await page.waitForTimeout(300); // let the screen fade in
+  await page.screenshot({ path: '.scratch/victory-desktop.png' });
+});
+
+test('the victory screen names Player 2 when the right paddle wins', async ({ page }) => {
+  await finishGame(page, 'right');
+  await expect(victoryScreen(page).getByRole('heading', { name: 'Player 2 Wins!' })).toBeVisible();
+});
+
+test('Play Again button starts a new game', async ({ page }) => {
+  await finishGame(page);
+  await overlayButton(victoryScreen(page), 'Play Again').click();
+  await waitForGameState(page, 'PLAYING');
+  await expect(victoryScreen(page)).toBeHidden();
+  expect(await page.evaluate(() => window.__gameState.score)).toEqual({ left: 0, right: 0 });
+});
+
+test('Space on the victory screen plays again', async ({ page }) => {
+  await finishGame(page);
+  await page.keyboard.press(' ');
+  await waitForGameState(page, 'PLAYING');
+  expect(await page.evaluate(() => window.__gameState.winner)).toBeNull();
+});
+
+test('Main Menu button returns to landing', async ({ page }) => {
+  await finishGame(page);
+  await overlayButton(victoryScreen(page), 'Main Menu').click();
+  await waitForGameState(page, 'LANDING');
+  await expect(victoryScreen(page)).toBeHidden();
 });
 
 test('Escape on the victory screen returns to the menu', async ({ page }) => {
-  await page.evaluate(() => {
-    window.__gameState.gameState = 'GAME_OVER';
-    window.__gameState.winner = 'right';
-  });
+  await finishGame(page, 'right');
   await page.keyboard.press('Escape');
   await waitForGameState(page, 'LANDING');
 });
 
 test('pause is ignored on the victory screen', async ({ page }) => {
-  await page.evaluate(() => {
-    window.__gameState.gameState = 'GAME_OVER';
-    window.__gameState.winner = 'left';
-  });
+  await finishGame(page);
   await page.keyboard.press('p');
-  expect(await page.evaluate(() => window.__gameState.gameState)).toBe('GAME_OVER');
+  expect(await gameState(page)).toBe('GAME_OVER');
 });
 

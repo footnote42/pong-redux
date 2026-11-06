@@ -329,8 +329,147 @@ html[data-layout="touch"] .credit-link {
   padding: 6px 4px;
 }
 
+/* --- Pause button and the pause and victory overlays (#15) ----------------
+   Overlays are translucent so the court (and victory confetti) shows behind. */
+
+.hud {
+  background: transparent;
+  pointer-events: none; /* touches fall through to the Touch zones... */
+  animation: none;
+}
+
+.pause-button {
+  position: absolute;
+  top: calc(8 * var(--u));
+  right: calc(8 * var(--u)); /* top-right only: top-left is the portfolio's back link */
+  display: grid;
+  place-items: center;
+  width: max(32px, calc(40 * var(--u)));
+  height: max(32px, calc(40 * var(--u)));
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(21, 21, 21, 0.6);
+  color: var(--ink-dim);
+  pointer-events: auto; /* ...except on the button itself */
+  transition: color 120ms ease-out, background-color 120ms ease-out;
+}
+
+.pause-button svg {
+  width: 50%;
+  height: 50%;
+}
+
+.overlay {
+  align-items: center;
+  justify-content: center;
+  gap: calc(22 * var(--u));
+  background: rgba(0, 0, 0, 0.72);
+  text-align: center;
+}
+
+.overlay-title {
+  margin: 0;
+  font-size: calc(56 * var(--u));
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.overlay-actions {
+  display: flex;
+  flex-direction: column;
+  gap: calc(12 * var(--u));
+  width: calc(260 * var(--u));
+}
+
+.overlay-button {
+  min-height: calc(48 * var(--u));
+  padding: 0 calc(16 * var(--u));
+  border: 2px solid var(--line);
+  border-radius: calc(6 * var(--u));
+  background: var(--panel);
+  font-size: calc(18 * var(--u));
+  font-weight: 700;
+  transition: border-color 120ms ease-out, background-color 120ms ease-out, transform 120ms ease-out;
+}
+
+.overlay-button:active {
+  transform: scale(0.98);
+}
+
+.overlay .key-hint {
+  margin: 0;
+  font-size: calc(13 * var(--u));
+  color: var(--ink-faint);
+}
+
+@media (hover: hover) {
+  .overlay-button:hover {
+    border-color: var(--ink);
+    background: var(--panel-hi);
+  }
+  .pause-button:hover {
+    color: var(--ink);
+    background: var(--panel-hi);
+  }
+}
+
+html[data-layout="touch"] .pause-button {
+  top: max(8px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  width: 48px;
+  height: 48px;
+}
+
+html[data-layout="touch"] .pause-button:active {
+  color: var(--ink);
+  background: var(--panel-hi);
+}
+
+/* Thumb-sized: tall full-width buttons, title scaled to the short landscape screen */
+html[data-layout="touch"] .overlay {
+  gap: 12px;
+}
+
+html[data-layout="touch"] .overlay-title {
+  font-size: clamp(28px, 11dvh, 56px);
+}
+
+html[data-layout="touch"] .overlay-actions {
+  width: min(360px, 100%);
+  gap: 10px;
+}
+
+html[data-layout="touch"] .overlay-button {
+  min-height: 52px;
+  border-radius: 10px;
+  font-size: 18px;
+}
+
+html[data-layout="touch"] .overlay-button:active {
+  border-color: var(--ink);
+  background: var(--panel-hi);
+}
+
+html[data-layout="touch"] .overlay .key-hint {
+  display: none;
+}
+
+/* Very short screens: buttons side by side so nothing runs off */
+@media (max-height: 380px) {
+  html[data-layout="touch"] .overlay-actions {
+    flex-direction: row;
+    width: min(720px, 100%);
+  }
+  html[data-layout="touch"] .overlay-button {
+    flex: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .screen { animation: none; }
+  .pause-button, .overlay-button { transition: none; }
+  .overlay-button:active { transform: none; }
   .mode, .icon-button { transition: none; }
   .mode:active { transform: none; }
 }

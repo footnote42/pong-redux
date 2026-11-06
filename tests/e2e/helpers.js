@@ -20,12 +20,13 @@ export async function chooseGameMode(page, mode) {
   await gameModeButton(page, mode).click();
 }
 
-// Click at court coordinates on the canvas (still used for the canvas pause
-// buttons), accounting for the 2px CSS border
-export async function clickCanvasAt(page, canvasX, canvasY) {
-  const box = await page.locator('#gameCanvas').boundingBox();
-  await page.mouse.click(box.x + canvasX + 2, box.y + canvasY + 2);
-}
+// The pause button (HUD), pause screen and victory screen are HTML too
+export const pauseButton = (page) => page.getByRole('button', { name: 'Pause', exact: true });
+export const pauseScreen = (page) => page.locator('[data-screen="pause"]');
+export const victoryScreen = (page) => page.locator('[data-screen="victory"]');
+
+// Press a button on an overlay screen by its visible name
+export const overlayButton = (screen, name) => screen.getByRole('button', { name, exact: true });
 
 export async function waitForGameState(page, target, timeout = 3000) {
   await page.waitForFunction(

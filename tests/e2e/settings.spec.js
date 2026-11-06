@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {
-  waitForGameState, chooseGameMode, clickCanvasAt, landing,
+  waitForGameState, chooseGameMode, landing, pauseButton, pauseScreen, overlayButton,
   settingsPanel, settingsTab, settingsGroup, openSettingsFromGear, freshProfileOnce,
 } from './helpers.js';
 
@@ -74,12 +74,26 @@ test.describe('opening and closing', () => {
     await waitForGameState(page, 'PLAYING');
     await page.keyboard.press('p');
     await waitForGameState(page, 'PAUSED');
-    await clickCanvasAt(page, 400, 416 + 30); // pause overlay Settings button
+    await overlayButton(pauseScreen(page), 'Settings').click();
     await expect(settingsPanel(page)).toBeVisible();
+    await expect(pauseScreen(page)).toBeHidden();
     expect(await page.evaluate(() => window.__gameState.gameState)).toBe('PAUSED');
     await page.keyboard.press('Escape');
     await expect(settingsPanel(page)).toBeHidden();
+    await expect(pauseScreen(page)).toBeVisible();
     expect(await page.evaluate(() => window.__gameState.gameState)).toBe('PAUSED');
+  });
+
+  test('the HUD pause button is gone while settings is open over play', async ({ page }) => {
+    await page.keyboard.press('1');
+    await waitForGameState(page, 'PLAYING');
+    await expect(pauseButton(page)).toBeVisible();
+    await page.keyboard.press('Tab');
+    await expect(settingsPanel(page)).toBeVisible();
+    await expect(pauseButton(page)).toBeHidden();
+    await page.keyboard.press('Escape');
+    await expect(pauseButton(page)).toBeVisible();
+    expect(await page.evaluate(() => window.__gameState.gameState)).toBe('PLAYING');
   });
 
   test('Tab opens and closes the panel during play', async ({ page }) => {

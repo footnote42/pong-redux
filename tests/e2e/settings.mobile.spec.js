@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { waitForGameState, gameModeButton, settingsPanel, settingsTab, settingsGroup, openSettingsFromGear, freshProfileOnce } from './helpers.js';
+import { waitForGameState, gameModeButton, pauseButton, pauseScreen, overlayButton, settingsPanel, settingsTab, settingsGroup, openSettingsFromGear, freshProfileOnce } from './helpers.js';
 
 // Touch layout on the phone projects (android, iphone, held in landscape).
 
@@ -124,6 +124,24 @@ test('the close button and a tap outside the panel both close it', async ({ page
   // The tap that closed it must not fall through to a Game mode behind
   expect(await page.evaluate(() => window.__gameState.gameState)).toBe('LANDING');
   await expect(gameModeButton(page, 'single')).toBeVisible();
+});
+
+test('settings opened from the pause screen: close returns to pause, tap outside too', async ({ page }) => {
+  await settingsPanel(page).getByRole('button', { name: 'Close settings' }).tap();
+  await gameModeButton(page, 'single').tap();
+  await waitForGameState(page, 'PLAYING');
+  await pauseButton(page).tap();
+  await waitForGameState(page, 'PAUSED');
+  await overlayButton(pauseScreen(page), 'Settings').tap();
+  await expect(settingsPanel(page)).toBeVisible();
+  await expect(pauseButton(page)).toBeHidden();
+  await settingsGroup(page, 'Difficulty').getByRole('radio', { name: 'Hard' }).tap();
+  await settingsPanel(page).getByRole('button', { name: 'Close settings' }).tap();
+  await expect(pauseScreen(page)).toBeVisible();
+  await overlayButton(pauseScreen(page), 'Settings').tap();
+  await settingsPanel(page).tap({ position: { x: 3, y: 3 } });
+  await expect(pauseScreen(page)).toBeVisible();
+  expect(await page.evaluate(() => window.__gameState.gameState)).toBe('PAUSED');
 });
 
 test('a tap inside the panel does not close it', async ({ page }) => {

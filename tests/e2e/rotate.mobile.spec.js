@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { gameModeButton, landing, waitForGameState } from './helpers.js';
+import { gameModeButton, landing, waitForGameState, pauseScreen, overlayButton } from './helpers.js';
 
 // Rotate prompt: phone projects (android, iphone), which start in landscape.
 
@@ -7,6 +7,8 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.clear();
     localStorage.setItem('pong:seenInstructions', '1');
+    // Real fullscreen in headless Chromium blocks setViewportSize (install.smoke.spec.js covers the request)
+    Element.prototype.requestFullscreen = () => Promise.resolve();
   });
   await page.goto('/');
   await page.waitForFunction(() => !!window.__gameState);
@@ -61,8 +63,9 @@ test('rotating mid-game pauses, and turning back does not resume', async ({ page
   await page.waitForTimeout(200);
   expect(await gameState(page)).toBe('PAUSED');
 
-  // The player chooses Resume
-  await page.keyboard.press('p');
+  // The player chooses Resume on the HTML pause screen
+  await expect(pauseScreen(page)).toBeVisible();
+  await overlayButton(pauseScreen(page), 'Resume').tap();
   await waitForGameState(page, 'PLAYING');
 });
 

@@ -4,6 +4,7 @@
 
 import { startPlaying, startRugbyMode, triggerButtonPress } from './game-state.js';
 import { soundManager } from './sound.js';
+import { requestGameFullscreen } from './fullscreen.js';
 
 const GRID_COLUMNS = 2; // Game modes sit in a 2x2 grid in both layouts
 
@@ -13,6 +14,7 @@ const GRID_COLUMNS = 2; // Game modes sit in a 2x2 grid in both layouts
  * @param {'single'|'versus'|'rugby-single'|'rugby-versus'} mode
  */
 export function startGameMode(state, mode) {
+  requestGameFullscreen(document); // inside the tap, or the browser refuses
   triggerButtonPress(state, mode);
   if (mode.startsWith('rugby')) {
     soundManager.playUIClick();
